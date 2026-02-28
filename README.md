@@ -1,205 +1,207 @@
-# Nx TypeScript Repository
+# Nx TypeScript 代码仓库
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ A repository showcasing key [Nx](https://nx.dev) features for TypeScript monorepos ✨
-## Finish your Nx platform setup
+✨ 这是一个展示 [Nx](https://nx.dev) TypeScript monorepo 核心功能的代码仓库 ✨
 
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/na5hFAaVxR) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
-## 📦 Project Overview
+## 完成 Nx 平台配置
 
-This repository demonstrates a production-ready TypeScript monorepo with:
+🚀 [完成工作空间配置](https://cloud.nx.app/connect/na5hFAaVxR) 以获得更快的构建速度，支持远程缓存、分布式任务执行和自愈 CI。[了解更多关于 Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud)。
 
-- **3 Publishable Packages** - Ready for NPM publishing
+## 📦 项目概述
 
-  - `@org/strings` - String manipulation utilities
-  - `@org/async` - Async utility functions with retry logic
-  - `@org/colors` - Color conversion and manipulation utilities
+本仓库展示了一个生产就绪的 TypeScript monorepo，包含：
 
-- **1 Internal Library**
-  - `@org/utils` - Shared utilities (private, not published)
+- **3 个可发布包** - 可直接发布到 NPM
 
-## 🚀 Quick Start
+  - `@org/strings` - 字符串处理工具库
+  - `@org/async` - 异步工具函数，支持重试逻辑
+  - `@org/colors` - 颜色转换和处理工具库
+
+- **1 个内部库**
+  - `@org/utils` - 共享工具库（私有，不发布）
+
+## 🚀 快速开始
 
 ```bash
-# Clone the repository
+# 克隆仓库
 git clone <your-fork-url>
 cd typescript-template
 
-# Install dependencies
+# 安装依赖
 npm install
 
-# Build all packages
+# 构建所有包
 npx nx run-many -t build
 
-# Run tests
+# 运行测试
 npx nx run-many -t test
 
-# Lint all projects
+# 检查所有项目
 npx nx run-many -t lint
 
-# Run everything in parallel
+# 并行执行所有任务
 npx nx run-many -t lint test build --parallel=3
 
-# Visualize the project graph
+# 可视化项目依赖图
 npx nx graph
 ```
 
-## ⭐ Featured Nx Capabilities
+## ⭐ Nx 核心功能
 
-This repository showcases several powerful Nx features:
+本仓库展示了 Nx 的多项强大功能：
 
-### 1. 🔒 Module Boundaries
+### 1. 🔒 模块边界
 
-Enforces architectural constraints using tags. Each package has specific dependencies it can use:
+使用标签强制执行架构约束。每个包都有特定的依赖规则：
 
-- `scope:shared` (utils) - Can be used by all packages
-- `scope:strings` - Can only depend on shared utilities
-- `scope:async` - Can only depend on shared utilities
-- `scope:colors` - Can only depend on shared utilities
+- `scope:shared` (utils) - 可被所有包使用
+- `scope:strings` - 只能依赖共享工具库
+- `scope:async` - 只能依赖共享工具库
+- `scope:colors` - 只能依赖共享工具库
 
-**Try it out:**
+**试试看：**
 
 ```bash
-# See the current project graph and boundaries
+# 查看当前项目图和边界
 npx nx graph
 
-# View a specific project's details
+# 查看特定项目的详细信息
 npx nx show project strings --web
 ```
 
-[Learn more about module boundaries →](https://nx.dev/features/enforce-module-boundaries)
+[了解更多关于模块边界 →](https://nx.dev/features/enforce-module-boundaries)
 
-### 2. 🛠️ Custom Run Commands
+### 2. 🛠️ 自定义运行命令
 
-Packages can define custom commands beyond standard build/test/lint:
+包可以定义标准 build/test/lint 之外的自定义命令：
 
 ```bash
-# Run the custom build-base command for strings package
+# 运行 strings 包的自定义 build-base 命令
 npx nx run strings:build-base
 
-# See all available targets for a project
+# 查看项目的所有可用目标
 npx nx show project strings
 ```
 
-[Learn more about custom run commands →](https://nx.dev/concepts/executors-and-configurations)
+[了解更多关于自定义运行命令 →](https://nx.dev/concepts/executors-and-configurations)
 
-### 3. 🔧 Self-Healing CI
+### 3. 🔧 自愈 CI
 
-The CI pipeline includes `nx fix-ci` which automatically identifies and suggests fixes for common issues. To test it, you can make a change to `async-retry.spec.ts` so that it fails, and create a PR.
+CI 流水线包含 `nx fix-ci`，可自动识别并建议修复常见问题。你可以修改 `async-retry.spec.ts` 使其失败并创建 PR 来测试此功能。
 
 ```bash
-# Run tests and see the failure
+# 运行测试并查看失败
 npx nx test async
 
-# In CI, this command provides automated fixes
+# 在 CI 中，此命令提供自动修复
 npx nx fix-ci
 ```
 
-[Learn more about self-healing CI →](https://nx.dev/ci/features/self-healing-ci)
+[了解更多关于自愈 CI →](https://nx.dev/ci/features/self-healing-ci)
 
-### 4. 📦 Package Publishing
+### 4. 📦 包发布
 
-Manage releases and publishing with Nx Release:
+使用 Nx Release 管理版本和发布：
 
 ```bash
-# Dry run to see what would be published
+# 预览将要发布的内容
 npx nx release --dry-run
 
-# Version and release packages
+# 版本更新并发布包
 npx nx release
 
-# Publish only specific packages
+# 只发布特定包
 npx nx release publish --projects=strings,colors
 ```
 
-[Learn more about Nx Release →](https://nx.dev/features/manage-releases)
+[了解更多关于 Nx Release →](https://nx.dev/features/manage-releases)
 
-## 📁 Project Structure
+## 📁 项目结构
 
 ```
 ├── packages/
-│   ├── strings/     [scope:strings] - String utilities (publishable)
-│   ├── async/       [scope:async]   - Async utilities (publishable)
-│   ├── colors/      [scope:colors]  - Color utilities (publishable)
-│   └── utils/       [scope:shared]  - Shared utilities (private)
-├── nx.json          - Nx configuration
-├── tsconfig.json    - TypeScript configuration
-└── eslint.config.mjs - ESLint with module boundary rules
+│   ├── strings/     [scope:strings] - 字符串工具库（可发布）
+│   ├── async/       [scope:async]   - 异步工具库（可发布）
+│   ├── colors/      [scope:colors]  - 颜色工具库（可发布）
+│   └── utils/       [scope:shared]  - 共享工具库（私有）
+├── nx.json          - Nx 配置
+├── tsconfig.json    - TypeScript 配置
+└── eslint.config.mjs - ESLint 模块边界规则
 ```
 
-## 🏷️ Understanding Tags
+## 🏷️ 理解标签
 
-This repository uses tags to enforce module boundaries:
+本仓库使用标签来强制执行模块边界：
 
-| Package        | Tag             | Can Import From        |
-| -------------- | --------------- | ---------------------- |
-| `@org/utils`   | `scope:shared`  | Nothing (base library) |
-| `@org/strings` | `scope:strings` | `scope:shared`         |
-| `@org/async`   | `scope:async`   | `scope:shared`         |
-| `@org/colors`  | `scope:colors`  | `scope:shared`         |
+| 包名           | 标签            | 可导入自       |
+| -------------- | --------------- | -------------- |
+| `@org/utils`   | `scope:shared`  | 无（基础库）   |
+| `@org/strings` | `scope:strings` | `scope:shared` |
+| `@org/async`   | `scope:async`   | `scope:shared` |
+| `@org/colors`  | `scope:colors`  | `scope:shared` |
 
-The ESLint configuration enforces these boundaries, preventing circular dependencies and maintaining clean architecture.
+ESLint 配置强制执行这些边界，防止循环依赖并保持清晰的架构。
 
-## 🧪 Testing Module Boundaries
+## 🧪 测试模块边界
 
-To see module boundary enforcement in action:
+查看模块边界强制执行的实际效果：
 
-1. Try importing `@org/colors` into `@org/strings`
-2. Run `npx nx lint strings`
-3. You'll see an error about violating module boundaries
+1. 尝试在 `@org/strings` 中导入 `@org/colors`
+2. 运行 `npx nx lint strings`
+3. 你将看到违反模块边界的错误
 
-## 📚 Useful Commands
+## 📚 常用命令
 
 ```bash
-# Project exploration
-npx nx graph                                    # Interactive dependency graph
-npx nx list                                     # List installed plugins
-npx nx show project strings --web              # View project details
+# 项目探索
+npx nx graph                                    # 交互式依赖图
+npx nx list                                     # 列出已安装的插件
+npx nx show project strings --web              # 查看项目详情
 
-# Development
-npx nx build strings                           # Build a specific package
-npx nx test async                              # Test a specific package
-npx nx lint colors                             # Lint a specific package
+# 开发
+npx nx build strings                           # 构建特定包
+npx nx test async                              # 测试特定包
+npx nx lint colors                             # 检查特定包
 
-# Running multiple tasks
-npx nx run-many -t build                       # Build all projects
-npx nx run-many -t test --parallel=3          # Test in parallel
-npx nx run-many -t lint test build            # Run multiple targets
+# 运行多个任务
+npx nx run-many -t build                       # 构建所有项目
+npx nx run-many -t test --parallel=3          # 并行测试
+npx nx run-many -t lint test build            # 运行多个目标
 
-# Affected commands (great for CI)
-npx nx affected -t build                       # Build only affected projects
-npx nx affected -t test                        # Test only affected projects
+# Affected 命令（适用于 CI）
+npx nx affected -t build                       # 只构建受影响的项目
+npx nx affected -t test                        # 只测试受影响的项目
 
-# Release management
-npx nx release --dry-run                       # Preview release changes
-npx nx release                                 # Create a new release
+# 发布管理
+npx nx release --dry-run                       # 预览发布变更
+npx nx release                                 # 创建新版本
 ```
 
 ## Nx Cloud
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+Nx Cloud 确保[快速且可扩展的 CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) 流水线。它包含以下功能：
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [远程缓存](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [跨多机任务分发](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [自动化 e2e 测试分割](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [任务不稳定性检测和重试](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
-## 🔗 Learn More
+## 🔗 了解更多
 
-- [Nx Documentation](https://nx.dev)
-- [Module Boundaries](https://nx.dev/features/enforce-module-boundaries)
-- [Custom Commands](https://nx.dev/concepts/executors-and-configurations)
-- [Self-Healing CI](https://nx.dev/ci/features/self-healing-ci)
-- [Releasing Packages](https://nx.dev/features/manage-releases)
+- [Nx 文档](https://nx.dev)
+- [模块边界](https://nx.dev/features/enforce-module-boundaries)
+- [自定义命令](https://nx.dev/concepts/executors-and-configurations)
+- [自愈 CI](https://nx.dev/ci/features/self-healing-ci)
+- [发布包](https://nx.dev/features/manage-releases)
 - [Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud)
 
-## 💬 Community
+## 💬 社区
 
-Join the Nx community:
+加入 Nx 社区：
 
 - [Discord](https://go.nx.dev/community)
 - [X (Twitter)](https://twitter.com/nxdevtools)
 - [LinkedIn](https://www.linkedin.com/company/nrwl)
 - [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+- [博客](https://nx.dev/blog)
