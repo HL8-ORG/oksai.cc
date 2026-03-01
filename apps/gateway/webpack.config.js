@@ -1,9 +1,9 @@
-const { composePlugins, withNx } = require('@nx/webpack');
+const { composePlugins, withNx } = require("@nx/webpack");
 
 module.exports = composePlugins(withNx(), (config) => {
   // Disable license-webpack-plugin which causes issues
   config.plugins = (config.plugins || []).filter(
-    (plugin) => plugin.constructor.name !== 'LicenseWebpackPlugin'
+    (plugin) => plugin.constructor.name !== "LicenseWebpackPlugin"
   );
 
   return {

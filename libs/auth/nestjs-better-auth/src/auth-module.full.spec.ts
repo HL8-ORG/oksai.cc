@@ -1,21 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthModule } from './auth-module';
-import { AuthService } from './auth-service';
-import { Hook, BeforeHook } from './decorators';
-import { Injectable, Controller, Get } from '@nestjs/common';
-import type { AuthHookContext } from './decorators';
+import { Injectable } from "@nestjs/common";
+import { Test, type TestingModule } from "@nestjs/testing";
+import { AuthModule } from "./auth-module";
+import { AuthService } from "./auth-service";
+import type { AuthHookContext } from "./decorators";
+import { BeforeHook, Hook } from "./decorators";
 
-describe('AuthModule 完整测试', () => {
+describe("AuthModule 完整测试", () => {
   let module: TestingModule;
 
   const createFullMockAuth = (options: any = {}) => ({
     api: {
       getSession: jest.fn().mockResolvedValue(null),
-      getActiveMemberRole: jest.fn().mockResolvedValue({ role: 'member' }),
+      getActiveMemberRole: jest.fn().mockResolvedValue({ role: "member" }),
     },
     options: {
-      basePath: '/api/auth',
-      trustedOrigins: ['http://localhost:3000'],
+      basePath: "/api/auth",
+      trustedOrigins: ["http://localhost:3000"],
       hooks: {},
       ...options,
     },
@@ -27,8 +27,8 @@ describe('AuthModule 完整测试', () => {
     }
   });
 
-  describe('模块注册', () => {
-    it('应该成功注册 forRoot', async () => {
+  describe("模块注册", () => {
+    it("应该成功注册 forRoot", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -45,7 +45,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService.api).toBe(mockAuth.api);
     });
 
-    it('应该成功注册 forRootAsync', async () => {
+    it("应该成功注册 forRootAsync", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -64,7 +64,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该支持全局模块', async () => {
+    it("应该支持全局模块", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -81,7 +81,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该支持非全局模块', async () => {
+    it("应该支持非全局模块", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -99,8 +99,8 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('全局守卫配置', () => {
-    it('应该启用全局守卫', async () => {
+  describe("全局守卫配置", () => {
+    it("应该启用全局守卫", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -116,7 +116,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该禁用全局守卫', async () => {
+    it("应该禁用全局守卫", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -133,10 +133,10 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('CORS 配置', () => {
-    it('应该配置 CORS（数组形式 trustedOrigins）', async () => {
+  describe("CORS 配置", () => {
+    it("应该配置 CORS（数组形式 trustedOrigins）", async () => {
       const mockAuth = createFullMockAuth({
-        trustedOrigins: ['http://localhost:3000', 'https://example.com'],
+        trustedOrigins: ["http://localhost:3000", "https://example.com"],
       });
 
       module = await Test.createTestingModule({
@@ -153,9 +153,9 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该禁用 CORS', async () => {
+    it("应该禁用 CORS", async () => {
       const mockAuth = createFullMockAuth({
-        trustedOrigins: ['http://localhost:3000'],
+        trustedOrigins: ["http://localhost:3000"],
       });
 
       module = await Test.createTestingModule({
@@ -172,7 +172,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该处理无 trustedOrigins', async () => {
+    it("应该处理无 trustedOrigins", async () => {
       const mockAuth = createFullMockAuth({
         trustedOrigins: undefined,
       });
@@ -191,8 +191,8 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('Body Parser 配置', () => {
-    it('应该启用 body parser', async () => {
+  describe("Body Parser 配置", () => {
+    it("应该启用 body parser", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -209,7 +209,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该禁用 body parser', async () => {
+    it("应该禁用 body parser", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -226,7 +226,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该启用 raw body parser', async () => {
+    it("应该启用 raw body parser", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -244,8 +244,8 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('控制器配置', () => {
-    it('应该启用控制器', async () => {
+  describe("控制器配置", () => {
+    it("应该启用控制器", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -262,7 +262,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该禁用控制器', async () => {
+    it("应该禁用控制器", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -280,10 +280,10 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('自定义中间件', () => {
-    it('应该支持自定义中间件', async () => {
+  describe("自定义中间件", () => {
+    it("应该支持自定义中间件", async () => {
       const mockAuth = createFullMockAuth();
-      const customMiddleware = jest.fn((req, res, next) => next());
+      const customMiddleware = jest.fn((_req, _res, next) => next());
 
       module = await Test.createTestingModule({
         imports: [
@@ -300,14 +300,14 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('钩子系统', () => {
-    it('应该配置钩子提供者', async () => {
+  describe("钩子系统", () => {
+    it("应该配置钩子提供者", async () => {
       @Hook()
       @Injectable()
       class TestHookProvider {
-        @BeforeHook('/sign-in')
-        async handleHook(ctx: AuthHookContext) {
-          console.log('Hook executed');
+        @BeforeHook("/sign-in")
+        async handleHook(_ctx: AuthHookContext) {
+          console.log("Hook executed");
         }
       }
 
@@ -327,7 +327,7 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该处理无钩子提供者', async () => {
+    it("应该处理无钩子提供者", async () => {
       const mockAuth = createFullMockAuth({ hooks: {} });
 
       module = await Test.createTestingModule({
@@ -344,8 +344,8 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('basePath 配置', () => {
-    it('应该使用默认 basePath', async () => {
+  describe("basePath 配置", () => {
+    it("应该使用默认 basePath", async () => {
       const mockAuth = createFullMockAuth();
 
       module = await Test.createTestingModule({
@@ -361,9 +361,9 @@ describe('AuthModule 完整测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该使用自定义 basePath', async () => {
+    it("应该使用自定义 basePath", async () => {
       const mockAuth = createFullMockAuth({
-        basePath: '/custom/auth',
+        basePath: "/custom/auth",
       });
 
       module = await Test.createTestingModule({
@@ -380,10 +380,10 @@ describe('AuthModule 完整测试', () => {
     });
   });
 
-  describe('组合选项', () => {
-    it('应该支持多个选项组合', async () => {
+  describe("组合选项", () => {
+    it("应该支持多个选项组合", async () => {
       const mockAuth = createFullMockAuth({
-        trustedOrigins: ['http://localhost:3000'],
+        trustedOrigins: ["http://localhost:3000"],
         hooks: {},
       });
 

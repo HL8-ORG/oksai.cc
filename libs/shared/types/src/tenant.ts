@@ -1,4 +1,4 @@
-export type TenantPlan = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+export type TenantPlan = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
 
 export interface Tenant {
   id: string;

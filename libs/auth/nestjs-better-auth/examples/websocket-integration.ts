@@ -4,17 +4,17 @@
  */
 
 import {
-  WebSocketGateway,
+  type OnGatewayConnection,
   SubscribeMessage,
+  WebSocketGateway,
   WebSocketServer,
-  OnGatewayConnection,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { Session } from '@oksai/nestjs-better-auth';
+} from "@nestjs/websockets";
+import { Session } from "@oksai/nestjs-better-auth";
+import type { Server, Socket } from "socket.io";
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // 生产环境应配置正确的源
+    origin: "*", // 生产环境应配置正确的源
   },
 })
 export class EventsGateway implements OnGatewayConnection {
@@ -29,12 +29,12 @@ export class EventsGateway implements OnGatewayConnection {
   }
 
   // 需要认证的事件
-  @SubscribeMessage('message')
+  @SubscribeMessage("message")
   async handleMessage(@Session() session: any, payload: { text: string }) {
     console.log(`用户 ${session.user.name} 发送消息: ${payload.text}`);
 
     // 广播消息给所有客户端
-    this.server.emit('message', {
+    this.server.emit("message", {
       user: session.user.name,
       text: payload.text,
       timestamp: new Date(),
@@ -42,8 +42,8 @@ export class EventsGateway implements OnGatewayConnection {
   }
 
   // 获取在线用户列表 - 需要认证
-  @SubscribeMessage('getUsers')
-  async handleGetUsers(@Session() session: any) {
+  @SubscribeMessage("getUsers")
+  async handleGetUsers(@Session() _session: any) {
     // 返回在线用户列表
     return {
       users: [], // 实际应用中应从某个服务中获取
@@ -51,13 +51,13 @@ export class EventsGateway implements OnGatewayConnection {
   }
 
   // 可选认证 - 游客也可以访问
-  @SubscribeMessage('ping')
+  @SubscribeMessage("ping")
   @OptionalAuth()
   async handlePing(@Session() session: any) {
     if (session) {
       return { pong: true, user: session.user.name };
     }
-    return { pong: true, user: 'guest' };
+    return { pong: true, user: "guest" };
   }
 }
 
@@ -65,7 +65,7 @@ export class EventsGateway implements OnGatewayConnection {
  * 客户端连接示例 (JavaScript)
  */
 
-const clientCode = `
+const _clientCode = `
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:3000', {
@@ -95,8 +95,8 @@ socket.on('message', (data) => {
  * 模块配置
  */
 
-import { Module } from '@nestjs/common';
-import { AuthModule } from '@oksai/nestjs-better-auth';
+import { Module } from "@nestjs/common";
+import { AuthModule } from "@oksai/nestjs-better-auth";
 
 @Module({
   imports: [

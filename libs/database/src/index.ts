@@ -1,13 +1,13 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import * as schema from './schema';
+import process from "node:process";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 
 const connectionString =
-  process.env.DATABASE_URL ||
-  'postgresql://oksai:oksai_dev_password@localhost:5432/oksai';
+  process.env.DATABASE_URL || "postgresql://oksai:oksai_dev_password@localhost:5432/oksai";
 
 const client = postgres(connectionString);
 
 export const db = drizzle(client, { schema });
 
-export * from './schema';
+export * from "./schema";

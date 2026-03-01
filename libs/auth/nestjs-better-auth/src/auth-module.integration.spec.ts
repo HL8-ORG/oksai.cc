@@ -1,10 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthModule } from './auth-module';
-import { AuthService } from './auth-service';
-import { AuthGuard } from './auth-guard';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from "@nestjs/core";
+import { Test, type TestingModule } from "@nestjs/testing";
+import { AuthModule } from "./auth-module";
+import { AuthService } from "./auth-service";
 
-describe('AuthModule 集成测试', () => {
+describe("AuthModule 集成测试", () => {
   let module: TestingModule;
 
   const mockAuth = {
@@ -12,8 +11,8 @@ describe('AuthModule 集成测试', () => {
       getSession: jest.fn(),
     },
     options: {
-      basePath: '/api/auth',
-      trustedOrigins: ['http://localhost:3000'],
+      basePath: "/api/auth",
+      trustedOrigins: ["http://localhost:3000"],
     },
   };
 
@@ -23,8 +22,8 @@ describe('AuthModule 集成测试', () => {
     }
   });
 
-  describe('forRoot', () => {
-    it('应该成功注册模块', async () => {
+  describe("forRoot", () => {
+    it("应该成功注册模块", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({
@@ -40,7 +39,7 @@ describe('AuthModule 集成测试', () => {
       expect(authService.api).toBe(mockAuth.api);
     });
 
-    it('应该启用全局认证守卫', async () => {
+    it("应该启用全局认证守卫", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({
@@ -56,7 +55,7 @@ describe('AuthModule 集成测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该支持禁用全局守卫', async () => {
+    it("应该支持禁用全局守卫", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({
@@ -71,7 +70,7 @@ describe('AuthModule 集成测试', () => {
       expect(() => module.get(APP_GUARD)).toThrow();
     });
 
-    it('应该导出 AuthService', async () => {
+    it("应该导出 AuthService", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({
@@ -85,8 +84,8 @@ describe('AuthModule 集成测试', () => {
     });
   });
 
-  describe('forRootAsync', () => {
-    it('应该支持异步配置', async () => {
+  describe("forRootAsync", () => {
+    it("应该支持异步配置", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRootAsync({
@@ -108,14 +107,14 @@ describe('AuthModule 集成测试', () => {
       expect(authService.api).toBe(mockAuth.api);
     });
 
-    it('应该支持依赖注入', async () => {
+    it("应该支持依赖注入", async () => {
       class ConfigService {
         getAuthConfig() {
           return { auth: mockAuth };
         }
       }
 
-      const configService = new ConfigService();
+      const _configService = new ConfigService();
 
       // 简化测试，验证异步工厂函数能够工作
       module = await Test.createTestingModule({
@@ -137,8 +136,8 @@ describe('AuthModule 集成测试', () => {
     });
   });
 
-  describe('AuthService', () => {
-    it('应该提供访问 auth API 的能力', async () => {
+  describe("AuthService", () => {
+    it("应该提供访问 auth API 的能力", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({
@@ -158,8 +157,8 @@ describe('AuthModule 集成测试', () => {
     });
   });
 
-  describe('模块配置选项', () => {
-    it('应该支持全局模块配置', async () => {
+  describe("模块配置选项", () => {
+    it("应该支持全局模块配置", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({
@@ -175,7 +174,7 @@ describe('AuthModule 集成测试', () => {
       expect(authService).toBeDefined();
     });
 
-    it('应该支持禁用控制器', async () => {
+    it("应该支持禁用控制器", async () => {
       module = await Test.createTestingModule({
         imports: [
           AuthModule.forRoot({

@@ -1,129 +1,129 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 import {
-  AllowAnonymous,
-  OptionalAuth,
-  Roles,
-  OrgRoles,
-  Session,
-  Public,
-  Optional,
-  BeforeHook,
   AfterHook,
+  AllowAnonymous,
+  BeforeHook,
   Hook,
-} from './decorators';
-import { BEFORE_HOOK_KEY, AFTER_HOOK_KEY, HOOK_KEY } from './symbols';
+  Optional,
+  OptionalAuth,
+  OrgRoles,
+  Public,
+  Roles,
+  Session,
+} from "./decorators";
+import { HOOK_KEY } from "./symbols";
 
-describe('Decorators', () => {
-  describe('@AllowAnonymous', () => {
-    it('应该定义为函数', () => {
+describe("Decorators", () => {
+  describe("@AllowAnonymous", () => {
+    it("应该定义为函数", () => {
       expect(AllowAnonymous).toBeDefined();
-      expect(typeof AllowAnonymous).toBe('function');
+      expect(typeof AllowAnonymous).toBe("function");
     });
 
-    it('应该返回装饰器函数', () => {
+    it("应该返回装饰器函数", () => {
       const decorator = AllowAnonymous();
-      expect(typeof decorator).toBe('function');
+      expect(typeof decorator).toBe("function");
     });
   });
 
-  describe('@OptionalAuth', () => {
-    it('应该定义为函数', () => {
+  describe("@OptionalAuth", () => {
+    it("应该定义为函数", () => {
       expect(OptionalAuth).toBeDefined();
-      expect(typeof OptionalAuth).toBe('function');
+      expect(typeof OptionalAuth).toBe("function");
     });
 
-    it('应该返回装饰器函数', () => {
+    it("应该返回装饰器函数", () => {
       const decorator = OptionalAuth();
-      expect(typeof decorator).toBe('function');
+      expect(typeof decorator).toBe("function");
     });
   });
 
-  describe('@Roles', () => {
-    it('应该定义为函数', () => {
+  describe("@Roles", () => {
+    it("应该定义为函数", () => {
       expect(Roles).toBeDefined();
-      expect(typeof Roles).toBe('function');
+      expect(typeof Roles).toBe("function");
     });
 
-    it('应该接受角色数组参数', () => {
-      const roles = ['admin', 'user'];
+    it("应该接受角色数组参数", () => {
+      const roles = ["admin", "user"];
       const decorator = Roles(roles);
-      expect(typeof decorator).toBe('function');
+      expect(typeof decorator).toBe("function");
     });
 
-    it('应该支持单个角色', () => {
-      const roles = ['admin'];
+    it("应该支持单个角色", () => {
+      const roles = ["admin"];
       const decorator = Roles(roles);
-      expect(typeof decorator).toBe('function');
+      expect(typeof decorator).toBe("function");
     });
   });
 
-  describe('@OrgRoles', () => {
-    it('应该定义为函数', () => {
+  describe("@OrgRoles", () => {
+    it("应该定义为函数", () => {
       expect(OrgRoles).toBeDefined();
-      expect(typeof OrgRoles).toBe('function');
+      expect(typeof OrgRoles).toBe("function");
     });
 
-    it('应该接受组织角色数组参数', () => {
-      const roles = ['owner', 'admin'];
+    it("应该接受组织角色数组参数", () => {
+      const roles = ["owner", "admin"];
       const decorator = OrgRoles(roles);
-      expect(typeof decorator).toBe('function');
+      expect(typeof decorator).toBe("function");
     });
   });
 
-  describe('@Public (deprecated)', () => {
-    it('应该是 AllowAnonymous 的别名', () => {
+  describe("@Public (deprecated)", () => {
+    it("应该是 AllowAnonymous 的别名", () => {
       expect(Public).toBe(AllowAnonymous);
     });
   });
 
-  describe('@Optional (deprecated)', () => {
-    it('应该是 OptionalAuth 的别名', () => {
+  describe("@Optional (deprecated)", () => {
+    it("应该是 OptionalAuth 的别名", () => {
       expect(Optional).toBe(OptionalAuth);
     });
   });
 
-  describe('@Session', () => {
-    it('应该定义为参数装饰器', () => {
+  describe("@Session", () => {
+    it("应该定义为参数装饰器", () => {
       expect(Session).toBeDefined();
-      expect(typeof Session).toBe('function');
+      expect(typeof Session).toBe("function");
     });
   });
 
-  describe('@BeforeHook', () => {
-    it('应该定义为函数', () => {
+  describe("@BeforeHook", () => {
+    it("应该定义为函数", () => {
       expect(BeforeHook).toBeDefined();
-      expect(typeof BeforeHook).toBe('function');
+      expect(typeof BeforeHook).toBe("function");
     });
 
-    it('应该接受可选的路径参数', () => {
-      const decoratorWithPath = BeforeHook('/sign-in');
+    it("应该接受可选的路径参数", () => {
+      const decoratorWithPath = BeforeHook("/sign-in");
       const decoratorWithoutPath = BeforeHook();
-      expect(typeof decoratorWithPath).toBe('function');
-      expect(typeof decoratorWithoutPath).toBe('function');
+      expect(typeof decoratorWithPath).toBe("function");
+      expect(typeof decoratorWithoutPath).toBe("function");
     });
   });
 
-  describe('@AfterHook', () => {
-    it('应该定义为函数', () => {
+  describe("@AfterHook", () => {
+    it("应该定义为函数", () => {
       expect(AfterHook).toBeDefined();
-      expect(typeof AfterHook).toBe('function');
+      expect(typeof AfterHook).toBe("function");
     });
 
-    it('应该接受可选的路径参数', () => {
-      const decoratorWithPath = AfterHook('/sign-in');
+    it("应该接受可选的路径参数", () => {
+      const decoratorWithPath = AfterHook("/sign-in");
       const decoratorWithoutPath = AfterHook();
-      expect(typeof decoratorWithPath).toBe('function');
-      expect(typeof decoratorWithoutPath).toBe('function');
+      expect(typeof decoratorWithPath).toBe("function");
+      expect(typeof decoratorWithoutPath).toBe("function");
     });
   });
 
-  describe('@Hook', () => {
-    it('应该定义为类装饰器', () => {
+  describe("@Hook", () => {
+    it("应该定义为类装饰器", () => {
       expect(Hook).toBeDefined();
-      expect(typeof Hook).toBe('function');
+      expect(typeof Hook).toBe("function");
     });
 
-    it('应该在类上设置元数据', () => {
+    it("应该在类上设置元数据", () => {
       @Hook()
       class TestClass {}
 
@@ -132,8 +132,8 @@ describe('Decorators', () => {
     });
   });
 
-  describe('装饰器组合', () => {
-    it('应该支持多个装饰器同时使用', () => {
+  describe("装饰器组合", () => {
+    it("应该支持多个装饰器同时使用", () => {
       class TestClass {
         @AllowAnonymous()
         @OptionalAuth()

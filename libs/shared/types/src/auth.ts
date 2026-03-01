@@ -1,4 +1,4 @@
-import type { UserRole } from './user';
+import type { UserRole } from "./user";
 
 export interface Session {
   id: string;
@@ -50,7 +50,7 @@ export interface LoginCredentials {
 export interface OAuthCallback {
   code: string;
   state?: string;
-  provider: 'github' | 'google';
+  provider: "github" | "google";
 }
 
 export interface MFASetup {

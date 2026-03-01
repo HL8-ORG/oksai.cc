@@ -5,20 +5,16 @@
  * 展示如何配置 Better Auth 支持多种登录方式和插件
  */
 
-import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import process from "node:process";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 /**
  * 基础配置示例
  */
-export function createBasicAuth(
-  databaseUrl: string,
-  secret: string,
-  baseUrl: string,
-  corsOrigin: string,
-) {
+export function createBasicAuth(databaseUrl: string, secret: string, baseUrl: string, corsOrigin: string) {
   const client = postgres(databaseUrl);
   const db = drizzle(client);
 
@@ -26,7 +22,7 @@ export function createBasicAuth(
     secret,
     baseURL: baseUrl,
     trustedOrigins: [corsOrigin],
-    database: drizzleAdapter(db, { provider: 'pg' }),
+    database: drizzleAdapter(db, { provider: "pg" }),
 
     emailAndPassword: {
       enabled: true,
@@ -53,7 +49,7 @@ export function createAdvancedAuth(
   databaseUrl: string,
   secret: string,
   baseUrl: string,
-  corsOrigins: string[],
+  corsOrigins: string[]
 ) {
   const client = postgres(databaseUrl);
   const db = drizzle(client);
@@ -62,7 +58,7 @@ export function createAdvancedAuth(
     secret,
     baseURL: baseUrl,
     trustedOrigins: corsOrigins,
-    database: drizzleAdapter(db, { provider: 'pg' }),
+    database: drizzleAdapter(db, { provider: "pg" }),
 
     // 邮箱/密码登录
     emailAndPassword: {

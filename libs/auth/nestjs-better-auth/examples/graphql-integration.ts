@@ -3,9 +3,8 @@
  * 展示如何在 GraphQL 解析器中使用认证
  */
 
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
-import { Session, Roles } from '@oksai/nestjs-better-auth';
+import { Query, Resolver } from "@nestjs/graphql";
+import { Roles, Session } from "@oksai/nestjs-better-auth";
 
 @Resolver()
 export class UsersResolver {
@@ -17,7 +16,7 @@ export class UsersResolver {
 
   // 管理员查询 - 需要 admin 角色
   @Query(() => [User])
-  @Roles(['admin'])
+  @Roles(["admin"])
   async allUsers() {
     // 返回所有用户
     return [];
@@ -35,7 +34,7 @@ export class UsersResolver {
  * GraphQL Schema 定义示例
  */
 
-const gql = `
+const _gql = `
   type User {
     id: ID!
     email: String!
@@ -58,9 +57,9 @@ const gql = `
  * 模块配置 - 同时启用 GraphQL 和认证
  */
 
-import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { AuthModule } from '@oksai/nestjs-better-auth';
+import { Module } from "@nestjs/common";
+import { GraphQLModule } from "@nestjs/graphql";
+import { AuthModule } from "@oksai/nestjs-better-auth";
 
 @Module({
   imports: [

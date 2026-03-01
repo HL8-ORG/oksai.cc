@@ -4,7 +4,7 @@
 
 export const WsException = class WsException extends Error {
   constructor(message: any) {
-    super(typeof message === 'string' ? message : JSON.stringify(message));
-    this.name = 'WsException';
+    super(typeof message === "string" ? message : JSON.stringify(message));
+    this.name = "WsException";
   }
 };

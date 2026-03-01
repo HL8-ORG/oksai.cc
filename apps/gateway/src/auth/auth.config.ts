@@ -1,7 +1,8 @@
-import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import process from "node:process";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 /**
  * 创建 Better Auth 实例
@@ -31,7 +32,7 @@ export function createAuth(databaseUrl: string) {
   return betterAuth({
     // 数据库适配器
     database: drizzleAdapter(db, {
-      provider: 'pg',
+      provider: "pg",
     }),
 
     // 邮箱/密码登录配置
@@ -47,8 +48,8 @@ export function createAuth(databaseUrl: string) {
       // 创建应用：https://github.com/settings/developers
       // 回调 URL：http://localhost:3000/api/auth/callback/github
       github: {
-        clientId: process.env.GITHUB_CLIENT_ID || '',
-        clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+        clientId: process.env.GITHUB_CLIENT_ID || "",
+        clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
       },
 
       // Google OAuth
@@ -56,8 +57,8 @@ export function createAuth(databaseUrl: string) {
       // 创建应用：https://console.cloud.google.com/apis/credentials
       // 回调 URL：http://localhost:3000/api/auth/callback/google
       google: {
-        clientId: process.env.GOOGLE_CLIENT_ID || '',
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+        clientId: process.env.GOOGLE_CLIENT_ID || "",
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       },
     },
 
@@ -77,11 +78,11 @@ export function createAuth(databaseUrl: string) {
       generateId: false,
 
       // Cookie 安全配置
-      useSecureCookies: process.env.NODE_ENV === 'production',
+      useSecureCookies: process.env.NODE_ENV === "production",
 
       // IP 地址提取（用于代理环境）
       ipAddress: {
-        ipAddressHeaders: ['x-forwarded-for', 'x-real-ip'],
+        ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
       },
     },
 
@@ -90,7 +91,7 @@ export function createAuth(databaseUrl: string) {
       enabled: true,
       window: 60, // 60 秒窗口
       max: 100, // 最多 100 次请求
-      storage: 'database', // 使用数据库存储
+      storage: "database", // 使用数据库存储
     },
   });
 }

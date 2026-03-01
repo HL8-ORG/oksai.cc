@@ -1,5 +1,5 @@
-import { createStart } from '@tanstack/react-start';
-import App from './App';
+import { createStart } from "@tanstack/react-start";
+import App from "./App";
 
 const Start = createStart({ App });
 

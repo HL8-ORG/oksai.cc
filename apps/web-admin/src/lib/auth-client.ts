@@ -1,6 +1,5 @@
-import { createAuthClient } from 'better-auth/react';
-
-import { env } from '@/env/client';
+import { createAuthClient } from "better-auth/react";
+import { env } from "@/env/client";
 
 /**
  * Better Auth 客户端

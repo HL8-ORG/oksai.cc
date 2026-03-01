@@ -4,10 +4,10 @@ import type { GqlExecutionContext as GqlExecutionContextType } from "@nestjs/gra
 let GqlExecutionContext: typeof GqlExecutionContextType | undefined;
 
 function getGqlExecutionContext(): typeof GqlExecutionContextType {
-	if (!GqlExecutionContext) {
-		GqlExecutionContext = require("@nestjs/graphql").GqlExecutionContext;
-	}
-	return GqlExecutionContext as typeof GqlExecutionContextType;
+  if (!GqlExecutionContext) {
+    GqlExecutionContext = require("@nestjs/graphql").GqlExecutionContext;
+  }
+  return GqlExecutionContext as typeof GqlExecutionContextType;
 }
 
 /**
@@ -16,14 +16,14 @@ function getGqlExecutionContext(): typeof GqlExecutionContextType {
  * @returns The request object
  */
 export function getRequestFromContext(context: ExecutionContext) {
-	const contextType = context.getType<"graphql" | "ws" | "http">();
-	if (contextType === "graphql") {
-		return getGqlExecutionContext().create(context).getContext().req;
-	}
+  const contextType = context.getType<"graphql" | "ws" | "http">();
+  if (contextType === "graphql") {
+    return getGqlExecutionContext().create(context).getContext().req;
+  }
 
-	if (contextType === "ws") {
-		return context.switchToWs().getClient();
-	}
+  if (contextType === "ws") {
+    return context.switchToWs().getClient();
+  }
 
-	return context.switchToHttp().getRequest();
+  return context.switchToHttp().getRequest();
 }

@@ -1,6 +1,6 @@
-import type { TenantPlan } from './tenant';
+import type { TenantPlan } from "./tenant";
 
-export type UserRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
+export type UserRole = "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
 
 export interface User {
   id: string;

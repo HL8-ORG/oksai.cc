@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { AuthModule } from '@oksai/nestjs-better-auth';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { HealthController } from './health/health.controller';
-import { UserController } from './auth/user.controller';
-import { auth } from './auth/auth';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { AuthModule } from "@oksai/nestjs-better-auth";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { auth } from "./auth/auth";
+import { UserController } from "./auth/user.controller";
+import { HealthController } from "./health/health.controller";
 
 /**
  * 根模块
@@ -25,7 +25,7 @@ import { auth } from './auth/auth';
     // 配置模块
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [".env.local", ".env"],
     }),
 
     // 限流保护

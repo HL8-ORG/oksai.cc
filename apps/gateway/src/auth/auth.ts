@@ -1,4 +1,5 @@
-import { createAuth } from './auth.config';
+import process from "node:process";
+import { createAuth } from "./auth.config";
 
 /**
  * Better Auth 实例
@@ -20,6 +21,5 @@ import { createAuth } from './auth.config';
  * @see https://better-auth.com/docs/reference/options
  */
 export const auth = createAuth(
-  process.env.DATABASE_URL ||
-    'postgresql://oksai:oksai_dev_password@localhost:5432/oksai',
+  process.env.DATABASE_URL || "postgresql://oksai:oksai_dev_password@localhost:5432/oksai"
 );

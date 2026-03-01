@@ -1,23 +1,23 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get } from "@nestjs/common";
 
-@Controller('health')
+@Controller("health")
 export class HealthController {
   @Get()
   check(): { status: string; timestamp: string } {
     return {
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
     };
   }
 
-  @Get('ready')
+  @Get("ready")
   ready(): { status: string; services: Record<string, string> } {
     return {
-      status: 'ready',
+      status: "ready",
       services: {
-        database: 'connected',
-        redis: 'connected',
-        auth: 'ready',
+        database: "connected",
+        redis: "connected",
+        auth: "ready",
       },
     };
   }

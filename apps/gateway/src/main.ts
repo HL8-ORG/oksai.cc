@@ -1,10 +1,10 @@
-import 'tsconfig-paths/register';
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import { AppModule } from './app.module';
+import "tsconfig-paths/register";
+import { join } from "node:path";
+import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
+import { AppModule } from "./app.module";
 
 /**
  * 应用启动入口
@@ -24,10 +24,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // 设置全局前缀
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
 
   // 配置静态文件服务（登录页面等）
-  app.useStaticAssets(join(__dirname, '..', 'public'));
+  app.useStaticAssets(join(__dirname, "..", "public"));
 
   // 注意：CORS 由 Better Auth 模块根据 trustedOrigins 自动配置
   // 不要在这里手动配置 CORS，否则会冲突
@@ -41,7 +41,7 @@ async function bootstrap() {
     })
   );
 
-  const port = configService.get('PORT', 3000);
+  const port = configService.get("PORT", 3000);
   await app.listen(port);
   console.log(`🚀 Gateway running on http://localhost:${port}`);
   console.log(`📚 API Docs: http://localhost:${port}/api`);

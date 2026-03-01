@@ -1,7 +1,7 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { RouterProvider } from '@tanstack/react-router';
-import { getRouter } from './router';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { RouterProvider } from "@tanstack/react-router";
+import { getRouter } from "./router";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 
 const router = getRouter();
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
