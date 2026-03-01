@@ -4,7 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // 禁用内置 body parser，由 Better Auth 处理
+  });
   const configService = app.get(ConfigService);
 
   app.setGlobalPrefix('api');
