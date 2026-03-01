@@ -1,0 +1,285 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
+  "root": true,
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:"],
+              ["@oksai/**"],
+              ["~/**"],
+              [":PATH:"]
+            ]
+          }
+        }
+      }
+    },
+    "enabled": true
+  },
+  "formatter": {
+    "includes": ["**/*"],
+    "lineWidth": 110,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf"
+  },
+  "files": {
+    "includes": [
+      "**/*",
+      "!!**/node_modules",
+      "!!**/.next",
+      "!!**/.turbo",
+      "!!**/dist",
+      "!!**/build",
+      "!!**/public",
+      "!!**/*.d.ts",
+      "!!*.lock",
+      "!!*.log",
+      "!!.gitignore",
+      "!!.npmignore",
+      "!!.DS_Store",
+      "!!**/coverage",
+      "!!**/coverage/**",
+      "!!tmp"
+    ],
+    "maxSize": 2097152
+  },
+  "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
+    "formatter": {
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": true,
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "next": "recommended",
+      "react": "recommended"
+    },
+    "rules": {
+      "recommended": true,
+      "a11y": "off"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.tsx"],
+      "javascript": {
+        "jsxRuntime": "transparent"
+      }
+    },
+    {
+      "includes": [
+        "apps/web-admin/app/**/page.tsx",
+        "apps/web-admin/app/**/layout.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useExplicitType": "info",
+            "noTernary": "info",
+            "useSortedClasses": {
+              "level": "warn",
+              "options": {
+                "attributes": ["className", "classList"],
+                "functions": ["clsx", "cva", "cn", "tw"]
+              }
+            }
+          },
+          "correctness": {
+            "useImportExtensions": "warn",
+            "noProcessGlobal": "warn",
+            "useExhaustiveDependencies": "warn",
+            "noUnknownProperty": "warn",
+            "noUnreachable": "warn",
+            "noEmptyPattern": "warn",
+            "noSwitchDeclarations": "warn",
+            "useHookAtTopLevel": "warn",
+            "useJsxKeyInIterable": "warn",
+            "noUnsafeOptionalChaining": "warn"
+          },
+          "style": {
+            "useExportsLast": "warn",
+            "noProcessEnv": "warn",
+            "useNodejsImportProtocol": "error",
+            "noNestedTernary": "warn"
+          },
+          "complexity": {
+            "noExcessiveLinesPerFunction": {
+              "level": "warn",
+              "options": {
+                "maxLines": 100,
+                "skipBlankLines": true
+              }
+            }
+          },
+          "performance": {
+            "noImgElement": "warn"
+          },
+          "suspicious": {
+            "noDoubleEquals": "warn",
+            "noAssignInExpressions": "warn",
+            "noExplicitAny": "warn",
+            "useIterableCallbackReturn": "warn",
+            "noImplicitAnyLet": "warn",
+            "noRedeclare": "warn",
+            "noControlCharactersInRegex": "warn",
+            "noArrayIndexKey": "warn",
+            "noShadowRestrictedNames": "warn",
+            "noAsyncPromiseExecutor": "warn"
+          },
+          "security": {
+            "noBlankTarget": "warn",
+            "noDangerouslySetInnerHtml": "warn"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.e2e-spec.ts",
+        "**/*.integration-test.ts"
+      ],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "useArrowFunction": "off",
+            "noExcessiveLinesPerFunction": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["libs/shared/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["../auth/**"],
+                    "message": "shared 包不应从 auth 包导入，以避免循环依赖。"
+                  },
+                  {
+                    "group": ["../database/**"],
+                    "message": "shared 包不应从 database 包导入，以避免循环依赖。"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["libs/auth/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["../database/**"],
+                    "message": "auth 包不应从 database 包导入，以避免循环依赖。"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["libs/database/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["../auth/**"],
+                    "message": "database 包不应从 auth 包导入，以避免循环依赖。"
+                  },
+                  {
+                    "group": ["../../apps/**"],
+                    "message": "database 包不应从 apps 导入，以避免循环依赖。"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/gateway/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@oksai/web-admin", "@oksai/web-admin/**"],
+                    "message": "gateway 应用不应从 web-admin 导入，以避免循环依赖。"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web-admin/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@oksai/gateway", "@oksai/gateway/**"],
+                    "message": "web-admin 应用不应从 gateway 导入，以避免循环依赖。"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
