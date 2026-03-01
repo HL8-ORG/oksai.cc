@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+
+  redis:
+    extends:
+      file: docker-compose.yml
+      service: redis
+
+  rabbitmq:
+    extends:
+      file: docker-compose.yml
+      service: rabbitmq
+
+  minio:
+    extends:
+      file: docker-compose.yml
+      service: minio
+
+  mailhog:
+    extends:
+      file: docker-compose.yml
+      service: mailhog
+
+  gateway:
+    build:
+      context: ../
+      dockerfile: apps/gateway/Dockerfile
+    container_name: oksai-gateway
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://oksai:oksai_dev_password@postgres:5432/oksai
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: oksai_jwt_secret_key_dev
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../apps/gateway:/app/apps/gateway
+      - ../libs:/app/libs

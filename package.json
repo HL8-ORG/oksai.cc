@@ -1,23 +1,38 @@
 {
-  "name": "@org/source",
-  "version": "0.0.0",
+  "name": "@oksai/source",
+  "version": "0.0.1",
   "license": "MIT",
-  "scripts": {},
   "private": true,
+  "scripts": {
+    "dev": "nx serve gateway",
+    "build": "nx run-many -t build",
+    "test": "nx run-many -t test",
+    "lint": "nx run-many -t lint",
+    "db:generate": "nx run @oksai/database:db:generate",
+    "db:migrate": "nx run @oksai/database:db:migrate",
+    "db:push": "nx run @oksai/database:db:push",
+    "db:studio": "nx run @oksai/database:db:studio",
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down",
+    "docker:dev": "docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up"
+  },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@nx/eslint": "22.5.1",
     "@nx/eslint-plugin": "22.5.1",
     "@nx/js": "22.5.1",
+    "@nx/node": "^22.5.3",
     "@nx/vite": "22.5.1",
     "@nx/vitest": "22.5.1",
     "@nx/web": "22.5.1",
+    "@nx/webpack": "^22.5.3",
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
     "@types/node": "20.19.9",
     "@vitest/coverage-v8": "4.0.9",
     "@vitest/ui": "4.0.9",
+    "drizzle-kit": "^0.24.0",
     "eslint": "~8.57.0",
     "jiti": "2.4.2",
     "jsonc-eslint-parser": "^2.1.0",
@@ -30,9 +45,6 @@
     "vite": "^7.0.0",
     "vitest": "4.0.9"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "nx": {
     "includedScripts": [],
     "targets": {
@@ -45,6 +57,5 @@
         }
       }
     }
-  },
-  "dependencies": {}
+  }
 }

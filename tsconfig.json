@@ -1,19 +1,37 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "files": [],
-  "references": [
-    {
-      "path": "./packages/strings"
-    },
-    {
-      "path": "./packages/colors"
-    },
-    {
-      "path": "./packages/async"
-    },
-    {
-      "path": "./packages/utils"
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@oksai/database": ["libs/database/src/index.ts"],
+      "@oksai/database/schema": ["libs/database/src/schema/index.ts"],
+      "@oksai/nestjs-better-auth": [
+        "libs/auth/nestjs-better-auth/src/index.ts"
+      ],
+      "@oksai/types": ["libs/shared/types/src/index.ts"],
+      "@oksai/utils": ["libs/shared/utils/src/index.ts"]
     }
+  },
+  "references": [
+    { "path": "./libs/database" },
+    { "path": "./libs/shared/types" },
+    { "path": "./libs/shared/utils" },
+    { "path": "./libs/auth/nestjs-better-auth" }
   ]
 }
