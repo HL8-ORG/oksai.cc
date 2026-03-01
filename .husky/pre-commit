@@ -1,0 +1,6 @@
+if [ -f .git/MERGE_HEAD ]; then
+  echo "检测到合并操作。跳过 lint-staged。"
+  exit 0
+fi
+
+pnpm lint-staged --verbose

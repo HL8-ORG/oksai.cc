@@ -7,12 +7,7 @@
         "organizeImports": {
           "level": "on",
           "options": {
-            "groups": [
-              [":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:"],
-              ["@oksai/**"],
-              ["~/**"],
-              [":PATH:"]
-            ]
+            "groups": [[":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:"], ["@oksai/**"], ["~/**"], [":PATH:"]]
           }
         }
       }
@@ -28,22 +23,26 @@
   },
   "files": {
     "includes": [
-      "**/*",
-      "!!**/node_modules",
-      "!!**/.next",
-      "!!**/.turbo",
-      "!!**/dist",
-      "!!**/build",
-      "!!**/public",
-      "!!**/*.d.ts",
-      "!!*.lock",
-      "!!*.log",
-      "!!.gitignore",
-      "!!.npmignore",
-      "!!.DS_Store",
-      "!!**/coverage",
-      "!!**/coverage/**",
-      "!!tmp"
+      "apps/**/*",
+      "libs/**/*",
+      "!**/node_modules",
+      "!**/.next",
+      "!**/.turbo",
+      "!**/dist",
+      "!**/build",
+      "!**/public",
+      "!**/*.d.ts",
+      "!*.lock",
+      "!*.log",
+      "!.gitignore",
+      "!.npmignore",
+      "!.DS_Store",
+      "!**/coverage",
+      "!tmp",
+      "!forks",
+      "!specs",
+      "!docs",
+      "!scripts"
     ],
     "maxSize": 2097152
   },
@@ -80,10 +79,7 @@
       }
     },
     {
-      "includes": [
-        "apps/web-admin/app/**/page.tsx",
-        "apps/web-admin/app/**/layout.tsx"
-      ],
+      "includes": ["apps/web-admin/app/**/page.tsx", "apps/web-admin/app/**/layout.tsx"],
       "linter": {
         "rules": {
           "style": {
@@ -169,6 +165,16 @@
           "complexity": {
             "useArrowFunction": "off",
             "noExcessiveLinesPerFunction": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/gateway/**/*.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useHookAtTopLevel": "off"
           }
         }
       }
