@@ -1,4 +1,9 @@
-import { Inject, Logger, Module } from "@nestjs/common";
+import {
+	Inject,
+	Logger,
+	Module,
+	Optional,
+} from "@nestjs/common";
 import type {
 	DynamicModule,
 	MiddlewareConsumer,
@@ -6,14 +11,14 @@ import type {
 	OnModuleInit,
 } from "@nestjs/common";
 import {
-	ApplicationConfig,
 	DiscoveryModule,
 	DiscoveryService,
 	HttpAdapterHost,
 	MetadataScanner,
+	Reflector,
 } from "@nestjs/core";
 import { toNodeHandler } from "better-auth/node";
-import { createAuthMiddleware } from "better-auth/plugins";
+import { createAuthMiddleware } from "better-auth/api";
 import type { Request, Response } from "express";
 import {
 	type ASYNC_OPTIONS_TYPE,
@@ -21,14 +26,14 @@ import {
 	ConfigurableModuleClass,
 	MODULE_OPTIONS_TOKEN,
 	type OPTIONS_TYPE,
-} from "./auth-module-definition.ts";
-import { AuthService } from "./auth-service.ts";
-import { SkipBodyParsingMiddleware } from "./middlewares.ts";
-import { AFTER_HOOK_KEY, BEFORE_HOOK_KEY, HOOK_KEY } from "./symbols.ts";
-import { AuthGuard } from "./auth-guard.ts";
+} from "./auth-module-definition";
+import { AuthService } from "./auth-service";
+import { SkipBodyParsingMiddleware } from "./middlewares";
+import { AFTER_HOOK_KEY, BEFORE_HOOK_KEY, HOOK_KEY } from "./symbols";
+import { AuthGuard } from "./auth-guard";
+import type { AuthHookContext } from "./decorators";
 import { APP_GUARD } from "@nestjs/core";
 import { normalizePath } from "@nestjs/common/utils/shared.utils.js";
-import { mapToExcludeRoute } from "@nestjs/core/middleware/utils.js";
 
 const HOOKS = [
 	{ metadataKey: BEFORE_HOOK_KEY, hookType: "before" as const },
@@ -44,7 +49,7 @@ export type Auth = any;
  */
 @Module({
 	imports: [DiscoveryModule],
-	providers: [AuthService],
+	providers: [AuthService, Reflector],
 	exports: [AuthService],
 })
 export class AuthModule
@@ -55,14 +60,14 @@ export class AuthModule
 	private readonly basePath: string;
 
 	constructor(
-		@Inject(ApplicationConfig)
-		private readonly applicationConfig: ApplicationConfig,
 		@Inject(DiscoveryService)
 		private readonly discoveryService: DiscoveryService,
+		@Optional()
 		@Inject(MetadataScanner)
-		private readonly metadataScanner: MetadataScanner,
+		private readonly metadataScanner: MetadataScanner | null,
+		@Optional()
 		@Inject(HttpAdapterHost)
-		private readonly adapter: HttpAdapterHost,
+		private readonly adapter: HttpAdapterHost | null,
 		@Inject(MODULE_OPTIONS_TOKEN)
 		private readonly options: AuthModuleOptions,
 	) {
@@ -74,15 +79,6 @@ export class AuthModule
 		this.basePath = normalizePath(
 			this.options.auth.options.basePath ?? "/api/auth",
 		);
-
-		// Add exclusion to global prefix for Better Auth routes
-		const globalPrefixOptions = this.applicationConfig.getGlobalPrefixOptions();
-		this.applicationConfig.setGlobalPrefixOptions({
-			exclude: [
-				...(globalPrefixOptions.exclude ?? []),
-				...mapToExcludeRoute([this.basePath]),
-			],
-		});
 	}
 
 	onModuleInit(): void {
@@ -101,7 +97,7 @@ export class AuthModule
 				"Detected @Hook providers but Better Auth 'hooks' are not configured. Add 'hooks: {}' to your betterAuth(...) options.",
 			);
 
-		if (!hooksConfigured) return;
+		if (!hooksConfigured || !this.metadataScanner) return;
 
 		for (const provider of providers) {
 			const providerPrototype = Object.getPrototypeOf(provider.instance);
@@ -120,7 +116,7 @@ export class AuthModule
 		// if we ever need this, take a look at better-call which show an implementation for this
 		const isNotFunctionBased = trustedOrigins && Array.isArray(trustedOrigins);
 
-		if (!this.options.disableTrustedOriginsCors && isNotFunctionBased) {
+		if (!this.options.disableTrustedOriginsCors && isNotFunctionBased && this.adapter?.httpAdapter) {
 			this.adapter.httpAdapter.enableCors({
 				origin: trustedOrigins,
 				methods: ["GET", "POST", "PUT", "DELETE"],
@@ -172,7 +168,7 @@ export class AuthModule
 
 			const originalHook = this.options.auth.options.hooks[hookType];
 			this.options.auth.options.hooks[hookType] = createAuthMiddleware(
-				async (ctx) => {
+				async (ctx: AuthHookContext) => {
 					if (originalHook) {
 						await originalHook(ctx);
 					}

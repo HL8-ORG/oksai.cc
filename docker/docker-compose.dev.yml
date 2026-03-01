@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     extends:
@@ -47,3 +45,9 @@ services:
     volumes:
       - ../apps/gateway:/app/apps/gateway
       - ../libs:/app/libs
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:

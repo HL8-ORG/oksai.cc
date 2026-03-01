@@ -5,19 +5,18 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "outputPath": "dist/apps/gateway",
-        "main": "apps/gateway/src/main.ts",
-        "tsConfig": "apps/gateway/tsconfig.app.json",
-        "assets": ["apps/gateway/src/assets"]
+        "cwd": "apps/gateway",
+        "command": "nest build"
       }
     },
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "@oksai/gateway:build"
+        "cwd": "apps/gateway",
+        "command": "nest start --watch"
       }
     }
   },

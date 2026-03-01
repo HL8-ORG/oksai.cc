@@ -51,7 +51,7 @@ $ curl -X POST http://localhost:3000/api/auth/register \
 
 - 📋 Better Auth 数据库集成 (实际存储用户)
 - 📋 GitHub OAuth 登录
-- 📋 前端应用 (React + Ant Design)
+- 📋 前端应用 (React + radix-ui)
 
 ---
 
@@ -68,17 +68,17 @@ $ curl -X POST http://localhost:3000/api/auth/register \
 
 ## 二、技术栈
 
-| 层级           | 技术选型                                      |
-| -------------- | --------------------------------------------- |
-| **前端**       | React 18 + TanStack Router/Query + Ant Design |
-| **后端**       | NestJS 10 + TypeScript                        |
-| **数据库**     | PostgreSQL + Drizzle ORM                      |
-| **缓存**       | Redis                                         |
-| **消息队列**   | RabbitMQ                                      |
-| **向量数据库** | pgvector (PostgreSQL 扩展)                    |
-| **对象存储**   | MinIO                                         |
-| **认证**       | Better Auth                                   |
-| **部署**       | Docker Compose                                |
+| 层级           | 技术选型                                    |
+| -------------- | ------------------------------------------- |
+| **前端**       | React 18 + TanStack Router/Query + radix-ui |
+| **后端**       | NestJS 10 + TypeScript                      |
+| **数据库**     | PostgreSQL + Drizzle ORM                    |
+| **缓存**       | Redis                                       |
+| **消息队列**   | RabbitMQ                                    |
+| **向量数据库** | pgvector (PostgreSQL 扩展)                  |
+| **对象存储**   | MinIO                                       |
+| **认证**       | Better Auth                                 |
+| **部署**       | Docker Compose                              |
 
 ---
 
@@ -93,7 +93,7 @@ oksai.cc/
 │   ├── notification-service/       # 消息通知服务
 │   ├── analytics-service/          # 数据分析服务
 │   │
-│   ├── web-admin/                  # 管理后台 (React + Ant Design)
+│   ├── web-admin/                  # 管理后台 (React + radix-ui)
 │   ├── web-auth/                   # 认证中心 UI (SSO 登录页)
 │   ├── web-marketing/              # 营销官网
 │   └── web-docs/                   # API 文档站点
@@ -280,12 +280,12 @@ enum Plan {
 
 ## 五、前端应用规划
 
-| 应用              | 技术栈                        | 功能                                   |
-| ----------------- | ----------------------------- | -------------------------------------- |
-| **web-admin**     | React + Ant Design + TanStack | 租户管理、用户管理、权限配置、系统监控 |
-| **web-auth**      | React + Tailwind              | SSO 登录页、注册、密码重置、MFA 验证   |
-| **web-marketing** | React + Tailwind              | 产品介绍、定价、文档、博客             |
-| **web-docs**      | VitePress / Nextra            | API 文档、集成指南                     |
+| 应用              | 技术栈                      | 功能                                   |
+| ----------------- | --------------------------- | -------------------------------------- |
+| **web-admin**     | React + radix-ui + TanStack | 租户管理、用户管理、权限配置、系统监控 |
+| **web-auth**      | React + Tailwind            | SSO 登录页、注册、密码重置、MFA 验证   |
+| **web-marketing** | React + Tailwind            | 产品介绍、定价、文档、博客             |
+| **web-docs**      | VitePress / Nextra          | API 文档、集成指南                     |
 
 ---
 
@@ -489,7 +489,7 @@ volumes:
 - [ ] 服务间 RPC 调用
 - [ ] 事件发布/订阅
 
-### PoC 4: React + TanStack + Ant Design
+### PoC 4: React + TanStack + radix-ui
 
 **目标**: 验证前端技术栈整合
 
@@ -497,7 +497,7 @@ volumes:
 
 - [ ] Vite + React 18 项目
 - [ ] TanStack Router + Query
-- [ ] Ant Design 组件库
+- [ ] radix-ui 组件库
 - [ ] 认证状态管理
 
 ---

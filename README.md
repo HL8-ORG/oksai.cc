@@ -13,16 +13,16 @@
 
 ## 技术栈
 
-| 层级     | 技术选型                                      |
-| -------- | --------------------------------------------- |
-| 前端     | React 18 + TanStack Router/Query + Ant Design |
-| 后端     | NestJS 10 + TypeScript                        |
-| 数据库   | PostgreSQL + Prisma ORM + pgvector            |
-| 缓存     | Redis                                         |
-| 消息队列 | RabbitMQ                                      |
-| 对象存储 | MinIO                                         |
-| 认证     | Better Auth                                   |
-| 部署     | Docker Compose                                |
+| 层级     | 技术选型                                    |
+| -------- | ------------------------------------------- |
+| 前端     | React 18 + TanStack Router/Query + radix-ui |
+| 后端     | NestJS 10 + TypeScript                      |
+| 数据库   | PostgreSQL + Prisma ORM + pgvector          |
+| 缓存     | Redis                                       |
+| 消息队列 | RabbitMQ                                    |
+| 对象存储 | MinIO                                       |
+| 认证     | Better Auth                                 |
+| 部署     | Docker Compose                              |
 
 ## 项目结构
 
@@ -71,14 +71,33 @@ pnpm nx serve gateway
 # 查看所有项目
 pnpm nx show projects
 
+# 启动开发服务器
+pnpm dev
+
 # 构建所有项目
-pnpm nx run-many -t build
+pnpm build
 
 # 运行测试
-pnpm nx run-many -t test
+pnpm test
 
 # 代码检查
-pnpm nx run-many -t lint
+pnpm lint
+
+# 数据库操作
+pnpm db:generate    # 生成迁移
+pnpm db:migrate     # 运行迁移
+pnpm db:push        # 推送 schema
+pnpm db:studio      # 打开 Prisma Studio
+
+# Docker 操作
+pnpm docker:up      # 启动所有服务
+pnpm docker:down    # 停止所有服务
+pnpm docker:dev     # 开发模式（带日志）
+
+# 认证相关
+pnpm check:auth     # 检查 Better Auth 配置
+pnpm test:auth      # 测试基础认证
+pnpm test:oauth     # 测试 OAuth 集成
 
 # 查看依赖图
 pnpm nx graph
@@ -87,6 +106,12 @@ pnpm nx graph
 ## 文档
 
 - [架构规划文档](./docs/ARCHITECTURE.md) - 完整的架构设计、模块规划、实施路线图
+- [Better Auth 集成指南](./docs/BETTER_AUTH_INTEGRATION.md) - 认证系统实现和使用说明
+- [Better Auth 最佳实践](./docs/BETTER_AUTH_BEST_PRACTICES.md) - 官方最佳实践配置指南
+- [Better Auth 优化总结](./docs/BETTER_AUTH_OPTIMIZATION.md) - 配置优化和对比分析
+- [GitHub OAuth 设置](./docs/GITHUB_OAUTH_SETUP.md) - GitHub OAuth 配置指南
+- [Google OAuth 设置](./docs/GOOGLE_OAUTH_SETUP.md) - Google OAuth 配置指南
+- [实现总结](./docs/IMPLEMENTATION_SUMMARY.md) - 完整实现和测试指南
 - [API 设计规范](./docs/API_DESIGN.md) (待创建)
 - [部署指南](./docs/DEPLOYMENT.md) (待创建)
 

@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "nx serve gateway",
+    "dev:web": "nx dev @oksai/web-admin",
     "build": "nx run-many -t build",
     "test": "nx run-many -t test",
     "lint": "nx run-many -t lint",
@@ -14,7 +15,11 @@
     "db:studio": "nx run @oksai/database:db:studio",
     "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker-compose -f docker/docker-compose.yml down",
-    "docker:dev": "docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up"
+    "docker:dev": "docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up",
+    "check:auth": "node scripts/check-better-auth-config.js",
+    "verify:gateway": "node scripts/verify-gateway-startup.js",
+    "test:auth": "tsx apps/gateway/test-auth.ts",
+    "test:oauth": "tsx apps/gateway/test-oauth.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",

@@ -1,0 +1,4 @@
+{
+  "nx.enableWorkspaceRefresh": false,
+  "nx.console.enableDaemon": false
+}
