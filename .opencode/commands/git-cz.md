@@ -3,7 +3,7 @@ description: Git 提交助手。根据暂存区的代码变更自动生成规范
 argument-hint: '[type] [--scope <scope>] [--breaking] [--no-verify]'
 ---
 
-# Git Commit 命令
+# Git CZ 命令
 
 智能 Git 提交助手，根据暂存区的代码变更自动生成符合规范的 commit message。
 
@@ -98,10 +98,10 @@ $ARGUMENTS
 
 | 选项          | 说明                           | 示例                       |
 | ------------- | ------------------------------ | -------------------------- |
-| `[type]`      | 手动指定提交类型               | `/git-commit feat`         |
-| `--scope`     | 手动指定 scope                 | `/git-commit --scope auth` |
-| `--breaking`  | 标记为 BREAKING CHANGE         | `/git-commit --breaking`   |
-| `--no-verify` | 跳过 pre-commit 钩子（不推荐） | `/git-commit --no-verify`  |
+| `[type]`      | 手动指定提交类型               | `/git-cz feat`         |
+| `--scope`     | 手动指定 scope                 | `/git-cz --scope auth` |
+| `--breaking`  | 标记为 BREAKING CHANGE         | `/git-cz --breaking`   |
+| `--no-verify` | 跳过 pre-commit 钩子（不推荐） | `/git-cz --no-verify`  |
 
 ## 生成流程
 
@@ -232,133 +232,133 @@ Merge branch 'feature/add-auth' into main
 ### 示例 1: 简单功能
 
 ```bash
-用户: /git-commit
+用户: /git-cz
 
-[git-commit] 分析暂存区...
-[git-commit] 文件: apps/gateway/src/auth/auth.service.ts
-[git-commit] 类型: feat
-[git-commit] Scope: gateway
-[git-commit]
-[git-commit] 生成的 commit message:
-[git-commit] feat(gateway): implement JWT token validation
-[git-commit]
-[git-commit] 是否提交？(y/n)
+[git-cz] 分析暂存区...
+[git-cz] 文件: apps/gateway/src/auth/auth.service.ts
+[git-cz] 类型: feat
+[git-cz] Scope: gateway
+[git-cz]
+[git-cz] 生成的 commit message:
+[git-cz] feat(gateway): implement JWT token validation
+[git-cz]
+[git-cz] 是否提交？(y/n)
 用户: y
 
-[git-commit] ✓ 提交成功
+[git-cz] ✓ 提交成功
 ```
 
 ### 示例 2: 多文件变更
 
 ```bash
-用户: /git-commit
+用户: /git-cz
 
-[git-commit] 分析暂存区...
-[git-commit] 文件 (5):
-[git-commit]   - apps/gateway/src/auth/auth.service.ts
-[git-commit]   - apps/gateway/src/auth/auth.controller.ts
-[git-commit]   - libs/auth/src/auth-module.ts
-[git-commit]   - libs/database/src/schema/users.ts
-[git-commit]   - libs/shared/types/src/auth.ts
-[git-commit]
-[git-commit] 类型: feat
-[git-commit] Scope: auth
-[git-commit]
-[git-commit] 生成的 commit message:
-[git-commit] feat(auth): add user session management
-[git-commit]
-[git-commit] - Implement session store interface
-[git-commit] - Add session cleanup cron job
-[git-commit] - Update user schema with session fields
-[git-commit] - Add session-related types
-[git-commit]
-[git-commit] 是否提交？(y/n)
+[git-cz] 分析暂存区...
+[git-cz] 文件 (5):
+[git-cz]   - apps/gateway/src/auth/auth.service.ts
+[git-cz]   - apps/gateway/src/auth/auth.controller.ts
+[git-cz]   - libs/auth/src/auth-module.ts
+[git-cz]   - libs/database/src/schema/users.ts
+[git-cz]   - libs/shared/types/src/auth.ts
+[git-cz]
+[git-cz] 类型: feat
+[git-cz] Scope: auth
+[git-cz]
+[git-cz] 生成的 commit message:
+[git-cz] feat(auth): add user session management
+[git-cz]
+[git-cz] - Implement session store interface
+[git-cz] - Add session cleanup cron job
+[git-cz] - Update user schema with session fields
+[git-cz] - Add session-related types
+[git-cz]
+[git-cz] 是否提交？(y/n)
 用户: y
 
-[git-commit] ✓ 提交成功
+[git-cz] ✓ 提交成功
 ```
 
 ### 示例 3: 指定类型和 Scope
 
 ```bash
-用户: /git-commit fix --scope api
+用户: /git-cz fix --scope api
 
-[git-commit] 分析暂存区...
-[git-commit] 文件: apps/gateway/src/api/users.controller.ts
-[git-commit] 指定类型: fix
-[git-commit] 指定 Scope: api
-[git-commit]
-[git-commit] 生成的 commit message:
-[git-commit] fix(api): resolve user update endpoint validation
-[git-commit]
-[git-commit] 是否提交？(y/n)
+[git-cz] 分析暂存区...
+[git-cz] 文件: apps/gateway/src/api/users.controller.ts
+[git-cz] 指定类型: fix
+[git-cz] 指定 Scope: api
+[git-cz]
+[git-cz] 生成的 commit message:
+[git-cz] fix(api): resolve user update endpoint validation
+[git-cz]
+[git-cz] 是否提交？(y/n)
 用户: y
 
-[git-commit] ✓ 提交成功
+[git-cz] ✓ 提交成功
 ```
 
 ### 示例 4: Breaking Change
 
 ```bash
-用户: /git-commit --breaking
+用户: /git-cz --breaking
 
-[git-commit] 分析暂存区...
-[git-commit] 文件:
-[git-commit]   - apps/gateway/src/auth/auth.controller.ts
-[git-commit]   - apps/web-admin/src/lib/auth-client.ts
-[git-commit] 类型: feat
-[git-commit] Scope: auth
-[git-commit] Breaking: true
-[git-commit]
-[git-commit] 生成的 commit message:
-[git-commit] feat(auth)!: migrate from JWT to session-based auth
-[git-commit]
-[git-commit] BREAKING CHANGE: Authentication mechanism changed from
-[git-commit] stateless JWT to stateful sessions. All clients must update
-[git-commit] their authentication logic.
-[git-commit]
-[git-commit] - Remove JWT token generation
-[git-commit] - Add session store
-[git-commit] - Update client auth library
-[git-commit]
-[git-commit] Migration guide: docs/migration/session-auth.md
-[git-commit]
-[git-commit] 是否提交？(y/n)
+[git-cz] 分析暂存区...
+[git-cz] 文件:
+[git-cz]   - apps/gateway/src/auth/auth.controller.ts
+[git-cz]   - apps/web-admin/src/lib/auth-client.ts
+[git-cz] 类型: feat
+[git-cz] Scope: auth
+[git-cz] Breaking: true
+[git-cz]
+[git-cz] 生成的 commit message:
+[git-cz] feat(auth)!: migrate from JWT to session-based auth
+[git-cz]
+[git-cz] BREAKING CHANGE: Authentication mechanism changed from
+[git-cz] stateless JWT to stateful sessions. All clients must update
+[git-cz] their authentication logic.
+[git-cz]
+[git-cz] - Remove JWT token generation
+[git-cz] - Add session store
+[git-cz] - Update client auth library
+[git-cz]
+[git-cz] Migration guide: docs/migration/session-auth.md
+[git-cz]
+[git-cz] 是否提交？(y/n)
 用户: y
 
-[git-commit] ✓ 提交成功
+[git-cz] ✓ 提交成功
 ```
 
 ### 示例 5: Biome Lint 修复
 
 ```bash
-用户: /git-commit
+用户: /git-cz
 
-[git-commit] 分析暂存区...
-[git-commit] 文件 (84):
-[git-commit]   - apps/gateway/src/*.ts
-[git-commit]   - apps/web-admin/src/**/*.tsx
-[git-commit]   - libs/**/*.ts
-[git-commit]   - biome.json
-[git-commit]   - .vscode/settings.json
-[git-commit] 类型: style
-[git-commit] Scope: (root)
-[git-commit]
-[git-commit] 生成的 commit message:
-[git-commit] style: migrate from ESLint to Biome lint system
-[git-commit]
-[git-commit] - Replace ESLint + Prettier with Biome
-[git-commit] - Update all code formatting to Biome standards
-[git-commit] - Configure Biome with project-specific rules
-[git-commit] - Update VSCode settings for Biome integration
-[git-commit] - Add Husky pre-commit hook for Biome lint
-[git-commit]
-[git-commit] Performance improvement: 15-30x faster than ESLint + Prettier
-[git-commit]
-[git-commit] 是否提交？(y/n)
+[git-cz] 分析暂存区...
+[git-cz] 文件 (84):
+[git-cz]   - apps/gateway/src/*.ts
+[git-cz]   - apps/web-admin/src/**/*.tsx
+[git-cz]   - libs/**/*.ts
+[git-cz]   - biome.json
+[git-cz]   - .vscode/settings.json
+[git-cz] 类型: style
+[git-cz] Scope: (root)
+[git-cz]
+[git-cz] 生成的 commit message:
+[git-cz] style: migrate from ESLint to Biome lint system
+[git-cz]
+[git-cz] - Replace ESLint + Prettier with Biome
+[git-cz] - Update all code formatting to Biome standards
+[git-cz] - Configure Biome with project-specific rules
+[git-cz] - Update VSCode settings for Biome integration
+[git-cz] - Add Husky pre-commit hook for Biome lint
+[git-cz]
+[git-cz] Performance improvement: 15-30x faster than ESLint + Prettier
+[git-cz]
+[git-cz] 是否提交？(y/n)
 用户: y
 
-[git-commit] ✓ 提交成功
+[git-cz] ✓ 提交成功
 ```
 
 ## 最佳实践
@@ -418,9 +418,9 @@ Closes #789
 如果配置了 Husky，提交前会自动运行 pre-commit 钩子：
 
 ```bash
-[git-commit] 运行 pre-commit 钩子...
-[git-commit] ✅ Lint check passed
-[git-commit] ✓ 提交成功
+[git-cz] 运行 pre-commit 钩子...
+[git-cz] ✅ Lint check passed
+[git-cz] ✓ 提交成功
 ```
 
 ### Biome Lint
@@ -428,7 +428,7 @@ Closes #789
 与 Biome 配合使用，确保代码质量：
 
 ```bash
-用户修改代码 → Biome 自动格式化 → git add → /git-commit → Husky 钩子检查 → 提交
+用户修改代码 → Biome 自动格式化 → git add → /git-cz → Husky 钩子检查 → 提交
 ```
 
 ## 配置选项
@@ -437,7 +437,7 @@ Closes #789
 
 ```json
 {
-  "git-commit": {
+  "git-cz": {
     "defaultType": "feat",
     "maxLength": 72,
     "emoji": true,
@@ -448,7 +448,7 @@ Closes #789
 
 ## 总结
 
-`/git-commit` 命令提供：
+`/git-cz` 命令提供：
 
 - ✅ 智能 commit message 生成
 - ✅ Conventional Commits 规范
