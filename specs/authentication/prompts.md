@@ -1,13 +1,8 @@
-# 认证系统常用提示词
+# 认证系统提示词
 
 ## 同步实现状态
 
 审查 `authentication` 已实现内容，并更新 `specs/authentication/implementation.md`。
-
-**示例命令：**
-```bash
-/spec sync authentication
-```
 
 **检查要点：**
 - 已完成的认证功能（邮箱密码、OAuth、Magic Link 等）
@@ -18,14 +13,25 @@
 
 ---
 
+## 开始开发新功能
+
+按照工作流程开发 `authentication`：
+
+1. **用户故事**：在 `specs/authentication/design.md` 中定义用户故事（使用 INVEST 原则）
+2. **BDD 场景**：在 `features/authentication.feature` 中编写验收场景
+3. **TDD 循环**：
+   - 🔴 Red: 编写失败的单元测试
+   - 🟢 Green: 用最简代码让测试通过
+   - 🔵 Refactor: 优化代码结构
+4. **代码实现**：按照 DDD 分层实现功能
+
+详见 `specs/_templates/workflow.md`。
+
+---
+
 ## 生成测试
 
-为认证系统的 `{component}` 编写测试，遵循现有测试模式。
-
-**示例：**
-- 为 API Key Strategy 编写单元测试
-- 为邮箱验证流程编写集成测试
-- 为登录页面编写 E2E 测试
+为认证系统的 `{component}` 编写测试，遵循现有测试模式（使用 Vitest）。
 
 **测试模式：**
 ```bash
@@ -38,6 +44,11 @@ pnpm vitest run apps/gateway/src/**/*.integration.spec.ts
 # E2E 测试
 pnpm vitest run e2e/**/*.spec.ts
 ```
+
+**测试覆盖：**
+- 正常流程（Happy Path）
+- 异常流程（Error Cases）
+- 边界条件（Edge Cases）
 
 ---
 
@@ -59,78 +70,98 @@ pnpm vitest run e2e/**/*.spec.ts
 
 ---
 
-## 继续开发认证功能
+## 继续开发功能
 
 继续处理 `authentication`。请先阅读 `specs/authentication/implementation.md` 了解当前状态。
 
-**示例命令：**
-```bash
-/spec continue authentication
+**当前状态：** Phase 1 已完成，准备开始 Phase 2
+
+**下一步任务：**
+- 完善 2FA/TOTP 认证
+- 实现 API Key 认证
+- 实现组织/团队管理
+
+---
+
+## 生成 BDD 场景
+
+为 `authentication` 编写 BDD 场景：
+
+1. 分析 `specs/authentication/design.md` 中的用户故事
+2. 识别正常流程（Happy Path）
+3. 识别异常流程（Error Cases）
+4. 识别边界条件（Edge Cases）
+5. 编写 `features/authentication.feature` 文件
+
+**场景示例：**
+```gherkin
+Feature: 用户认证
+
+  Scenario: 用户通过邮箱密码登录
+    Given 用户已注册且邮箱已验证
+    When 用户输入邮箱 "test@example.com" 和密码 "SecurePass123"
+    And 用户点击登录按钮
+    Then 系统验证凭据成功
+    And 用户获得 Session Token
 ```
 
-**常见任务：**
-- 继续实现邮箱密码登录
-- 继续实现 OAuth 登录
-- 继续实现 2FA 功能
-- 继续实现 API Key 认证
+---
+
+## TDD 开发
+
+使用 TDD 方式开发认证系统组件：
+
+1. 🔴 **Red**: 先编写失败的单元测试
+2. 🟢 **Green**: 用最简单的方式让测试通过
+3. 🔵 **Refactor**: 优化代码，保持测试通过
+
+**示例：**
+```typescript
+// 🔴 Red
+describe('AuthService', () => {
+  describe('signIn', () => {
+    it('should authenticate user with valid credentials', async () => {
+      const result = await authService.signIn({
+        email: 'test@example.com',
+        password: 'SecurePass123',
+      });
+      expect(result.user).toBeDefined();
+      expect(result.session).toBeDefined();
+    });
+  });
+});
+
+// 🟢 Green
+async signIn(dto: SignInDto) {
+  // 最简实现
+  return this.authClient.signIn.email(dto);
+}
+
+// 🔵 Refactor
+// 优化错误处理、添加日志、提取验证逻辑
+```
 
 ---
 
-## 实现邮箱密码登录
+## 实现 OAuth Provider
 
-实现邮箱密码注册和登录功能，参考 Cal.com 的实现：
-
-**Cal.com 参考路径：**
-- `/home/arligle/forks/cal.com/packages/features/auth/lib/next-auth-options.ts`
-- `/home/arligle/forks/cal.com/packages/features/auth/lib/verifyPassword.ts`
+实现新的 OAuth Provider（如 Microsoft、Apple）：
 
 **实现步骤：**
-1. 配置 Better Auth Credentials Provider
-2. 创建注册 API (`/api/auth/sign-up/email`)
-3. 创建登录 API (`/api/auth/sign-in/email`)
-4. 实现密码加密验证（bcryptjs）
-5. 编写单元测试
+1. 在 `libs/auth/config/providers/oauth.providers.ts` 添加配置
+2. 在 Better Auth 配置中注册 Provider
+3. 创建回调路由（Better Auth 自动处理）
+4. 测试 OAuth 流程
+
+**参考实现：**
+- Google OAuth: `libs/auth/config/src/auth.config.ts`
+- Cal.com 参考: `/home/arligle/forks/cal.com/packages/features/auth/lib/next-auth-options.ts`
 
 ---
 
-## 实现 Magic Link 登录
+## 实现 2FA 功能
 
-实现 Magic Link 登录功能，参考 Cal.com 的实现：
-
-**Cal.com 参考路径：**
-- `/home/arligle/forks/cal.com/packages/features/auth/lib/sendVerificationRequest.ts`
-
-**实现步骤：**
-1. 配置 Better Auth Email Provider
-2. 创建 Magic Link API (`/api/auth/sign-in/magic-link`)
-3. 实现邮件发送逻辑（nodemailer）
-4. 处理 Magic Link 回调
-5. 编写集成测试
-
----
-
-## 实现 Google OAuth 登录
-
-实现 Google OAuth 登录功能，参考 Cal.com 的实现：
-
-**Cal.com 参考路径：**
-- `/home/arligle/forks/cal.com/packages/features/auth/lib/next-auth-options.ts` (Google Provider 部分)
-
-**实现步骤：**
-1. 配置 Google OAuth Provider（@better-auth/social-providers）
-2. 创建 OAuth 回调 API (`/api/auth/callback/google`)
-3. 处理 OAuth 流程
-4. 实现 OAuth 账户关联（相同邮箱自动关联）
-5. 编写集成测试
-
----
-
-## 实现 2FA/TOTP 认证
-
-实现双因素认证（2FA/TOTP）功能，参考 Cal.com 的实现：
-
-**Cal.com 参考路径：**
-- `/home/arligle/forks/cal.com/apps/web/app/api/auth/two-factor/totp/`
+实现双因素认证（2FA/TOTP）功能：
 
 **实现步骤：**
 1. 启用 Better Auth Two-Factor Plugin
@@ -140,14 +171,14 @@ pnpm vitest run e2e/**/*.spec.ts
 5. 实现备用码生成和使用
 6. 编写单元测试和集成测试
 
+**参考实现：**
+- Cal.com: `/home/arligle/forks/cal.com/apps/web/app/api/auth/two-factor/totp/`
+
 ---
 
 ## 实现 API Key 认证
 
-实现 API Key 认证功能，参考 Cal.com 的实现：
-
-**Cal.com 参考路径：**
-- `/home/arligle/forks/cal.com/apps/api/v2/src/modules/auth/strategies/api-auth/`
+实现 API Key 认证功能：
 
 **实现步骤：**
 1. 创建 API Key Schema（api_keys 表）
@@ -155,6 +186,9 @@ pnpm vitest run e2e/**/*.spec.ts
 3. 实现 API Key Guard（NestJS）
 4. 创建 API Key 管理 API（创建、撤销、列表）
 5. 编写单元测试和集成测试
+
+**参考实现：**
+- Cal.com: `/home/arligle/forks/cal.com/apps/api/v2/src/modules/auth/strategies/api-auth/`
 
 ---
 
@@ -209,6 +243,20 @@ pnpm vitest run e2e/**/*.spec.ts
 
 ---
 
+## 验证工作流程完成度
+
+检查 `authentication` 是否完成所有开发步骤：
+
+- [x] 用户故事已定义（符合 INVEST 原则）
+- [x] BDD 场景已编写
+- [x] TDD 循环已完成（Red-Green-Refactor）
+- [x] 单元测试覆盖率 > 80%（Phase 1）
+- [x] 集成测试已编写
+- [ ] 代码已 Review（待 Phase 2）
+- [ ] 文档已生成（待完成）
+
+---
+
 ## 安全审计
 
 对认证系统进行安全审计：
@@ -240,5 +288,35 @@ pnpm vitest run e2e/**/*.spec.ts
 
 ---
 
-**文档版本：** 1.0.0  
-**最后更新：** 2026年3月2日
+## 故障排除
+
+认证系统常见问题排查：
+
+### 问题 1：登录失败，提示"邮箱或密码错误"
+
+**排查步骤：**
+1. 检查数据库中是否存在该用户
+2. 检查用户邮箱是否已验证
+3. 检查密码加密是否正确
+4. 查看 Better Auth 日志（设置 `logger.level: "debug"`）
+
+### 问题 2：OAuth 登录失败
+
+**排查步骤：**
+1. 检查 OAuth Provider 配置（Client ID、Secret）
+2. 检查回调 URL 是否正确
+3. 查看 OAuth Provider 的错误响应
+4. 检查环境变量配置
+
+### 问题 3：Session 过期过快
+
+**排查步骤：**
+1. 检查 Session 配置（expiresIn）
+2. 检查 Cookie 配置（maxAge）
+3. 检查时区设置
+4. 查看数据库中的 session 表
+
+---
+
+**文档版本：** 2.0.0  
+**最后更新：** 2026年3月3日

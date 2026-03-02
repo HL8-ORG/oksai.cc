@@ -1,0 +1,80 @@
+# 🧪 测试指南文档系列
+
+本目录包含项目测试相关的完整指南，涵盖测试方法论、最佳实践和在 DDD 架构中的应用。
+
+---
+
+## 📑 文档索引
+
+| 文档 | 主题 | 说明 |
+|:---|:---|:---|
+| [01-testing-overview.md](./01-testing-overview.md) | 测试概述 | 测试类型分类、测试金字塔、各层测试策略 |
+| [02-unit-testing.md](./02-unit-testing.md) | 单元测试 | 单元测试原则、AAA 模式、Mock 使用 |
+| [03-bdd-testing.md](./03-bdd-testing.md) | BDD 测试 | Given-When-Then 结构、Gherkin 语法、场景设计 |
+| [04-tdd-methodology.md](./04-tdd-methodology.md) | TDD 方法论 | 红-绿-重构循环、测试驱动设计 |
+| [05-testing-in-ddd.md](./05-testing-in-ddd.md) | DDD 架构中的测试 | 各层测试策略、领域层测试、应用层测试 |
+| [06-testing-naming.md](./06-testing-naming.md) | 测试命名规范 | 文件命名、测试套件命名、测试用例命名 |
+| [07-mocking-guide.md](./07-mocking-guide.md) | Mock 与 Stub 指南 | 测试替身类型、Jest Mock 使用、最佳实践 |
+| [08-integration-testing.md](./08-integration-testing.md) | 集成测试 | 数据库测试、消息队列测试、测试容器 |
+| [09-e2e-testing.md](./09-e2e-testing.md) | 端到端测试 | API 测试、完整流程测试、测试环境 |
+| [10-ci-cd-integration.md](./10-ci-cd-integration.md) | CI/CD 集成 | 测试流水线、覆盖率报告、质量门禁 |
+| [11-development-workflow.md](./11-development-workflow.md) | 开发工作流程 | 用户故事 → BDD → TDD 完整流程 |
+
+---
+
+## 🎯 快速导航
+
+### 按角色导航
+
+| 角色 | 推荐阅读 |
+|:---|:---|
+| **新成员** | 01-testing-overview → 02-unit-testing → 06-testing-naming |
+| **后端开发者** | 02-unit-testing → 05-testing-in-ddd → 08-integration-testing |
+| **架构师** | 01-testing-overview → 05-testing-in-ddd → 10-ci-cd-integration |
+| **测试工程师** | 03-bdd-testing → 08-integration-testing → 09-e2e-testing |
+
+### 按场景导航
+
+| 场景 | 推荐阅读 |
+|:---|:---|
+| **开始新功能开发** | 04-tdd-methodology → 02-unit-testing |
+| **编写领域层测试** | 05-testing-in-ddd → 07-mocking-guide |
+| **设计测试用例** | 03-bdd-testing → 06-testing-naming |
+| **配置 CI/CD** | 08-integration-testing → 10-ci-cd-integration |
+
+---
+
+## 📊 测试金字塔
+
+```
+                    ┌─────────────┐
+                    │   E2E 测试   │  10% - 关键业务流程
+                    │   (慢、少)   │
+                ┌───┴─────────────┴───┐
+                │     集成测试         │  20% - 组件交互
+                │    (较慢、适中)      │
+            ┌───┴─────────────────────┴───┐
+            │         单元测试             │  70% - 业务逻辑
+            │       (快、大量)             │
+            └─────────────────────────────┘
+```
+
+---
+
+## 🔗 相关文档
+
+- [命名规范 - 测试文件](../spec/spec-07-testing.md)
+- [架构设计](../archi/archi.md)
+- [项目宪章](../.cursor/rules/XS-project-charter.md)
+- [用户故事文档](../user-stories/README.md)
+- [BDD 场景文档](../features/README.md)
+
+---
+
+## 📝 修订历史
+
+| 版本 | 日期 | 变更说明 |
+|:---|:---|:---|
+| v1.2 | 2026-02-20 | 新增 11-development-workflow.md 开发工作流程文档 |
+| v1.1 | 2026-02-20 | 统一示例模块为 Job，更新文件命名规范为 kebab-case + 类型后缀 |
+| v1.0 | 2026-02-20 | 创建测试指南文档系列 |

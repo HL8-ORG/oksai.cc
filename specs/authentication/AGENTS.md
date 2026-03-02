@@ -6,8 +6,8 @@
 
 ## 开始前
 
-1. **阅读技术规格**
-   - 阅读 `specs/authentication/design.md` 了解完整的技术设计
+1. **阅读设计文档**
+   - 阅读 `specs/authentication/design.md` 了解完整的技术设计、用户故事和 BDD 场景
    - 阅读 `specs/authentication/implementation.md` 了解当前实现进度
    - 阅读 `specs/authentication/decisions.md` 了解架构决策
 
@@ -25,6 +25,47 @@
    - 确保数据库已启动（`pnpm docker:up`）
    - 确保环境变量已配置（`.env`）
    - 确保依赖已安装（`pnpm install`）
+
+## 开发工作流程
+
+遵循 `specs/_templates/workflow.md` 中的标准流程：
+
+1. **用户故事**：在 `design.md` 中定义用户故事（符合 INVEST 原则）
+2. **BDD 场景**：编写验收场景（Given-When-Then）
+3. **TDD 循环**：
+   - 🔴 Red: 编写失败的测试
+   - 🟢 Green: 最简实现
+   - 🔵 Refactor: 优化代码
+4. **代码实现**：按照 DDD 分层实现
+
+### Phase 1: 核心认证（P0） - 已完成 ✅
+
+**完成时间：** 2026-03-02
+
+- ✅ Better Auth 核心配置
+- ✅ 数据库 Schema 创建
+- ✅ 邮件服务集成
+- ✅ 邮箱密码注册/登录
+- ✅ 邮箱验证
+- ✅ 密码重置
+- ✅ Magic Link 登录
+- ✅ Google/GitHub OAuth 登录
+- ✅ 前端登录/注册页面
+- ✅ 集成测试（18 个测试用例，100% 通过）
+
+### Phase 2: 高级特性（P1） - 进行中
+
+**预计时间：** 2-3 周
+
+**任务：**
+1. 完善 2FA/TOTP 认证
+2. 实现 API Key 认证
+3. 实现自定义 Session 超时
+4. 实现组织/团队管理
+
+### Phase 3-4: 企业级功能和 Platform OAuth（P2-P3） - 计划中
+
+详见 `design.md` 实现计划
 
 ## 代码模式
 
@@ -117,6 +158,63 @@ export const authClient = createAuthClient({
 export const { useSession, signIn, signOut, signUp } = authClient;
 ```
 
+### 领域层测试模式
+
+```typescript
+// auth.service.spec.ts
+describe('AuthService', () => {
+  describe('signIn', () => {
+    it('should authenticate user with valid credentials', async () => {
+      // Arrange - 准备测试数据
+      const dto = {
+        email: 'test@example.com',
+        password: 'SecurePass123',
+      };
+      
+      // Act - 执行操作
+      const result = await authService.signIn(dto);
+      
+      // Assert - 验证结果
+      expect(result.user).toBeDefined();
+      expect(result.session).toBeDefined();
+    });
+  });
+});
+```
+
+### 应用层测试模式
+
+```typescript
+// auth.integration.spec.ts
+describe('Auth Integration', () => {
+  let app: INestApplication;
+  let authService: AuthService;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    
+    app = module.createNestApplication();
+    authService = module.get(AuthService);
+    await app.init();
+  });
+
+  it('should complete full auth flow', async () => {
+    // 注册
+    await authService.signUp({ email, password, name });
+    
+    // 验证邮箱
+    await authService.verifyEmail({ token });
+    
+    // 登录
+    const result = await authService.signIn({ email, password });
+    
+    expect(result.user.email).toBe(email);
+  });
+});
+```
+
 ## 不要做
 
 ### 不要偏离技术规格
@@ -145,55 +243,74 @@ export const { useSession, signIn, signOut, signUp } = authClient;
 - ❌ 不要忘记更新 `implementation.md` 的进度
 - ❌ 不要忘记在 `decisions.md` 记录重要决策
 
-## 开发流程
+## 测试策略
 
-### 1. 开始新功能前
+### 单元测试（70%）
+- 领域层：聚合根、实体、值对象
+- 应用层：Command Handler、Query Handler
+- 测试命名：`should {behavior} when {condition}`
 
+**重点测试：**
+- Email 值对象验证
+- Password 值对象加密验证
+- User 实体创建和验证
+- Auth Service 方法
+
+### 集成测试（20%）
+- 基础设施层：Repository 实现
+- 应用层：多个组件协作
+
+**重点测试：**
+- 完整登录流程
+- OAuth 登录流程
+- Magic Link 流程
+- 2FA 启用/验证流程
+- API Key 创建/使用/撤销
+
+### E2E 测试（10%）
+- 关键业务流程
+- API 端到端验证
+
+**重点测试：**
+- 用户注册到登录完整流程
+- 2FA 启用到验证流程
+- API Key 使用流程
+
+**测试命令：**
 ```bash
-# 1. 查看当前进度
-cat specs/authentication/implementation.md
-
-# 2. 创建功能分支
-git checkout -b feature/auth-email-verification
-
-# 3. 阅读相关设计
-cat specs/authentication/design.md
-```
-
-### 2. 实现过程中
-
-```bash
-# 1. 编写代码（遵循代码模式）
-
-# 2. 编写单元测试
+# 运行单元测试
 pnpm vitest run libs/auth/src/**/*.spec.ts
 
-# 3. 运行 lint
-pnpm lint
+# 运行集成测试
+pnpm vitest run apps/gateway/src/**/*.integration.spec.ts
 
-# 4. 更新进度
-# 编辑 specs/authentication/implementation.md
-```
-
-### 3. 完成功能后
-
-```bash
-# 1. 运行完整测试
+# 运行所有测试
 pnpm test
 
-# 2. 运行 lint 和格式化
-pnpm check:fix
-
-# 3. 更新文档
-# - 更新 implementation.md 的完成项
-# - 如有决策，更新 decisions.md
-
-# 4. 提交代码
-git add .
-git commit -m "feat(auth): implement email verification"
+# 运行测试并生成覆盖率
+pnpm vitest run --coverage
 ```
 
 ## 常见问题
+
+### Q: 如何确定何时编写测试？
+
+**A:** 遵循 TDD 原则，先写失败的测试（Red），再写最简代码（Green），最后优化（Refactor）。
+
+### Q: 测试应该覆盖哪些场景？
+
+**A:** 参考 BDD 场景文件（`design.md` 中的场景设计），至少覆盖：
+- 正常流程（Happy Path）
+- 异常流程（Error Cases）
+- 边界条件（Edge Cases）
+
+### Q: 如何保证代码质量？
+
+**A:** 
+1. 所有公共 API 都有 TSDoc 注释
+2. 测试覆盖率 > 80%
+3. 遵循项目代码规范（Biome）
+4. 代码 Review 通过
 
 ### Q: 如何添加新的 OAuth Provider？
 
@@ -247,7 +364,4 @@ pnpm db:migrate
 - [NestJS 认证文档](https://docs.nestjs.com/security/authentication)
 - [Drizzle ORM 文档](https://orm.drizzle.team)
 - [OWASP 认证最佳实践](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
-
-## 联系方式
-
-如有疑问，请在项目 GitHub Issues 中提问或联系团队。
+- [开发工作流程](../_templates/workflow.md)

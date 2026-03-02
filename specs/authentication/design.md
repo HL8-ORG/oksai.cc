@@ -1,756 +1,514 @@
-# 认证系统技术规格
+# 认证系统设计
 
-## 一、概述
+## 概述
 
 基于 Better Auth 实现完整的认证系统，对齐 Cal.com 的认证功能，支持多种认证方式、双因素认证、SAML SSO、API Key 认证等企业级特性。
 
-## 二、Cal.com 认证功能对标
+## 问题陈述
 
-### 2.1 核心认证方式
+企业级应用需要完整的用户认证系统，包括：
+- 多种认证方式（邮箱密码、OAuth、Magic Link）满足不同用户习惯
+- 双因素认证（2FA）提升安全性
+- API Key 认证支持第三方集成
+- SAML SSO 满足企业客户需求
 
-| 认证方式 | Cal.com | oksai.cc | 技术方案 | 优先级 |
-|---------|---------|----------|----------|--------|
-| 邮箱密码登录 | ✅ | 🎯 | Better Auth Credentials Provider | P0 |
-| Magic Link | ✅ | 🎯 | Better Auth Email Provider | P0 |
-| Google OAuth | ✅ | 🎯 | Better Auth OAuth Provider | P0 |
-| SAML SSO | ✅ | 🎯 | 自定义 SAML 集成 + Better Auth | P2 |
-| 用户模拟 | ✅ | 🎯 | 自定义 Provider | P3 |
-| API Key | ✅ | 🎯 | 自定义 Strategy + NestJS Guard | P1 |
+## 用户故事
 
-### 2.2 高级特性
+### 主用户故事
 
-| 功能特性 | Cal.com | oksai.cc | 技术方案 | 优先级 |
-|---------|---------|----------|----------|--------|
-| 双因素认证 (2FA/TOTP) | ✅ | 🎯 | Better Auth Two-Factor Plugin | P1 |
-| 备用码 | ✅ | 🎯 | Better Auth Two-Factor Plugin | P1 |
-| 密码重置 | ✅ | 🎯 | Better Auth 内置 | P0 |
-| 邮箱验证 | ✅ | 🎯 | Better Auth 内置 | P0 |
-| Session 管理 | ✅ JWT | 🎯 JWT | Better Auth JWT Strategy | P0 |
-| Session 缓存 | ✅ LRU | 🎯 | 自定义缓存层 | P2 |
-| 自定义 Session 超时 | ✅ | 🎯 | Better Auth Session Config | P1 |
-| 并发登录控制 | ✅ | 🎯 | 自定义 Session Store | P2 |
-
-### 2.3 用户管理
-
-| 用户功能 | Cal.com | oksai.cc | 优先级 |
-|---------|---------|----------|--------|
-| 用户注册/登录 | ✅ | 🎯 | P0 |
-| 用户资料管理 | ✅ | 🎯 | P0 |
-| 头像上传 | ✅ | 🎯 | P1 |
-| 用户名/昵称 | ✅ | 🎯 | P0 |
-| 邮箱修改 | ✅ | 🎯 | P1 |
-| 密码修改 | ✅ | 🎯 | P0 |
-| 账户锁定 | ✅ | 🎯 | P2 |
-| 用户角色系统 | ✅ | 🎯 | P0 |
-
-### 2.4 企业级功能
-
-| 企业功能 | Cal.com | oksai.cc | 技术方案 | 优先级 |
-|---------|---------|----------|----------|--------|
-| SAML SSO (BoxyHQ) | ✅ | 🎯 | @boxyhq/saml-jackson | P2 |
-| 组织/团队管理 | ✅ | 🎯 | Better Auth Organization Plugin | P1 |
-| 组织角色 | ✅ | 🎯 | 自定义角色系统 | P1 |
-| OAuth 2.0 Platform | ✅ | 🎯 | 自定义 OAuth Server | P3 |
-| 白标/自定义域名 | ✅ | 🎯 | 多租户架构 | P3 |
-
-## 三、技术架构设计
-
-### 3.1 整体架构
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     oksai.cc 认证架构                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │            Web 应用 (TanStack Start)               │    │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐            │    │
-│  │  │ 邮箱密码 │  │  Magic  │  │  OAuth  │            │    │
-│  │  │  Login  │  │  Link   │  │ Google  │            │    │
-│  │  └────┬────┘  └────┬────┘  └────┬────┘            │    │
-│  │       └────────────┴─────────────┘                 │    │
-│  │                      ▼                             │    │
-│  │  ┌────────────────────────────────────────────┐   │    │
-│  │  │           Better Auth Core                 │   │    │
-│  │  │  - JWT Session Strategy                   │   │    │
-│  │  │  - Drizzle Adapter                        │   │    │
-│  │  │  - Email Provider (Magic Link)            │   │    │
-│  │  │  - Credentials Provider                   │   │    │
-│  │  │  - OAuth Provider (Google)                │   │    │
-│  │  └────────────────────────────────────────────┘   │    │
-│  │                      │                             │    │
-│  │  ┌───────────────────┴───────────────────┐       │    │
-│  │  │      Better Auth Plugins              │       │    │
-│  │  │  - Two-Factor (TOTP + Backup Codes)   │       │    │
-│  │  │  - Organization (Teams)                │       │    │
-│  │  │  - Admin (Role Management)             │       │    │
-│  │  └───────────────────────────────────────┘       │    │
-│  └──────────────────────────────────────────────────┘    │
-│                         │                                 │
-│  ┌──────────────────────┴────────────────────────────┐   │
-│  │           API Gateway (NestJS)                    │   │
-│  │                                                   │   │
-│  │  ┌────────────────────────────────────────────┐  │   │
-│  │  │    nestjs-better-auth 集成模块            │  │   │
-│  │  │  - AuthGuard (全局守卫)                  │  │   │
-│  │  │  - Decorators (@Roles, @OrgRoles)        │  │   │
-│  │  │  - Hooks (前置/后置钩子)                 │  │   │
-│  │  │  - Session Injection (@Session)          │  │   │
-│  │  └────────────────────────────────────────────┘  │   │
-│  │                     │                             │   │
-│  │  ┌──────────────────┴──────────────────┐        │   │
-│  │  │      自定义认证策略                 │        │   │
-│  │  │  - API Key Strategy                 │        │   │
-│  │  │  - OAuth Client Credentials         │        │   │
-│  │  │  - SAML Strategy                    │        │   │
-│  │  └─────────────────────────────────────┘        │   │
-│  └─────────────────────────────────────────────────┘   │
-│                         │                                │
-│  ┌──────────────────────┴────────────────────────────┐  │
-│  │            SAML SSO (可选)                         │  │
-│  │  - @boxyhq/saml-jackson                           │  │
-│  │  - /api/auth/saml/authorize                       │  │
-│  │  - /api/auth/saml/callback                        │  │
-│  └───────────────────────────────────────────────────┘  │
-│                         │                                │
-│  ┌──────────────────────┴────────────────────────────┐  │
-│  │          PostgreSQL (Drizzle ORM)                 │  │
-│  │  ┌──────────┐ ┌──────────┐ ┌─────────────────┐   │  │
-│  │  │   user   │ │ account  │ │  session        │   │  │
-│  │  │ password │ │   token  │ │ verification    │   │  │
-│  │  │  api_key │ │  totp    │ │ backup_code     │   │  │
-│  │  └──────────┘ └──────────┘ └─────────────────┘   │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
+```gherkin
+作为应用用户
+我想要使用邮箱密码、OAuth 或 Magic Link 登录系统
+以便于安全便捷地访问应用功能
 ```
 
-### 3.2 数据库设计
+### 验收标准（INVEST 原则）
 
-#### 3.2.1 Better Auth 核心表
+| 原则 | 说明 | 检查点 |
+|:---|:---|:---|
+| **I**ndependent | 独立性 | ✅ 各种认证方式独立实现，互不依赖 |
+| **N**egotiable | 可协商 | ✅ 认证方式和优先级可以根据需求调整 |
+| **V**aluable | 有价值 | ✅ 满足用户安全登录的基本需求 |
+| **E**stimable | 可估算 | ✅ 基于成熟框架（Better Auth），工作量可估算 |
+| **S**mall | 足够小 | ✅ 分 4 个 Phase 实现，每个 Phase 1-3 周 |
+| **T**estable | 可测试 | ✅ 有明确的验收标准和测试用例 |
+
+### 相关用户故事
+
+- 作为新用户，我希望通过邮箱注册账号，以便开始使用应用
+- 作为注册用户，我希望使用 Google/GitHub OAuth 登录，以便快速登录
+- 作为安全意识强的用户，我希望启用 2FA，以便保护账户安全
+- 作为开发者，我希望使用 API Key 访问 API，以便集成到我的应用中
+- 作为企业用户，我希望使用 SAML SSO 登录，以便与企业身份系统集成
+- 作为忘记密码的用户，我希望重置密码，以便重新获得访问权限
+
+## BDD 场景设计
+
+### 正常流程（Happy Path）
+
+```gherkin
+Feature: 用户注册和登录
+
+  Scenario: 用户通过邮箱密码注册
+    Given 用户访问注册页面
+    When 用户输入邮箱 "test@example.com" 和密码 "SecurePass123"
+    And 用户点击注册按钮
+    Then 系统创建用户账号
+    And 系统发送邮箱验证邮件
+    And 用户看到"请验证邮箱"提示
+
+  Scenario: 用户通过邮箱密码登录
+    Given 用户已注册且邮箱已验证
+    When 用户输入邮箱 "test@example.com" 和密码 "SecurePass123"
+    And 用户点击登录按钮
+    Then 系统验证凭据成功
+    And 用户获得 Session Token
+    And 用户重定向到首页
+
+  Scenario: 用户通过 Google OAuth 登录
+    Given 用户访问登录页面
+    When 用户点击"使用 Google 登录"按钮
+    And 用户在 Google 页面授权
+    Then 系统创建或关联用户账号
+    And 用户获得 Session Token
+    And 用户重定向到首页
+
+  Scenario: 用户通过 Magic Link 登录
+    Given 用户访问登录页面
+    When 用户输入邮箱 "test@example.com"
+    And 用户点击"发送 Magic Link"按钮
+    Then 系统发送包含 Magic Link 的邮件
+    When 用户点击邮件中的 Magic Link
+    Then 系统验证 Token 成功
+    And 用户获得 Session Token
+    And 用户重定向到首页
+```
+
+### 异常流程（Error Cases）
+
+```gherkin
+Feature: 认证失败处理
+
+  Scenario: 邮箱密码登录失败 - 邮箱未验证
+    Given 用户已注册但邮箱未验证
+    When 用户尝试登录
+    Then 系统拒绝登录
+    And 用户看到"请先验证邮箱"错误提示
+    And 系统提供"重新发送验证邮件"选项
+
+  Scenario: 邮箱密码登录失败 - 密码错误
+    Given 用户已注册且邮箱已验证
+    When 用户输入错误密码
+    Then 系统拒绝登录
+    And 用户看到"邮箱或密码错误"提示
+
+  Scenario: 注册失败 - 邮箱已存在
+    Given 邮箱 "test@example.com" 已被注册
+    When 用户尝试使用相同邮箱注册
+    Then 系统拒绝注册
+    And 用户看到"邮箱已被注册"错误提示
+
+  Scenario: 2FA 验证失败 - 验证码错误
+    Given 用户已启用 2FA
+    And 用户输入正确的邮箱密码
+    When 用户输入错误的 2FA 验证码
+    Then 系统拒绝登录
+    And 用户看到"验证码错误"提示
+
+  Scenario: API Key 认证失败 - Key 已过期
+    Given API Key 已过期
+    When 客户端使用该 API Key 访问 API
+    Then 系统返回 401 Unauthorized
+    And 响应包含"API Key 已过期"错误信息
+```
+
+### 边界条件（Edge Cases）
+
+```gherkin
+Feature: 认证边界条件处理
+
+  Scenario: 密码重置链接过期
+    Given 用户请求密码重置
+    And 密码重置链接已过期（超过 1 小时）
+    When 用户点击重置链接
+    Then 系统提示"链接已过期，请重新申请"
+    And 系统提供"重新发送"选项
+
+  Scenario: OAuth 账户关联
+    Given 用户已通过邮箱注册
+    And Google 账户使用相同邮箱
+    When 用户使用 Google OAuth 登录
+    Then 系统自动关联到现有账号
+    And 用户保留原有数据
+
+  Scenario: 并发登录控制
+    Given 系统配置为不允许并发登录
+    And 用户在设备 A 已登录
+    When 用户在设备 B 再次登录
+    Then 设备 A 的 Session 被撤销
+    And 设备 B 登录成功
+
+  Scenario: Session 过期
+    Given 用户 Session 已过期（7 天后）
+    When 用户访问需要认证的页面
+    Then 系统重定向到登录页面
+    And 显示"会话已过期，请重新登录"提示
+```
+
+## 技术设计
+
+### 领域层
+
+**聚合根/实体**：
+- **User**: 用户实体，包含基本信息、认证状态、角色等
+- **Session**: 会话实体，包含 Token、过期时间、设备信息
+
+**值对象**：
+- **Email**: 邮箱值对象，验证格式
+- **Password**: 密码值对象，加密存储
+- **ApiKey**: API Key 值对象，包含前缀和哈希值
+
+**领域事件**：
+- **UserRegisteredEvent**: 用户注册成功事件
+- **UserLoggedInEvent**: 用户登录成功事件
+- **EmailVerifiedEvent**: 邮箱验证成功事件
+- **TwoFactorEnabledEvent**: 2FA 启用事件
+- **ApiKeyCreatedEvent**: API Key 创建事件
+
+**业务规则**：
+- 密码长度至少 8 位，最多 128 位
+- Session 有效期 7 天，可配置
+- API Key 格式为 `oks_<random_string>`
+- 2FA 验证码 6 位，有效期 30 秒
+- 邮箱验证链接有效期 1 小时
+
+### 应用层
+
+**Command**：
+- **RegisterUserCommand**: 用户注册命令
+- **SignInCommand**: 用户登录命令
+- **SignOutCommand**: 用户登出命令
+- **VerifyEmailCommand**: 邮箱验证命令
+- **ResetPasswordCommand**: 密码重置命令
+- **EnableTwoFactorCommand**: 启用 2FA 命令
+- **CreateApiKeyCommand**: 创建 API Key 命令
+
+**Query**：
+- **GetCurrentUserQuery**: 获取当前用户查询
+- **GetApiKeysQuery**: 获取 API Keys 查询
+- **GetSessionsQuery**: 获取会话列表查询
+
+**Handler**：
+- **AuthCommandHandler**: 处理认证相关命令，调用 Better Auth API
+- **UserQueryHandler**: 处理用户相关查询
+
+### 基础设施层
+
+**Repository**：
+- **UserRepository**: 用户存储实现（Drizzle ORM）
+- **SessionRepository**: 会话存储实现（Drizzle ORM）
+- **ApiKeyRepository**: API Key 存储实现（Drizzle ORM）
+
+**Adapter**：
+- **BetterAuthAdapter**: Better Auth 适配器
+- **EmailServiceAdapter**: 邮件服务适配器（Nodemailer）
+- **OAuthProviderAdapter**: OAuth Provider 适配器（Google、GitHub）
+
+### 数据库变更
+
+Better Auth 核心表 + 自定义扩展：
+
+```sql
+-- 用户表
+CREATE TABLE "user" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  name TEXT,
+  image TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  
+  -- 自定义扩展字段
+  username TEXT UNIQUE,
+  locale TEXT DEFAULT 'zh-CN',
+  timezone TEXT DEFAULT 'Asia/Shanghai',
+  role TEXT DEFAULT 'user' NOT NULL,
+  locked BOOLEAN DEFAULT FALSE
+);
+
+-- 账户表 (OAuth / Credentials)
+CREATE TABLE "account" (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES "user"(id),
+  account_id TEXT NOT NULL,
+  provider_id TEXT NOT NULL,
+  access_token TEXT,
+  refresh_token TEXT,
+  expires_at TIMESTAMP,
+  scope TEXT,
+  id_token TEXT,
+  session_state TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Session 表
+CREATE TABLE "session" (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES "user"(id),
+  expires_at TIMESTAMP NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  ip_address TEXT,
+  user_agent TEXT
+);
+
+-- 验证 Token (Magic Link, Email Verification)
+CREATE TABLE "verification" (
+  id TEXT PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- TOTP 配置 (2FA)
+CREATE TABLE "two_factor_credential" (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES "user"(id),
+  secret TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- 备用码 (2FA)
+CREATE TABLE "backup_code" (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES "user"(id),
+  code TEXT NOT NULL,
+  used_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- API Key
+CREATE TABLE "api_key" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES "user"(id),
+  team_id TEXT,
+  name TEXT,
+  hashed_key TEXT NOT NULL UNIQUE,
+  prefix TEXT NOT NULL,
+  expires_at TIMESTAMP,
+  last_used_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  revoked_at TIMESTAMP
+);
+
+-- 索引
+CREATE INDEX idx_user_email ON "user"(email);
+CREATE INDEX idx_session_token ON "session"(token);
+CREATE INDEX idx_api_key_prefix ON "api_key"(prefix);
+CREATE INDEX idx_api_key_hashed_key ON "api_key"(hashed_key);
+```
+
+### API 变更
+
+**新增接口**：
+
+认证相关：
+- `POST /api/auth/sign-up/email`: 邮箱注册
+- `POST /api/auth/sign-in/email`: 邮箱密码登录
+- `POST /api/auth/sign-out`: 登出
+- `GET /api/auth/session`: 获取当前会话
+- `POST /api/auth/verify-email`: 验证邮箱
+- `POST /api/auth/forgot-password`: 忘记密码
+- `POST /api/auth/reset-password`: 重置密码
+- `POST /api/auth/sign-in/magic-link`: Magic Link 登录
+- `GET /api/auth/callback/google`: Google OAuth 回调
+- `GET /api/auth/callback/github`: GitHub OAuth 回调
+- `GET /api/auth/oauth/providers`: 获取可用 OAuth Provider
+
+2FA 相关：
+- `POST /api/auth/2fa/enable`: 启用 2FA
+- `POST /api/auth/2fa/disable`: 禁用 2FA
+- `POST /api/auth/2fa/verify`: 验证 2FA 代码
+
+API Key 相关：
+- `GET /api/api-keys`: 获取 API Keys
+- `POST /api/api-keys`: 创建 API Key
+- `DELETE /api/api-keys/:id`: 撤销 API Key
+
+**请求/响应结构**：
 
 ```typescript
-// 用户表
-export const users = pgTable("user", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  name: text("name"),
-  image: text("image"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  
-  // 自定义字段
-  username: text("username").unique(),
-  locale: text("locale").default("zh-CN"),
-  timezone: text("timezone").default("Asia/Shanghai"),
-  role: text("role").default("user").notNull(), // user, admin
-  locked: boolean("locked").default(false),
-});
-
-// 账户表 (OAuth / Credentials)
-export const accounts = pgTable("account", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(), // credentials, google, email
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  expiresAt: timestamp("expires_at"),
-  scope: text("scope"),
-  idToken: text("id_token"),
-  sessionState: text("session_state"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-// Session 表
-export const sessions = pgTable("session", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-});
-
-// 验证 Token (Magic Link, Email Verification)
-export const verifications = pgTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").$defaultFn(() => /* 10 minutes */),
-  updatedAt: timestamp("updated_at").$defaultFn(() => /* 10 minutes */),
-});
-```
-
-#### 3.2.2 2FA 表 (Better Auth Two-Factor Plugin)
-
-```typescript
-// TOTP 配置
-export const twoFactorCredentials = pgTable("two_factor_credential", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id),
-  secret: text("secret").notNull(), // 加密存储
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-// 备用码
-export const backupCodes = pgTable("backup_code", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id),
-  code: text("code").notNull(), // 加密存储
-  usedAt: timestamp("used_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-```
-
-#### 3.2.3 API Key 表 (自定义)
-
-```typescript
-export const apiKeys = pgTable("api_key", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").notNull().references(() => users.id),
-  teamId: text("team_id"),
-  name: text("name"),
-  hashedKey: text("hashed_key").notNull().unique(),
-  prefix: text("prefix").notNull(), // 用于识别，如 "oks_abc123"
-  expiresAt: timestamp("expires_at"),
-  lastUsedAt: timestamp("last_used_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  revokedAt: timestamp("revoked_at"),
-});
-```
-
-### 3.3 Better Auth 配置
-
-#### 3.3.1 核心配置
-
-```typescript
-// libs/auth/config/auth.config.ts
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { twoFactor } from "better-auth/plugins";
-import { organization } from "better-auth/plugins";
-import { admin } from "better-auth/plugins";
-import { db } from "@oksai/database";
-
-export const auth = betterAuth({
-  // 数据库适配器
-  database: drizzleAdapter(db, {
-    provider: "pg",
-  }),
-  
-  // 邮箱密码认证
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: true,
-    minPasswordLength: 8,
-    maxPasswordLength: 128,
-  },
-  
-  // Session 配置
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 天
-    updateAge: 60 * 60 * 24,     // 每天更新一次
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5, // 5 分钟
-    },
-  },
-  
-  // 邮箱验证
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    expiresIn: 60 * 60, // 1 小时
-    sendVerificationEmail: async ({ user, token }) => {
-      // TODO: 集成邮件服务
-      await sendEmail({
-        to: user.email,
-        subject: "验证您的邮箱",
-        html: `<a href="${process.env.NEXT_PUBLIC_URL}/verify-email?token=${token}">点击验证</a>`,
-      });
-    },
-  },
-  
-  // 插件
-  plugins: [
-    // 2FA 认证
-    twoFactor({
-      issuer: "oksai.cc",
-      totpOptions: {
-        digits: 6,
-        period: 30,
-      },
-      backupCodesCount: 10,
-    }),
-    
-    // 组织/团队
-    organization({
-      allowUserToCreateOrganization: true,
-      membershipLimit: 100,
-    }),
-    
-    // 管理员功能
-    admin({
-      adminRole: "admin",
-      defaultRole: "user",
-    }),
-  ],
-  
-  // 高级选项
-  advanced: {
-    cookiePrefix: "oksai",
-    useSecureCookies: process.env.NODE_ENV === "production",
-    generateId: () => crypto.randomUUID(),
-  },
-  
-  // 日志
-  logger: {
-    disabled: process.env.NODE_ENV === "test",
-    level: "debug",
-  },
-});
-```
-
-#### 3.3.2 OAuth Provider 配置
-
-```typescript
-// libs/auth/config/providers/oauth.providers.ts
-import { google } from "@better-auth/social-providers";
-
-export const oauthProviders = {
-  google: google({
-    clientId: process.env.GOOGLE_CLIENT_ID!,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    scope: [
-      "openid",
-      "email",
-      "profile",
-      "https://www.googleapis.com/auth/calendar",
-      "https://www.googleapis.com/auth/calendar.events",
-    ],
-  }),
-};
-```
-
-#### 3.3.3 Magic Link 配置
-
-```typescript
-// libs/auth/config/providers/magic-link.provider.ts
-import { createTransport } from "nodemailer";
-
-export const magicLinkConfig = {
-  expiresIn: 10 * 60, // 10 分钟
-  sendMagicLink: async ({ email, token, url }) => {
-    const transporter = createTransport({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
-    
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: email,
-      subject: "登录到 oksai.cc",
-      html: `
-        <h1>点击下方链接登录</h1>
-        <a href="${url}">${url}</a>
-        <p>链接将在 10 分钟后失效</p>
-      `,
-    });
-  },
-};
-```
-
-### 3.4 NestJS 集成
-
-#### 3.4.1 API Key 认证策略
-
-```typescript
-// libs/auth/strategies/api-key.strategy.ts
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { HeaderAPIKeyStrategy } from "passport-headerapikey";
-import { db } from "@oksai/database";
-import { eq } from "drizzle-orm";
-import { apiKeys } from "@oksai/database/schema";
-import { createHash } from "crypto";
-
-@Injectable()
-export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, "api-key") {
-  constructor() {
-    super(
-      { header: "X-API-Key", prefix: "" },
-      true,
-      async (apiKey: string, done: (err: Error | null, user?: any) => void) => {
-        try {
-          // 提取前缀 (oks_abc123 -> oks)
-          const prefix = apiKey.substring(0, 3);
-          
-          // Hash API Key
-          const hashedKey = createHash("sha256").update(apiKey).digest("hex");
-          
-          // 查询 API Key
-          const [keyRecord] = await db
-            .select()
-            .from(apiKeys)
-            .where(eq(apiKeys.prefix, prefix))
-            .where(eq(apiKeys.hashedKey, hashedKey))
-            .limit(1);
-          
-          if (!keyRecord) {
-            return done(new UnauthorizedException("Invalid API Key"), null);
-          }
-          
-          // 检查是否过期
-          if (keyRecord.expiresAt && new Date() > keyRecord.expiresAt) {
-            return done(new UnauthorizedException("API Key expired"), null);
-          }
-          
-          // 检查是否已撤销
-          if (keyRecord.revokedAt) {
-            return done(new UnauthorizedException("API Key revoked"), null);
-          }
-          
-          // 更新 lastUsedAt
-          await db
-            .update(apiKeys)
-            .set({ lastUsedAt: new Date() })
-            .where(eq(apiKeys.id, keyRecord.id));
-          
-          // 返回用户信息
-          return done(null, {
-            id: keyRecord.userId,
-            apiKeyId: keyRecord.id,
-            type: "api_key",
-          });
-        } catch (error) {
-          return done(error, null);
-        }
-      }
-    );
-  }
+// 注册请求
+interface SignUpRequest {
+  email: string;
+  password: string;
+  name?: string;
 }
-```
 
-#### 3.4.2 API Key 守卫
-
-```typescript
-// libs/auth/guards/api-key.guard.ts
-import { Injectable, ExecutionContext } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-
-@Injectable()
-export class ApiKeyGuard extends AuthGuard("api-key") {
-  canActivate(context: ExecutionContext) {
-    return super.canActivate(context);
-  }
+// 登录请求
+interface SignInRequest {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
 }
-```
 
-#### 3.4.3 SAML SSO 集成 (Phase 2)
-
-```typescript
-// libs/auth/sso/saml.service.ts
-import { Injectable } from "@nestjs/common";
-import { JacksonService } from "@boxyhq/saml-jackson";
-
-@Injectable()
-export class SamlAuthService {
-  constructor(private readonly jacksonService: JacksonService) {}
-  
-  async getAuthorizationUrl(params: { tenant: string; product: string }) {
-    const { authorizationUrl } = await this.jacksonService.oauth.authorize({
-      ...params,
-      redirect_uri: `${process.env.NEXT_PUBLIC_URL}/api/auth/saml/callback`,
-    });
-    return authorizationUrl;
-  }
-  
-  async handleCallback(params: { code: string; state: string }) {
-    const { access_token } = await this.jacksonService.oauth.token({
-      ...params,
-      redirect_uri: `${process.env.NEXT_PUBLIC_URL}/api/auth/saml/callback`,
-    });
-    
-    const profile = await this.jacksonService.oauth.userInfo(access_token);
-    return profile;
-  }
-}
-```
-
-### 3.5 前端集成
-
-#### 3.5.1 TanStack Start 客户端配置
-
-```typescript
-// apps/web-admin/src/lib/auth-client.ts
-import { createAuthClient } from "better-auth/react";
-
-export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
-});
-
-// 导出 hooks
-export const {
-  useSession,
-  signIn,
-  signOut,
-  signUp,
-  useUser,
-} = authClient;
-```
-
-#### 3.5.2 登录页面示例
-
-```typescript
-// apps/web-admin/src/routes/login.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { signIn } from "~/lib/auth-client";
-
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
-});
-
-function LoginPage() {
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    await signIn.email({
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    });
+// Session 响应
+interface SessionResponse {
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+    image: string | null;
+    emailVerified: boolean;
+    role: string;
   };
-  
-  return (
-    <form onSubmit={handleLogin}>
-      <input name="email" type="email" placeholder="Email" required />
-      <input name="password" type="password" placeholder="Password" required />
-      <button type="submit">登录</button>
-    </form>
-  );
+  session: {
+    id: string;
+    expiresAt: string;
+  };
+}
+
+// API Key 创建请求
+interface CreateApiKeyRequest {
+  name?: string;
+  expiresAt?: string;
+}
+
+// API Key 响应
+interface ApiKeyResponse {
+  id: string;
+  name: string | null;
+  prefix: string;
+  createdAt: string;
+  expiresAt: string | null;
+  lastUsedAt: string | null;
+  // 仅创建时返回完整 key
+  key?: string;
 }
 ```
 
-## 四、API 路由设计
+### UI 变更
 
-### 4.1 认证相关路由
+**新增页面/组件**：
+- **LoginPage**: 登录页面（邮箱密码、OAuth、Magic Link）
+- **RegisterPage**: 注册页面
+- **VerifyEmailPage**: 邮箱验证页面
+- **ForgotPasswordPage**: 忘记密码页面
+- **ResetPasswordPage**: 重置密码页面
+- **TwoFactorSettingsPage**: 2FA 设置页面
+- **ApiKeyManagementPage**: API Key 管理页面
 
-| 路由 | 方法 | 描述 | 认证 |
-|------|------|------|------|
-| `/api/auth/sign-in/email` | POST | 邮箱密码登录 | ❌ |
-| `/api/auth/sign-up/email` | POST | 邮箱注册 | ❌ |
-| `/api/auth/sign-out` | POST | 登出 | ✅ |
-| `/api/auth/session` | GET | 获取当前会话 | ✅ |
-| `/api/auth/verify-email` | POST | 验证邮箱 | ❌ |
-| `/api/auth/forgot-password` | POST | 忘记密码 | ❌ |
-| `/api/auth/reset-password` | POST | 重置密码 | ❌ |
-| `/api/auth/sign-in/magic-link` | POST | Magic Link 登录 | ❌ |
-| `/api/auth/callback/google` | GET | Google OAuth 回调 | ❌ |
-| `/api/auth/2fa/enable` | POST | 启用 2FA | ✅ |
-| `/api/auth/2fa/disable` | POST | 禁用 2FA | ✅ |
-| `/api/auth/2fa/verify` | POST | 验证 2FA 代码 | ✅ |
-| `/api/api-keys` | GET | 获取 API Keys | ✅ |
-| `/api/api-keys` | POST | 创建 API Key | ✅ |
-| `/api/api-keys/:id` | DELETE | 撤销 API Key | ✅ |
+**用户流程**：
+1. 用户进入登录页面，选择认证方式
+2. 邮箱密码：输入凭据 -> 验证 -> 登录成功
+3. OAuth：点击按钮 -> 跳转授权 -> 回调 -> 登录成功
+4. Magic Link：输入邮箱 -> 收到邮件 -> 点击链接 -> 登录成功
+5. 2FA 用户：输入邮箱密码 -> 输入 2FA 验证码 -> 登录成功
 
-## 五、安全考虑
+## 边界情况
 
-### 5.1 密码安全
+需要处理的重要边界情况：
 
-- ✅ 使用 bcryptjs 加密（Better Auth 内置）
-- ✅ 最小长度 8 位，最大 128 位
-- ✅ 要求包含大小写字母、数字、特殊字符（可选）
-- ✅ 登录失败次数限制（可配置）
-- ✅ 账户锁定机制（可配置）
+- **邮箱未验证登录**: 拒绝登录，提供重新发送验证邮件选项
+- **OAuth 账户关联**: 相同邮箱自动关联到现有账号
+- **密码重置链接过期**: 提示过期，提供重新申请选项
+- **2FA 验证码错误**: 提示错误，允许使用备用码
+- **API Key 过期**: 返回 401 Unauthorized
+- **Session 过期**: 重定向到登录页面
+- **并发登录**: 可配置允许/禁止（默认允许）
 
-### 5.2 Session 安全
+## 范围外
 
-- ✅ JWT Token 签名验证
-- ✅ HttpOnly Cookie
-- ✅ Secure Cookie (生产环境)
-- ✅ SameSite=Lax
-- ✅ Session 过期时间可配置
-- ✅ 支持 Session 撤销
+该功能明确不包含的内容：
 
-### 5.3 2FA 安全
+- LDAP/Active Directory 集成（企业版特性）
+- SCIM 用户供应（企业版特性）
+- WebAuthn/Passkeys（P3 优先级）
+- 微信 OAuth（中国市场，P2 优先级）
+- 多步骤认证流程（P3 优先级）
 
-- ✅ TOTP Secret 加密存储
-- ✅ 备用码加密存储
-- ✅ 备用码使用后立即失效
-- ✅ 2FA 禁用需要验证当前 2FA 代码
+## 测试策略
 
-### 5.4 API Key 安全
+### 单元测试（70%）
 
-- ✅ API Key 不明文存储（SHA256 hash）
-- ✅ API Key 前缀用于快速识别
-- ✅ 支持 API Key 过期时间
-- ✅ 支持 API Key 撤销
-- ✅ 记录 lastUsedAt
+**领域层测试**：
+- Email 值对象验证
+- Password 值对象加密验证
+- ApiKey 值对象生成验证
+- User 实体创建和验证
 
-### 5.5 CORS 和 CSRF
+**应用层测试**：
+- RegisterUserCommand 处理
+- SignInCommand 处理
+- VerifyEmailCommand 处理
+- CreateApiKeyCommand 处理
 
-- ✅ 严格的 CORS 配置
-- ✅ CSRF Token 保护（可选）
-- ✅ trustedOrigins 配置
+### 集成测试（20%）
 
-## 六、环境变量
+- 完整登录流程测试
+- OAuth 登录流程测试
+- Magic Link 流程测试
+- 2FA 启用/验证流程测试
+- API Key 创建/使用/撤销测试
+- Repository 实现测试
 
-```bash
-# Better Auth
-BETTER_AUTH_SECRET=<your-secret-key>
-NEXT_PUBLIC_URL=https://your-domain.com
+### E2E 测试（10%）
 
-# Google OAuth
-GOOGLE_CLIENT_ID=<client-id>
-GOOGLE_CLIENT_SECRET=<client-secret>
+- 用户注册到登录完整流程
+- 2FA 启用到验证流程
+- API Key 使用流程
+- 密码重置流程
 
-# Email (SMTP)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=user@example.com
-SMTP_PASSWORD=<password>
-SMTP_FROM=noreply@example.com
+## 实现计划
 
-# SAML SSO (Optional)
-SAML_DATABASE_URL=postgresql://...
-SAML_CLIENT_SECRET_VERIFIER=<verifier>
+### Phase 1: 核心认证（P0） - 2 周
 
-# Encryption
-CALENDSO_ENCRYPTION_KEY=<32-byte-key>
-```
+- [x] Better Auth 核心配置
+- [x] 数据库 Schema 创建
+- [x] 邮件服务集成
+- [x] 邮箱密码注册/登录
+- [x] 邮箱验证
+- [x] 密码重置
+- [x] Magic Link 登录
+- [x] Google/GitHub OAuth 登录
+- [x] 前端登录/注册页面
+- [x] 集成测试（18 个测试用例）
 
-## 七、测试策略
+**状态：** ✅ 已完成（2026-03-02）
 
-### 7.1 单元测试
+### Phase 2: 高级特性（P1） - 2-3 周
 
-- ✅ 密码验证逻辑
-- ✅ API Key 验证逻辑
-- ✅ 2FA TOTP 验证
-- ✅ Session 提取逻辑
-
-### 7.2 集成测试
-
-- ✅ 完整登录流程
-- ✅ OAuth 登录流程
-- ✅ Magic Link 流程
-- ✅ 2FA 启用/验证流程
-- ✅ API Key 创建/使用/撤销
-
-### 7.3 E2E 测试
-
-- ✅ 用户注册到登录完整流程
-- ✅ 2FA 启用到验证流程
-- ✅ API Key 使用流程
-
-## 八、迁移计划
-
-### 8.1 Phase 0: 准备工作
-
-- [x] Better Auth + NestJS 集成（nestjs-better-auth）
-- [x] Drizzle ORM 数据库层
-- [ ] 邮件服务集成
-
-### 8.2 Phase 1: 核心认证 (P0)
-
-**目标：** 实现基本的用户注册登录
-
-- [ ] Better Auth 核心配置
-- [ ] 数据库 Schema 创建
-- [ ] 邮箱密码注册/登录
-- [ ] 邮箱验证
-- [ ] 密码重置
-- [ ] Magic Link 登录
-- [ ] Google OAuth 登录
-- [ ] 前端登录/注册页面
-
-### 8.3 Phase 2: 高级特性 (P1)
-
-**目标：** 企业级安全特性
-
-- [ ] 2FA/TOTP 认证
-- [ ] 备用码
-- [ ] API Key 认证
+- [ ] 2FA/TOTP 认证（Better Auth Two-Factor Plugin）
+- [ ] 备用码生成和使用
+- [ ] API Key 认证（Passport Strategy + NestJS Guard）
 - [ ] 自定义 Session 超时
 - [ ] 组织/团队管理（Better Auth Organization Plugin）
 
-### 8.4 Phase 3: 企业级功能 (P2)
-
-**目标：** SAML SSO 和高级管理
+### Phase 3: 企业级功能（P2） - 2-3 周
 
 - [ ] SAML SSO 集成（@boxyhq/saml-jackson）
 - [ ] 组织角色管理
-- [ ] Session 缓存优化
+- [ ] Session 缓存优化（LRU Cache）
 - [ ] 并发登录控制
 - [ ] 用户模拟功能
 
-### 8.5 Phase 4: Platform OAuth (P3)
-
-**目标：** 开放平台 API
+### Phase 4: Platform OAuth（P3） - 3-4 周
 
 - [ ] OAuth 2.0 授权服务器
 - [ ] Access Token / Refresh Token
 - [ ] Platform OAuth Clients
 - [ ] Webhook 支持
 
-## 九、边界情况
+## 参考资料
 
-### 9.1 认证失败处理
-
-| 场景 | 处理方式 |
-|------|----------|
-| 邮箱未验证 | 提示验证邮箱，允许重新发送 |
-| 密码错误 | 提示错误，记录失败次数 |
-| 账户锁定 | 提示联系管理员 |
-| 2FA 代码错误 | 提示错误，允许使用备用码 |
-| API Key 过期 | 返回 401 Unauthorized |
-| Session 过期 | 重定向到登录页面 |
-
-### 9.2 特殊场景
-
-| 场景 | 处理方式 |
-|------|----------|
-| 并发登录 | 可配置允许/禁止 |
-| OAuth 账户关联 | 自动关联相同邮箱 |
-| 密码重置 | 发送邮件，链接 1 小时有效 |
-| 邮箱修改 | 需要验证新邮箱 |
-
-## 十、监控和日志
-
-### 10.1 关键指标
-
-- 登录成功率/失败率
-- 注册转化率
-- 2FA 启用率
-- API Key 使用统计
-- Session 活跃度
-
-### 10.2 日志记录
-
-- 登录/登出事件
-- 2FA 启用/禁用事件
-- API Key 创建/撤销事件
-- 异常登录行为（IP 变更、地理位置变更）
-
-## 十一、参考资源
-
+- [开发工作流程](../_templates/workflow.md)
 - [Better Auth 官方文档](https://www.better-auth.com)
 - [Cal.com 认证实现](/home/arligle/forks/cal.com/packages/features/auth/)
 - [BoxyHQ SAML Jackson](https://github.com/boxyhq/jackson)
 - [NestJS Passport](https://docs.nestjs.com/security/authentication)
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
-
----
-
-**文档版本：** 1.0.0  
-**最后更新：** 2026年3月2日  
-**维护者：** oksai.cc 团队
