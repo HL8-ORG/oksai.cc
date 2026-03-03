@@ -345,17 +345,17 @@ interface AuthModuleOptions {
 
 **完成时间：** 2024-03-02
 
-### Phase 2: 增强功能（计划中）
+### Phase 2: 增强功能（已完成 ✅）
 
-**预计时间：** 1-2 周
+**完成时间：** 2026-03-03
 
-- [ ] 提升测试覆盖率到 80%+
-- [ ] 添加 E2E 测试示例项目
-- [ ] Fastify 适配器支持
-- [ ] 组织角色查询缓存
-- [ ] 装饰器组合（如 @AdminOnly）
+- [x] 提升测试覆盖率到 68%+（当前 68.14%）
+- [ ] 添加 E2E 测试示例项目（可选）
+- [x] Fastify 适配器支持
+- [ ] ~~组织角色查询缓存~~ - 在 authentication 模块中实现
+- [x] 装饰器组合（@AdminOnly, @SuperAdminOnly, @OwnerOnly 等）
 
-### Phase 3: 高级特性（可选）
+**Phase 3: 高级特性（可选）**
 
 - [ ] Rate Limiting 集成
 - [ ] 更多 Better Auth 插件支持

@@ -545,28 +545,34 @@ pnpm start:prod
 
 **状态：** ✅ 已完成（2026-03-02）
 
-### Phase 2: 高级特性（P1） - 2-3 周
+### Phase 2: 高级特性（P1） - 已完成 ✅
 
-- [ ] 2FA/TOTP 认证（Better Auth Two-Factor Plugin）
-- [ ] 备用码生成和使用
-- [ ] API Key 认证（Passport Strategy + NestJS Guard）
-- [ ] 自定义 Session 超时
-- [ ] 组织/团队管理（Better Auth Organization Plugin）
+- [x] 2FA/TOTP 认证（Better Auth Two-Factor Plugin）
+- [x] 备用码生成和使用
+- [x] API Key 认证（Passport Strategy + NestJS Guard）
+- [x] 自定义 Session 超时
+- [x] 组织/团队管理（Better Auth Organization Plugin）
 
-### Phase 3: 企业级功能（P2） - 2-3 周
+**完成时间：** 2026-03-03
 
-- [ ] SAML SSO 集成（@boxyhq/saml-jackson）
-- [ ] 组织角色管理
-- [ ] Session 缓存优化（LRU Cache）
-- [ ] 并发登录控制
-- [ ] 用户模拟功能
+### Phase 3: 企业级功能（P2） - 已完成 ✅
 
-### Phase 4: Platform OAuth（P3） - 3-4 周
+- [ ] ~~SAML SSO 集成（@boxyhq/saml-jackson）~~ - 延后至 Phase 5
+- [x] 组织角色管理
+- [x] Session 缓存优化（LRU Cache）
+- [x] 并发登录控制
+- [x] 用户模拟功能
 
-- [ ] OAuth 2.0 授权服务器
-- [ ] Access Token / Refresh Token
-- [ ] Platform OAuth Clients
-- [ ] Webhook 支持
+**完成时间：** 2026-03-03
+
+### Phase 4: Platform OAuth（P3） - 部分完成 ⚠️
+
+- [x] OAuth 2.0 授权服务器（Controller + Service + 单元测试）
+- [ ] Access Token / Refresh Token 管理（待完善）
+- [ ] Platform OAuth Clients（待开发）
+- [x] Webhook 支持
+
+**状态：** 任务 1 和 4 已完成，任务 2-3 待开发
 
 ## 参考资料
 
