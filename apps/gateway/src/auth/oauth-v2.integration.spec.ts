@@ -1,13 +1,26 @@
 /**
  * OAuth 2.0 集成测试
+ *
+ * 使用 Mock 服务进行测试，避免数据库依赖
  */
 
 import type { INestApplication } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthFeatureModule } from "./auth.module";
+import { OAuthService } from "./oauth.service";
+
+// Mock OAuthService
+const mockOAuthService = {
+  registerClient: vi.fn(),
+  generateAuthorizationCode: vi.fn(),
+  exchangeAccessToken: vi.fn(),
+  refreshAccessToken: vi.fn(),
+  validateAccessToken: vi.fn(),
+  revokeToken: vi.fn(),
+};
 
 describe("OAuth 2.0 Integration", () => {
   let app: INestApplication;
@@ -16,7 +29,10 @@ describe("OAuth 2.0 Integration", () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [AuthFeatureModule],
-    }).compile();
+    })
+      .overrideProvider(OAuthService)
+      .useValue(mockOAuthService)
+      .compile();
 
     app = module.createNestApplication();
     await app.init();
@@ -26,8 +42,24 @@ describe("OAuth 2.0 Integration", () => {
     await app.close();
   });
 
+  beforeEach(() => {
+    // 重置所有 mock
+    vi.clearAllMocks();
+  });
+
   describe("POST /oauth/register - 客户端注册", () => {
     it("应该成功注册 OAuth 客户端", async () => {
+      // 配置 mock 返回值
+      mockOAuthService.registerClient.mockResolvedValueOnce({
+        id: "test-id",
+        name: "Test OAuth App",
+        clientId: "client_test123",
+        clientSecret: "secret_test123",
+        clientType: "confidential",
+        redirectUris: ["http://localhost:3000/callback"],
+        allowedScopes: ["read", "write"],
+      });
+
       const response = await request(app.getHttpServer())
         .post("/oauth/register")
         .set("x-user-id", "test-user-id")
@@ -43,6 +75,7 @@ describe("OAuth 2.0 Integration", () => {
       expect(response.body).toHaveProperty("clientId");
       expect(response.body).toHaveProperty("clientSecret");
       expect(response.body.name).toBe("Test OAuth App");
+      expect(mockOAuthService.registerClient).toHaveBeenCalled();
     });
 
     it("应该拒绝无效的重定向 URI", async () => {

@@ -12,9 +12,9 @@
 
 import process from "node:process";
 import type * as schema from "@oksai/database/schema";
-import { betterAuth } from "better-auth/react";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin, organization, twoFactor } from "better-auth/plugins";
+import { betterAuth } from "better-auth/react";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 /**
