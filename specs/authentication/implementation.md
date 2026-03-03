@@ -483,9 +483,20 @@ Scenario: 并发登录控制
 **预计时间：** 3-4 周
 
 **技术选型：**
-- OAuth 2.0 库：Better Auth OAuth2 Plugin 或 @node-oauth/oauth2-server
-- Webhook：自实现或使用第三方库
-- Token 加密：crypto + AES-256-GCM
+- OAuth 2.0 庽 Better Auth OAuth2 Plugin（统一到 Better Auth）
+- **不构建独立的 OAuth 2.0 授权服务器**
+- **保留现有实现**，标记为 "Platform OAuth"
+  - **定位**: 让第三方应用接入你的平台
+  - **功能**: 完整的授权码流程、 Token 管理、 Webhook 触发
+  - **与 Better Auth genericOAuth 插件的关系**:
+    - 客户端身份验证（社交登录）使用 genericOAuth 插件
+    - Platform OAuth 使用自定义 OAuth 2.0 实现（保留）
+  - **架构上保持统一**，都使用 Better Auth 生态
+  - **数据存储**: 统一使用 Better Auth 数据库适配器
+
+    - **事件触发**: 统一通过 Webhook 系统
+
+  - **技术栈**: 统一使用 Better Auth + 自定义扩展
 
 ### Phase 3: 企业级功能（P2） - 已完成 ✅
 
