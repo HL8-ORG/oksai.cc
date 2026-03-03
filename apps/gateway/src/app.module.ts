@@ -5,6 +5,7 @@ import { AuthModule } from "@oksai/nestjs-better-auth";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { auth } from "./auth/auth";
+import { AuthFeatureModule } from "./auth/auth.module";
 import { UserController } from "./auth/user.controller";
 import { HealthController } from "./health/health.controller";
 
@@ -16,6 +17,7 @@ import { HealthController } from "./health/health.controller";
  * - ConfigModule: 全局配置管理
  * - ThrottlerModule: API 限流保护
  * - AuthModule: Better Auth 认证集成
+ * - AuthFeatureModule: 认证功能模块（注册/登录/邮箱验证等）
  *
  * 注意：AuthModule 默认注册全局 AuthGuard
  * 所有路由默认需要认证，使用 @AllowAnonymous() 或 @OptionalAuth() 开放访问
@@ -43,6 +45,9 @@ import { HealthController } from "./health/health.controller";
       // disableGlobalAuthGuard: false (默认值，启用全局守卫)
       // disableTrustedOriginsCors: false (默认值，自动配置 CORS)
     }),
+
+    // 认证功能模块
+    AuthFeatureModule,
   ],
   controllers: [AppController, HealthController, UserController],
   providers: [AppService],

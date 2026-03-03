@@ -49,7 +49,7 @@ export function SkipBodyParsingMiddleware(options: SkipBodyParsingMiddlewareOpti
   // NestJS consumer.apply() accepts plain functions directly
   return (req: Request, res: Response, next: NextFunction): void => {
     // skip body parsing for better-auth routes
-    if (req.baseUrl.startsWith(basePath)) {
+    if (req.baseUrl?.startsWith(basePath)) {
       next();
       return;
     }

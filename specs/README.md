@@ -30,7 +30,8 @@ Review the codebase and fill in specs/{feature}/design.md"
 |-----------|------|
 | `AGENTS.md` | AI 助手在处理该功能时的说明 |
 | `design.md` | 事实来源（Source of truth）——做什么、怎么做 |
-| `implementation.md` | 进度跟踪——已完成、进行中、阻塞项 |
+| `implementation.md` | 进度跟踪——BDD 场景、TDD 循环、覆盖率 |
+| `testing.md` | 测试计划——单元/集成/E2E 测试策略 |
 | `decisions.md` | 架构决策记录（ADR） |
 | `prompts.md` | 常见任务可复用提示词 |
 | `future-work.md` | 延后实现的想法与增强项 |

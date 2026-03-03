@@ -23,6 +23,7 @@ import {
 import { AuthService } from "./auth-service";
 import type { AuthHookContext } from "./decorators";
 import { SkipBodyParsingMiddleware } from "./middlewares";
+import { SkipBodyParsingMiddlewareFastify } from "./middlewares-fastify";
 import { AFTER_HOOK_KEY, BEFORE_HOOK_KEY, HOOK_KEY } from "./symbols";
 
 const HOOKS = [
@@ -110,14 +111,27 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
       );
 
     if (!this.options.disableBodyParser) {
-      consumer
-        .apply(
-          SkipBodyParsingMiddleware({
-            basePath: this.basePath,
-            enableRawBodyParser: this.options.enableRawBodyParser,
-          })
-        )
-        .forRoutes("*path");
+      const platform = this.options.platform ?? this.detectPlatform();
+
+      // 使用平台对应的中间件
+      if (platform === "fastify") {
+        consumer
+          .apply(
+            SkipBodyParsingMiddlewareFastify({
+              basePath: this.basePath,
+            })
+          )
+          .forRoutes("*path");
+      } else {
+        consumer
+          .apply(
+            SkipBodyParsingMiddleware({
+              basePath: this.basePath,
+              enableRawBodyParser: this.options.enableRawBodyParser,
+            })
+          )
+          .forRoutes("*path");
+      }
     }
 
     const handler = toNodeHandler(this.options.auth);
@@ -129,7 +143,29 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
         return handler(req, res);
       })
       .forRoutes(this.basePath);
-    this.logger.log(`AuthModule initialized BetterAuth on '${this.basePath}'`);
+    this.logger.log(
+      `AuthModule initialized BetterAuth on '${this.basePath}' (platform: ${this.options.platform ?? "express"})`
+    );
+  }
+
+  /**
+   * 检测当前使用的平台类型
+   * @returns 'fastify' 或 'express'
+   */
+  private detectPlatform(): "express" | "fastify" {
+    // 通过检查 HttpAdapterHost 的类型来判断平台
+    const httpAdapter = this.adapter?.httpAdapter;
+    if (!httpAdapter) {
+      return "express"; // 默认使用 Express
+    }
+
+    // 检查是否是 FastifyAdapter
+    const adapterName = httpAdapter.constructor?.name ?? "";
+    if (adapterName.includes("Fastify")) {
+      return "fastify";
+    }
+
+    return "express";
   }
 
   private setupHooks(
@@ -166,6 +202,8 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
       module: options.disableControllers ? AuthModuleWithoutControllers : module,
       controllers: options.disableControllers ? [] : forRootAsyncResult.controllers,
       providers: [
+        AuthService,
+        Reflector,
         ...(forRootAsyncResult.providers ?? []),
         ...(!options.disableGlobalAuthGuard
           ? [
@@ -176,6 +214,7 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
             ]
           : []),
       ],
+      exports: [AuthService],
     };
   }
 
@@ -198,6 +237,8 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
       module: normalizedOptions.disableControllers ? AuthModuleWithoutControllers : module,
       controllers: normalizedOptions.disableControllers ? [] : forRootResult.controllers,
       providers: [
+        AuthService,
+        Reflector,
         ...(forRootResult.providers ?? []),
         ...(!normalizedOptions.disableGlobalAuthGuard
           ? [
@@ -208,6 +249,7 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
             ]
           : []),
       ],
+      exports: [AuthService],
     };
   }
 }

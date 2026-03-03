@@ -1,15 +1,20 @@
 import "reflect-metadata";
 import {
+  AdminOnly,
   AfterHook,
   AllowAnonymous,
   BeforeHook,
   Hook,
+  MemberOnly,
   Optional,
   OptionalAuth,
+  OrgAdminOnly,
   OrgRoles,
+  OwnerOnly,
   Public,
   Roles,
   Session,
+  SuperAdminOnly,
 } from "./decorators";
 import { HOOK_KEY } from "./symbols";
 
@@ -142,6 +147,93 @@ describe("Decorators", () => {
 
       // 只要不抛出错误就说明装饰器可以组合使用
       expect(TestClass).toBeDefined();
+    });
+  });
+
+  describe("组合装饰器（便捷方法）", () => {
+    describe("@AdminOnly", () => {
+      it("应该定义为函数", () => {
+        expect(AdminOnly).toBeDefined();
+        expect(typeof AdminOnly).toBe("function");
+      });
+
+      it("应该设置 admin 角色", () => {
+        class TestClass {
+          @AdminOnly()
+          adminMethod() {}
+        }
+
+        const metadata = Reflect.getMetadata("ROLES", TestClass.prototype.adminMethod);
+        expect(metadata).toEqual(["admin"]);
+      });
+    });
+
+    describe("@SuperAdminOnly", () => {
+      it("应该定义为函数", () => {
+        expect(SuperAdminOnly).toBeDefined();
+        expect(typeof SuperAdminOnly).toBe("function");
+      });
+
+      it("应该设置 superadmin 角色", () => {
+        class TestClass {
+          @SuperAdminOnly()
+          superAdminMethod() {}
+        }
+
+        const metadata = Reflect.getMetadata("ROLES", TestClass.prototype.superAdminMethod);
+        expect(metadata).toEqual(["superadmin"]);
+      });
+    });
+
+    describe("@OwnerOnly", () => {
+      it("应该定义为函数", () => {
+        expect(OwnerOnly).toBeDefined();
+        expect(typeof OwnerOnly).toBe("function");
+      });
+
+      it("应该设置 owner 组织角色", () => {
+        class TestClass {
+          @OwnerOnly()
+          ownerMethod() {}
+        }
+
+        const metadata = Reflect.getMetadata("ORG_ROLES", TestClass.prototype.ownerMethod);
+        expect(metadata).toEqual(["owner"]);
+      });
+    });
+
+    describe("@OrgAdminOnly", () => {
+      it("应该定义为函数", () => {
+        expect(OrgAdminOnly).toBeDefined();
+        expect(typeof OrgAdminOnly).toBe("function");
+      });
+
+      it("应该设置 owner 和 admin 组织角色", () => {
+        class TestClass {
+          @OrgAdminOnly()
+          orgAdminMethod() {}
+        }
+
+        const metadata = Reflect.getMetadata("ORG_ROLES", TestClass.prototype.orgAdminMethod);
+        expect(metadata).toEqual(["owner", "admin"]);
+      });
+    });
+
+    describe("@MemberOnly", () => {
+      it("应该定义为函数", () => {
+        expect(MemberOnly).toBeDefined();
+        expect(typeof MemberOnly).toBe("function");
+      });
+
+      it("应该设置 owner、admin 和 member 组织角色", () => {
+        class TestClass {
+          @MemberOnly()
+          memberMethod() {}
+        }
+
+        const metadata = Reflect.getMetadata("ORG_ROLES", TestClass.prototype.memberMethod);
+        expect(metadata).toEqual(["owner", "admin", "member"]);
+      });
     });
   });
 });

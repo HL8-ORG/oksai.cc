@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { AuthService } from "./auth-service";
 
 describe("AuthService", () => {
@@ -9,9 +10,9 @@ describe("AuthService", () => {
     // 创建 Better Auth 实例的 mock
     mockAuth = {
       api: {
-        getSession: jest.fn(),
-        signIn: jest.fn(),
-        signOut: jest.fn(),
+        getSession: vi.fn(),
+        signIn: vi.fn(),
+        signOut: vi.fn(),
       },
       options: {
         basePath: "/api/auth",
@@ -54,7 +55,7 @@ describe("AuthService", () => {
         ...mockAuth,
         api: {
           ...mockAuth.api,
-          customMethod: jest.fn(),
+          customMethod: vi.fn(),
         },
       };
 

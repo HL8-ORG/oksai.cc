@@ -1,6 +1,7 @@
 import process from "node:process";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { twoFactor } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -12,6 +13,7 @@ import postgres from "postgres";
  * - Drizzle ORM 数据库适配器
  * - 邮箱/密码登录
  * - OAuth 社交登录（GitHub、Google）
+ * - 双因素认证 (2FA/TOTP)
  * - 会话管理（支持 Redis 缓存）
  * - 安全策略（CORS、CSRF、Rate Limiting）
  *
@@ -23,6 +25,7 @@ import postgres from "postgres";
  *
  * @see https://better-auth.com/docs/integrations/nestjs
  * @see https://better-auth.com/docs/reference/options
+ * @see https://better-auth.com/docs/plugins/2fa
  */
 export function createAuth(databaseUrl: string) {
   // 创建数据库连接
@@ -71,6 +74,20 @@ export function createAuth(databaseUrl: string) {
         maxAge: 60 * 5, // 5 分钟缓存
       },
     },
+
+    // 插件配置
+    plugins: [
+      // 双因素认证插件
+      // 文档：https://better-auth.com/docs/plugins/2fa
+      twoFactor({
+        issuer: "oksai.cc",
+        totpOptions: {
+          digits: 6, // 6 位验证码
+          period: 30, // 30 秒有效期
+        },
+        backupCodesCount: 10, // 10 个备用码
+      }),
+    ],
 
     // 高级安全配置
     advanced: {

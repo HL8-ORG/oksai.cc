@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,18 @@ function LoginPage() {
             {isLoading ? "登录中..." : "登录"}
           </Button>
         </form>
+
+        <div className="flex justify-between text-sm">
+          <Link to="/forgot-password" className="text-primary hover:underline">
+            忘记密码？
+          </Link>
+          <span className="text-muted-foreground">
+            还没有账户？{" "}
+            <Link to="/register" className="text-primary hover:underline">
+              立即注册
+            </Link>
+          </span>
+        </div>
       </div>
     </div>
   );

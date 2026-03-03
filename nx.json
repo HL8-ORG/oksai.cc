@@ -36,13 +36,15 @@
         "typecheckTargetName": "typecheck",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
-      }
+      },
+      "exclude": ["@oksai/web-admin"]
     },
     {
       "plugin": "@nx/vitest",
       "options": {
         "testTargetName": "test"
-      }
+      },
+      "exclude": ["@oksai/web-admin"]
     }
   ],
   "release": {

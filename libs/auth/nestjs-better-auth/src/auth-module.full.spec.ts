@@ -1,17 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { vi } from "vitest";
 import { AuthModule } from "./auth-module";
 import { AuthService } from "./auth-service";
 import type { AuthHookContext } from "./decorators";
-import { BeforeHook, Hook } from "./decorators";
+import { AfterHook, BeforeHook, Hook } from "./decorators";
 
 describe("AuthModule 完整测试", () => {
   let module: TestingModule;
 
   const createFullMockAuth = (options: any = {}) => ({
     api: {
-      getSession: jest.fn().mockResolvedValue(null),
-      getActiveMemberRole: jest.fn().mockResolvedValue({ role: "member" }),
+      getSession: vi.fn().mockResolvedValue(null),
+      getActiveMemberRole: vi.fn().mockResolvedValue({ role: "member" }),
     },
     options: {
       basePath: "/api/auth",
@@ -283,7 +284,7 @@ describe("AuthModule 完整测试", () => {
   describe("自定义中间件", () => {
     it("应该支持自定义中间件", async () => {
       const mockAuth = createFullMockAuth();
-      const customMiddleware = jest.fn((_req, _res, next) => next());
+      const customMiddleware = vi.fn((_req, _res, next) => next());
 
       module = await Test.createTestingModule({
         imports: [
@@ -399,6 +400,169 @@ describe("AuthModule 完整测试", () => {
             disableControllers: false,
           }),
         ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+  });
+
+  describe("钩子配置错误处理", () => {
+    it("应该在正确配置 hooks 时正常工作", async () => {
+      @Hook()
+      @Injectable()
+      class TestHookProvider {
+        @BeforeHook("/sign-in")
+        async handleHook(_ctx: AuthHookContext) {
+          console.log("Hook executed");
+        }
+      }
+
+      const mockAuth = {
+        api: {
+          getSession: vi.fn().mockResolvedValue(null),
+        },
+        options: {
+          basePath: "/api/auth",
+          trustedOrigins: ["http://localhost:3000"],
+          hooks: {},
+        },
+      };
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableGlobalAuthGuard: true,
+          }),
+        ],
+        providers: [TestHookProvider],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+  });
+
+  describe("函数式 trustedOrigins 处理", () => {
+    it("应该在禁用 CORS 时不检查 trustedOrigins 类型", async () => {
+      const mockAuth = {
+        api: {
+          getSession: vi.fn().mockResolvedValue(null),
+        },
+        options: {
+          basePath: "/api/auth",
+          trustedOrigins: () => ["http://localhost:3000"],
+        },
+      };
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableGlobalAuthGuard: true,
+            disableTrustedOriginsCors: true,
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+  });
+
+  describe("Fastify 平台支持", () => {
+    it("应该支持显式指定 Fastify 平台", async () => {
+      const mockAuth = createFullMockAuth();
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableGlobalAuthGuard: true,
+            platform: "fastify",
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+
+    it("应该支持显式指定 Express 平台", async () => {
+      const mockAuth = createFullMockAuth();
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableGlobalAuthGuard: true,
+            platform: "express",
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+  });
+
+  describe("forRootAsync 完整测试", () => {
+    it("应该支持异步配置所有选项", async () => {
+      const mockAuth = createFullMockAuth({
+        trustedOrigins: ["http://localhost:3000"],
+        hooks: {},
+      });
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRootAsync({
+            useFactory: async () =>
+              Promise.resolve({
+                auth: mockAuth as any,
+                isGlobal: true,
+                disableGlobalAuthGuard: true,
+                disableTrustedOriginsCors: false,
+                disableBodyParser: false,
+                enableRawBodyParser: true,
+                disableControllers: false,
+                platform: "express",
+              }),
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+  });
+
+  describe("after 钩子", () => {
+    it("应该配置 after 钩子", async () => {
+      const originalAfterHook = vi.fn();
+      const mockAuth = createFullMockAuth({
+        hooks: {
+          after: originalAfterHook,
+        },
+      });
+
+      @Hook()
+      @Injectable()
+      class TestAfterHookProvider {
+        @AfterHook("/sign-in")
+        async handleAfterHook(_ctx: AuthHookContext) {
+          console.log("After hook");
+        }
+      }
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableGlobalAuthGuard: true,
+          }),
+        ],
+        providers: [TestAfterHookProvider],
       }).compile();
 
       const authService = module.get<AuthService>(AuthService);

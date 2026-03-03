@@ -1,5 +1,24 @@
 import type { NextFunction, Request, Response } from "express";
+import { vi } from "vitest";
 import { SkipBodyParsingMiddleware } from "./middlewares";
+
+// Mock express module
+vi.mock("express", () => ({
+  json: vi.fn((options) => {
+    return (req: any, res: any, next: any) => {
+      // 如果有 verify 选项且是 Buffer，调用它
+      if (options?.verify && Buffer.isBuffer(req.body)) {
+        options.verify(req, res, req.body, () => true);
+      }
+      next();
+    };
+  }),
+  urlencoded: vi.fn(() => {
+    return (req: any, res: any, next: any) => {
+      next();
+    };
+  }),
+}));
 
 describe("SkipBodyParsingMiddleware", () => {
   let mockReq: Partial<Request>;
@@ -12,7 +31,7 @@ describe("SkipBodyParsingMiddleware", () => {
       headers: {},
     };
     mockRes = {};
-    mockNext = jest.fn();
+    mockNext = vi.fn();
   });
 
   describe("基础功能", () => {
@@ -49,69 +68,119 @@ describe("SkipBodyParsingMiddleware", () => {
       expect(mockNext).toHaveBeenCalled();
     });
 
-    it("应该对非 Auth 路由继续解析 body", (done) => {
+    it("应该对非 Auth 路由继续解析 body", async () => {
       mockReq.baseUrl = "/api/users";
       const middleware = SkipBodyParsingMiddleware({ basePath: "/api/auth" });
 
       const jsonBody = { name: "test" };
       mockReq.body = jsonBody;
 
-      middleware(mockReq as Request, mockRes as Response, (err?) => {
-        if (err) {
-          done.fail(err);
-        } else {
-          done();
-        }
+      await new Promise<void>((resolve, reject) => {
+        middleware(mockReq as Request, mockRes as Response, (err?) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
       });
     });
   });
 
   describe("Raw Body Parser", () => {
-    it("应该支持启用 rawBodyParser", () => {
+    it("应该支持启用 rawBodyParser 并设置 rawBody", async () => {
       const middleware = SkipBodyParsingMiddleware({
         enableRawBodyParser: true,
       });
-      expect(middleware).toBeDefined();
+
+      // Mock 请求对象，带有 Buffer body
+      const mockReq = {
+        baseUrl: "/api/other",
+        headers: { "content-type": "application/json" },
+        body: Buffer.from('{"test":"data"}'),
+      };
+      const mockRes = {};
+
+      await new Promise<void>((resolve) => {
+        middleware(mockReq as any, mockRes as Response, () => {
+          // 验证 rawBody 被设置
+          expect((mockReq as any).rawBody).toBeDefined();
+          expect((mockReq as any).rawBody.toString()).toBe('{"test":"data"}');
+          resolve();
+        });
+      });
     });
 
-    it("默认应该不启用 rawBodyParser", () => {
+    it("默认应该不启用 rawBodyParser", async () => {
       const middleware = SkipBodyParsingMiddleware({
         enableRawBodyParser: false,
       });
-      expect(middleware).toBeDefined();
+
+      const mockReq = {
+        baseUrl: "/api/other",
+        headers: { "content-type": "application/json" },
+        body: {},
+      };
+      const mockRes = {};
+
+      await new Promise<void>((resolve) => {
+        middleware(mockReq as Request, mockRes as Response, () => {
+          // 验证 rawBody 没有被设置
+          expect((mockReq as any).rawBody).toBeUndefined();
+          resolve();
+        });
+      });
     });
   });
 
   describe("错误处理", () => {
-    it("应该处理 body 解析错误", (done) => {
-      mockReq.baseUrl = "/api/users";
-      const middleware = SkipBodyParsingMiddleware();
-
-      // 模拟错误的 JSON
-      const _originalJson = jest.requireActual("express").json;
-      jest.doMock("express", () => ({
-        json: jest.fn(() => {
-          return (_req: any, _res: any, next: any) => {
-            next(new Error("Invalid JSON"));
-          };
-        }),
-        urlencoded: jest.fn(() => (_req: any, _res: any, next: any) => next()),
-      }));
-
-      middleware(mockReq as Request, mockRes as Response, (_err?) => {
-        // 即使有错误也应该调用 next
-        done();
+    it("应该处理 body 解析错误", async () => {
+      // Mock express.json 抛出错误
+      const express = await import("express");
+      vi.mocked(express.json).mockReturnValueOnce((req: any, res: any, next: any) => {
+        next(new Error("JSON parse error"));
       });
+
+      const middleware = SkipBodyParsingMiddleware({
+        basePath: "/api/auth",
+      });
+      const mockReq = {
+        baseUrl: "/api/other",
+        path: "/api/other",
+        headers: { "content-type": "application/json" },
+        body: {},
+      };
+      const mockRes = {};
+
+      const errorPromise = new Promise<Error>((resolve) => {
+        middleware(mockReq as Request, mockRes as Response, (err?: any) => {
+          resolve(err);
+        });
+      });
+
+      const error = await errorPromise;
+      expect(error).toBeDefined();
+      expect(error.message).toBe("JSON parse error");
     });
   });
 
   describe("URL 编码解析", () => {
-    it("应该在 JSON 解析后继续解析 URL 编码数据", (done) => {
-      mockReq.baseUrl = "/api/users";
-      const middleware = SkipBodyParsingMiddleware();
+    it("应该在 JSON 解析后继续解析 URL 编码数据", async () => {
+      const middleware = SkipBodyParsingMiddleware({
+        basePath: "/api/auth",
+      });
+      const mockReq = {
+        baseUrl: "/api/other",
+        path: "/api/other",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: {},
+      };
+      const mockRes = {};
 
-      middleware(mockReq as Request, mockRes as Response, () => {
-        done();
+      await new Promise<void>((resolve) => {
+        middleware(mockReq as Request, mockRes as Response, () => {
+          resolve();
+        });
       });
     });
   });

@@ -9,10 +9,15 @@
     "noEmit": true
   },
   "references": [
-    { "path": "./libs/database" },
-    { "path": "./libs/shared/types" },
-    { "path": "./libs/shared/utils" },
-    { "path": "./libs/auth/nestjs-better-auth" }
+    {
+      "path": "./libs/notification/email"
+    },
+    {
+      "path": "./libs/auth/config"
+    },
+    {
+      "path": "./apps/gateway"
+    }
   ],
   "exclude": ["node_modules", "dist", "apps"]
 }

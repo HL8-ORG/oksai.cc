@@ -464,6 +464,70 @@ interface ApiKeyResponse {
 - API Key 使用流程
 - 密码重置流程
 
+### 测试覆盖率目标
+
+- 领域层：>90%
+- 应用层：>85%
+- 总体：>80%
+
+详见 [测试计划](./testing.md)
+
+---
+
+## 风险评估
+
+| 风险 | 影响 | 概率 | 缓解措施 |
+|:---|:---:|:---:|:---|
+| Better Auth 框架不成熟 | 高 | 中 | 参考成熟实现（Cal.com）、保持框架可替换性 |
+| 安全漏洞（密码泄露、Session 劫持） | 高 | 低 | 使用标准加密算法、定期安全审计、遵循 OWASP 最佳实践 |
+| OAuth Provider 变更 API | 中 | 低 | 抽象 OAuth 适配层、监控 Provider 更新 |
+| 性能瓶颈（Session 查询、数据库压力） | 中 | 中 | 使用 JWT Session、添加缓存层、数据库索引优化 |
+| 用户数据迁移问题 | 高 | 低 | 完整迁移测试、保留回滚方案 |
+| 第三方依赖升级导致兼容性问题 | 中 | 中 | 锁定依赖版本、定期更新测试 |
+
+### 回滚计划
+
+如果认证系统出现严重问题：
+
+1. **立即回滚**：使用数据库快照恢复到上一个稳定版本
+2. **降级方案**：保留旧的认证系统作为备份
+3. **用户通知**：通过邮件和系统通知告知用户
+4. **数据恢复**：从备份中恢复用户数据和 Session
+5. **问题排查**：记录错误日志，分析根本原因
+
+**回滚步骤：**
+```bash
+# 1. 停止服务
+pnpm stop
+
+# 2. 恢复数据库
+pg_restore -d oksai_db backup_20260302.dump
+
+# 3. 切换到旧版本代码
+git checkout tags/v1.0.0
+
+# 4. 重启服务
+pnpm start:prod
+```
+
+---
+
+## 依赖关系
+
+### 内部依赖
+
+- **@oksai/nestjs-better-auth**: Better Auth 的 NestJS 集成
+- **@oksai/database**: Drizzle ORM 数据库访问层
+- **@oksai/email**: 邮件发送服务
+
+### 外部依赖
+
+- **Better Auth**: 认证框架（核心依赖）
+- **Drizzle ORM**: 数据库 ORM
+- **Passport.js**: API Key 认证策略
+- **Nodemailer**: 邮件发送
+- **BoxyHQ Jackson**: SAML SSO（Phase 2）
+
 ## 实现计划
 
 ### Phase 1: 核心认证（P0） - 2 周

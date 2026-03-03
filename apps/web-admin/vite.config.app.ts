@@ -3,13 +3,23 @@ import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import tsConfigPaths from "vite-tsconfig-paths";
+import { nitro } from "nitro/vite";
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   server: {
     port: 3001,
   },
-  plugins: [devtools(), tanstackStart(), viteReact(), tailwindcss()],
+  plugins: [
+    tailwindcss(),
+    tsConfigPaths({
+      projects: ["./tsconfig.json"],
+    }),
+    devtools(),
+    tanstackStart({
+      srcDirectory: "src",
+    }),
+    viteReact(),
+    nitro(),
+  ],
 });

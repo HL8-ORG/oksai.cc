@@ -1,5 +1,6 @@
 import { APP_GUARD } from "@nestjs/core";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { vi } from "vitest";
 import { AuthModule } from "./auth-module";
 import { AuthService } from "./auth-service";
 
@@ -8,7 +9,7 @@ describe("AuthModule 集成测试", () => {
 
   const mockAuth = {
     api: {
-      getSession: jest.fn(),
+      getSession: vi.fn(),
     },
     options: {
       basePath: "/api/auth",
@@ -180,6 +181,73 @@ describe("AuthModule 集成测试", () => {
           AuthModule.forRoot({
             auth: mockAuth as any,
             disableControllers: true,
+            disableGlobalAuthGuard: true,
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+
+    it("应该支持禁用 CORS", async () => {
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableTrustedOriginsCors: true,
+            disableGlobalAuthGuard: true,
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+
+    it("应该支持禁用 Body Parser", async () => {
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            disableBodyParser: true,
+            disableGlobalAuthGuard: true,
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+
+    it("应该支持启用 Raw Body Parser", async () => {
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: mockAuth as any,
+            enableRawBodyParser: true,
+            disableGlobalAuthGuard: true,
+          }),
+        ],
+      }).compile();
+
+      const authService = module.get<AuthService>(AuthService);
+      expect(authService).toBeDefined();
+    });
+
+    it("应该支持自定义 basePath", async () => {
+      const customMockAuth = {
+        ...mockAuth,
+        options: {
+          ...mockAuth.options,
+          basePath: "/custom/auth",
+        },
+      };
+
+      module = await Test.createTestingModule({
+        imports: [
+          AuthModule.forRoot({
+            auth: customMockAuth as any,
             disableGlobalAuthGuard: true,
           }),
         ],

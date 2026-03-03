@@ -101,6 +101,8 @@ pnpm biome lint --write apps/gateway/src/main.ts
 
 ### Test Commands
 
+**注意：项目已统一使用 Vitest 测试框架（2026-03-03 迁移完成）**
+
 ```bash
 # Run all tests
 pnpm test
@@ -126,6 +128,20 @@ pnpm vitest run --coverage
 
 # Run specific describe block
 pnpm vitest run -t "Decorators"
+```
+
+**迁移说明：**
+- ✅ 已从 Jest 迁移到 Vitest
+- ✅ 所有测试文件使用 `vi.fn()` 替代 `jest.fn()`
+- ✅ 兼容 Jest API，迁移成本低
+- ⚡ 更快的测试运行速度和 watch 模式
+- 📚 详见 `VITEST_MIGRATION.md`
+
+**测试最佳实践：**
+- 使用 `vi.fn()` 创建 mock 函数
+- 使用 `vi.mock()` mock 模块
+- 使用 `vi.importActual()` 获取真实模块
+- 优先使用 async/await 而非 done() callback
 ```
 
 ### Database Commands

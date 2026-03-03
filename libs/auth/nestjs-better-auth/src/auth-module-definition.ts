@@ -2,8 +2,20 @@ import { ConfigurableModuleBuilder } from "@nestjs/common";
 import type { NextFunction, Request, Response } from "express";
 import type { Auth } from "./auth-module";
 
-export type AuthModuleOptions<A = Auth> = {
+export interface AuthModuleOptions<A = Auth> {
   auth: A;
+  /**
+   * Platform to use for the authentication module.
+   * - 'express' (default) - Uses Express platform
+   * - 'fastify' - Uses Fastify platform
+   *
+   * Note: When using Fastify, you need to install:
+   * - @nestjs/platform-fastify
+   * - fastify
+   *
+   * @default 'express'
+   */
+  platform?: "express" | "fastify";
   disableTrustedOriginsCors?: boolean;
   disableBodyParser?: boolean;
   /**
@@ -20,7 +32,7 @@ export type AuthModuleOptions<A = Auth> = {
    */
   enableRawBodyParser?: boolean;
   middleware?: (req: Request, res: Response, next: NextFunction) => void;
-};
+}
 
 export const MODULE_OPTIONS_TOKEN = Symbol("AUTH_MODULE_OPTIONS");
 
@@ -35,12 +47,9 @@ export const { ConfigurableModuleClass, OPTIONS_TYPE, ASYNC_OPTIONS_TYPE } =
         disableGlobalAuthGuard: false,
         disableControllers: false,
       },
-      (def, extras) => {
-        return {
-          ...def,
-          exports: [MODULE_OPTIONS_TOKEN],
-          global: extras.isGlobal,
-        };
-      }
+      (def, extras) => ({
+        ...def,
+        global: extras.isGlobal,
+      })
     )
     .build();

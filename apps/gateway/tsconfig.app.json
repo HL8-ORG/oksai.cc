@@ -14,5 +14,13 @@
     "noEmit": false
   },
   "exclude": ["node_modules", "dist", "test"],
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "references": [
+    {
+      "path": "../../libs/auth/nestjs-better-auth"
+    },
+    {
+      "path": "../../libs/database"
+    }
+  ]
 }
