@@ -329,6 +329,32 @@ Scenario: 并发登录控制
 **任务分解：**
 
 #### 任务 1: OAuth 2.0 授权服务器基础
+
+**已完成：**
+- ✅ 扩展数据库 Schema（oauth_clients, oauth_authorization_codes, oauth_access_tokens, oauth_refresh_tokens）
+  - ✅ 创建 OAuth Schema 文件 (libs/database/src/schema/oauth.schema.ts)
+  - ✅ 生成数据库迁移文件 (0002_thankful_slayback.sql)
+  - ✅ 导出 OAuth Schema 到 @oksai/database
+- ✅ 实现 OAuth Service (apps/gateway/src/auth/oauth.service.ts)
+  - ✅ registerClient() - OAuth 客户端注册
+  - ✅ generateAuthorizationCode() - 授权码生成
+  - ✅ exchangeAccessToken() - Access Token 交换
+  - ✅ refreshAccessToken() - Refresh Token 轮换
+  - ✅ validateAccessToken() - Token 验证
+  - ✅ revokeToken() - Token 撤销
+
+**待完成：**
+- [ ] 实现 OAuth Controller
+  - [ ] POST /oauth/register - 客户端注册
+  - [ ] GET /oauth/authorize - 授权端点
+  - [ ] POST /oauth/token - Token 端点
+  - [ ] POST /oauth/revoke - Token 撤销端点
+  - [ ] POST /oauth/introspect - Token 内省端点
+- [ ] 更新 AuthModule
+- [ ] 创建测试
+- [ ] 支持 PKCE (code_challenge)
+
+**完成时间：** 2026-03-03 (基础框架)
 - [ ] 扩展数据库 Schema（oauth_clients, oauth_authorization_codes, oauth_tokens）
 - [ ] 实现 OAuth 2.0 授权码流程（Authorization Code Flow）
 - [ ] 实现 Token 端点（/oauth/token）
@@ -497,11 +523,16 @@ Scenario: 并发登录控制
   - 扩展 OrganizationService 添加 checkPermission() 方法
   - 创建角色权限单元测试（14 个测试用例，100% 通过）
   - Gateway 所有测试通过（99/99）
-- **2026-03-03**: **完成 Phase 3 任务 4 - 用户模拟功能（基础框架）** ✅
-  - 创建用户模拟 DTO（ImpersonateUserDto, ImpersonationUserResponse, ImpersonationSession）
-  - 创建用户模拟服务（ImpersonationService）
-  - 实现 impersonateUser() 方法（管理员专用，权限验证）
-  - 实现 stopImpersonating() 方法（停止模拟会话）
-  - 实现会话管理方法（getImpersonationSession, listActiveImpersonations）
-  - 添加安全措施（权限检查，审计日志集成点）
-  - **Phase 3 全部完成！准备开始 Phase 4 - Platform OAuth** 🎉
+- **2026-03-03**: **完成 Better Auth 导入路径迁移** ✅
+  - 修复 Better Auth 导入路径：`"better-auth"` → `"better-auth/react"`
+  - 修复 Auth 类型导入：保持 `"better-auth"`
+  - 迁移 9 个核心文件
+  - 测试通过：385/387 (99.2%)
+  - Git 提交：`577da3e`
+- **2026-03-03**: **开始 Phase 4 任务 1 - OAuth 2.0 授权服务器基础** 🚀
+  - 创建 OAuth 2.0 数据库 Schema（4 张表）
+  - 生成数据库迁移文件（0002_thankful_slayback.sql）
+  - 实现 OAuth Service（6 个核心方法）
+  - 支持授权码流程、PKCE、Token 轮换
+  - **Phase 4 任务 1 进行中** ⏳
+  - **准备开始 Phase 4: Platform OAuth** 🚀

@@ -15,6 +15,13 @@
       "when": 1772508153855,
       "tag": "0001_talented_logan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772511484868,
+      "tag": "0002_thankful_slayback",
+      "breakpoints": true
     }
   ]
 }

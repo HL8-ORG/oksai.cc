@@ -2,30 +2,27 @@
  * OAuth 2.0 数据库 Schema
  */
 
-import { boolean, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 /**
  * OAuth Client 类型枚举
  */
 export const oauthClientTypeEnum = pgEnum("oauth_client_type", [
-  "confidential", // 机密客户端（服务器端应用）
-  "public", // 公共客户端（SPA、移动应用）
-]);
-
-/**
- * OAuth Grant 类型枚举
- */
-export const oauthGrantTypeEnum = pgEnum("oauth_grant_type", [
-  "authorization_code", // 授权码模式
-  "client_credentials", // 客户端凭据模式
-  "refresh_token", // 刷新令牌
+  "confidential",
+  "public",
 ]);
 
 /**
  * OAuth Clients 表
- *
- * @description
- * 存储注册的 OAuth 客户端应用
  */
 export const oauthClients = pgTable(
   "oauth_clients",
@@ -35,10 +32,10 @@ export const oauthClients = pgTable(
       .$defaultFn(() => crypto.randomUUID()),
     name: text("name").notNull(),
     clientId: text("client_id").notNull().unique(),
-    clientSecret: text("client_secret"), // 机密客户端加密存储
+    clientSecret: text("client_secret"),
     clientType: oauthClientTypeEnum("client_type").default("confidential").notNull(),
-    redirectUris: text("redirect_uris").notNull(), // JSON 数组
-    allowedScopes: text("allowed_scopes").notNull(), // JSON 数组
+    redirectUris: text("redirect_uris").notNull(),
+    allowedScopes: text("allowed_scopes").notNull(),
     description: text("description"),
     homepageUrl: text("homepage_url"),
     logoUrl: text("logo_url"),
@@ -47,7 +44,7 @@ export const oauthClients = pgTable(
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdBy: text("created_by"),
   },
   (table) => ({
     clientIdIdx: uniqueIndex("oauth_clients_client_id_idx").on(table.clientId),
@@ -57,9 +54,6 @@ export const oauthClients = pgTable(
 
 /**
  * OAuth Authorization Codes 表
- *
- * @description
- * 存储 OAuth 授权码（短期有效）
  */
 export const oauthAuthorizationCodes = pgTable(
   "oauth_authorization_codes",
@@ -68,16 +62,12 @@ export const oauthAuthorizationCodes = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     code: text("code").notNull().unique(),
-    clientId: text("client_id")
-      .notNull()
-      .references(() => oauthClients.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    userId: text("user_id").notNull(),
     redirectUri: text("redirect_uri").notNull(),
     scope: text("scope").notNull(),
-    codeChallenge: text("code_challenge"), // PKCE
-    codeChallengeMethod: text("code_challenge_method"), // S256 or plain
+    codeChallenge: text("code_challenge"),
+    codeChallengeMethod: text("code_challenge_method"),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     usedAt: timestamp("used_at"),
@@ -91,9 +81,6 @@ export const oauthAuthorizationCodes = pgTable(
 
 /**
  * OAuth Access Tokens 表
- *
- * @description
- * 存储访问令牌
  */
 export const oauthAccessTokens = pgTable(
   "oauth_access_tokens",
@@ -102,12 +89,8 @@ export const oauthAccessTokens = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     accessToken: text("access_token").notNull().unique(),
-    clientId: text("client_id")
-      .notNull()
-      .references(() => oauthClients.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    userId: text("user_id").notNull(),
     scope: text("scope").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -122,9 +105,6 @@ export const oauthAccessTokens = pgTable(
 
 /**
  * OAuth Refresh Tokens 表
- *
- * @description
- * 存储刷新令牌
  */
 export const oauthRefreshTokens = pgTable(
   "oauth_refresh_tokens",
@@ -133,12 +113,8 @@ export const oauthRefreshTokens = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     refreshToken: text("refresh_token").notNull().unique(),
-    clientId: text("client_id")
-      .notNull()
-      .references(() => oauthClients.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    userId: text("user_id").notNull(),
     scope: text("scope").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
