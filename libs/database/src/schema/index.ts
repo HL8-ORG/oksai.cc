@@ -6,3 +6,4 @@
 
 export * from "./better-auth.schema";
 export * from "./oauth.schema";
+export * from "./webhook.schema";

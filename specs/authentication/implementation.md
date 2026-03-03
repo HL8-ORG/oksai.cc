@@ -414,12 +414,59 @@ Scenario: 并发登录控制
 - [ ] 支持 Client Credentials Flow
 - [ ] Client 密钥管理（加密存储）
 
-#### 任务 4: Webhook 支持
-- [ ] 设计 Webhook 事件类型
-- [ ] 实现 Webhook 注册和订阅
-- [ ] 实现 Webhook 发送和重试机制
-- [ ] Webhook 签名验证
-- [ ] Webhook 日志和监控
+#### 任务 4: Webhook 支持 🚧
+
+**进行中：**
+- ✅ 设计 Webhook 数据库 Schema（3 张表）
+  - ✅ webhooks - Webhook 配置表
+  - ✅ webhook_deliveries - 交付记录表
+  - ✅ webhook_event_queue - 事件队列表
+  - ✅ 生成数据库迁移文件 (0003_lumpy_onslaught.sql)
+- ✅ 定义 Webhook 事件类型（27 个事件）
+  - ✅ 用户事件（5 个）
+  - ✅ 会话事件（3 个）
+  - ✅ 组织事件（7 个）
+  - ✅ OAuth 事件（6 个）
+  - ✅ API Key 事件（3 个）
+- ✅ 创建 Webhook DTO
+  - ✅ CreateWebhookDto
+  - ✅ UpdateWebhookDto
+  - ✅ WebhookResponse
+  - ✅ WebhookPayload
+- ✅ 实现 Webhook Service（基础框架）
+  - ✅ createWebhook() - 创建 Webhook
+  - ✅ triggerEvent() - 触发事件
+  - ✅ generateSignature() - 生成签名
+  - ✅ generateSecret() - 生成密钥
+
+**待完成：**
+- [ ] 完善 Webhook Service
+  - [ ] listWebhooks() - 获取所有 Webhooks
+  - [ ] updateWebhook() - 更新 Webhook
+  - [ ] deleteWebhook() - 删除 Webhook
+  - [ ] processEventQueue() - 处理事件队列
+  - [ ] sendWebhook() - 发送 Webhook 请求
+  - [ ] recordDelivery() - 记录交付状态
+  - [ ] retryFailedDeliveries() - 重试失败的交付
+- [ ] 实现 Webhook Controller
+  - [ ] POST /webhooks - 创建 Webhook
+  - [ ] GET /webhooks - 获取所有 Webhooks
+  - [ ] GET /webhooks/:id - 获取单个 Webhook
+  - [ ] PUT /webhooks/:id - 更新 Webhook
+  - [ ] DELETE /webhooks/:id - 删除 Webhook
+  - [ ] GET /webhooks/:id/deliveries - 获取交付记录
+- [ ] 实现重试机制（5 次重试，指数退避）
+- [ ] 实现 Webhook 签名验证
+- [ ] 创建测试
+
+**完成时间：** 进行中
+
+**技术细节：**
+- Webhook 签名：HMAC SHA-256
+- 重试策略：1s, 5s, 15s, 1m, 5m（指数退避）
+- 最大重试次数：5 次
+- 支持自定义请求头
+- 支持组织级别 Webhook
 
 **预计时间：** 3-4 周
 

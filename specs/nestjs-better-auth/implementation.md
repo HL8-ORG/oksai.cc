@@ -142,7 +142,48 @@
 
 ## 进行中
 
-无
+### Phase 3: Better Auth 插件支持（2026-03-03）
+
+**目标：** 为 nestjs-better-auth 添加 Better Auth 插件类型支持
+
+**已完成：**
+- ✅ 创建 Better Auth 插件类型定义文件 (better-auth-types.ts)
+  - ✅ OrganizationAuthAPI - 组织管理插件（13 个方法）
+  - ✅ AdminAuthAPI - 管理员插件（5 个方法）
+  - ✅ TwoFactorAuthAPI - 双因素认证插件（3 个方法）
+  - ✅ BaseAuthAPI - 基础 API
+  - ✅ BetterAuthAPI - 完整 API 类型（组合所有插件）
+- ✅ 添加类型守卫函数
+  - ✅ hasOrganizationPlugin() - 检查是否启用组织插件
+  - ✅ hasAdminPlugin() - 检查是否启用管理员插件
+  - ✅ hasTwoFactorPlugin() - 检查是否启用双因素认证插件
+- ✅ 导出插件类型到 index.ts
+- ✅ 修复 utils.ts 的 @nestjs/graphql 可选依赖问题
+- ✅ 构建成功（CJS/ESM 双模块）
+
+**完成时间：** 2026-03-03
+
+**技术细节：**
+- 所有插件 API 都定义为 Partial，支持按需启用
+- 类型守卫函数支持运行时检查插件是否可用
+- 保持向后兼容，不破坏现有功能
+- GraphQL 依赖保持可选（懒加载）
+
+**使用示例：**
+```typescript
+import { hasOrganizationPlugin, type OrganizationAuthAPI } from '@oksai/nestjs-better-auth';
+
+// 检查插件是否启用
+if (hasOrganizationPlugin(authAPI)) {
+  // TypeScript 知道 authAPI 有 OrganizationAuthAPI 的方法
+  const org = await authAPI.createOrganization({ ... });
+}
+```
+
+**下一步（可选）：**
+- [ ] 添加更多插件类型（如 anonymous、passkey、magic-link 等）
+- [ ] 创建插件集成示例
+- [ ] 添加插件配置验证装饰器
 
 ## 阻塞项
 
