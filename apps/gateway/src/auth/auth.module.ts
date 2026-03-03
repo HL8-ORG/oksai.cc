@@ -16,6 +16,8 @@ import { OrganizationController } from "./organization.controller";
 import { OrganizationService } from "./organization.service";
 import { SessionController } from "./session.controller";
 import { SessionService } from "./session.service";
+import { WebhookController } from "./webhook.controller";
+import { WebhookService } from "./webhook.service";
 
 /**
  * 认证模块
@@ -31,6 +33,7 @@ import { SessionService } from "./session.service";
  * - API Key 认证
  * - Session 管理
  * - 组织/团队管理
+ * - Webhook 事件通知
  */
 @Module({
   imports: [CacheModule],
@@ -41,6 +44,7 @@ import { SessionService } from "./session.service";
     ApiKeyController,
     SessionController,
     OrganizationController,
+    WebhookController,
   ],
   providers: [
     {
@@ -54,6 +58,7 @@ import { SessionService } from "./session.service";
     ApiKeyService,
     OAuthService,
     SessionService,
+    WebhookService,
     {
       provide: OrganizationService,
       useFactory: () => {
@@ -61,6 +66,6 @@ import { SessionService } from "./session.service";
       },
     },
   ],
-  exports: [AuthService, ApiKeyService, OAuthService, SessionService, OrganizationService],
+  exports: [AuthService, ApiKeyService, OAuthService, SessionService, OrganizationService, WebhookService],
 })
 export class AuthFeatureModule {}
