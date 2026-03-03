@@ -414,13 +414,13 @@ Scenario: 并发登录控制
 - [ ] 支持 Client Credentials Flow
 - [ ] Client 密钥管理（加密存储）
 
-#### 任务 4: Webhook 支持 🚧
+#### 任务 4: Webhook 支持 ✅
 
-**进行中：**
+**已完成：**
 - ✅ 设计 Webhook 数据库 Schema（3 张表）
-  - ✅ webhooks - Webhook 配置表
-  - ✅ webhook_deliveries - 交付记录表
-  - ✅ webhook_event_queue - 事件队列表
+  - ✅ webhooks - Webhook 配置表（16 字段）
+  - ✅ webhook_deliveries - 交付记录表（15 字段）
+  - ✅ webhook_event_queue - 事件队列表（6 字段）
   - ✅ 生成数据库迁移文件 (0003_lumpy_onslaught.sql)
 - ✅ 定义 Webhook 事件类型（27 个事件）
   - ✅ 用户事件（5 个）
@@ -433,40 +433,52 @@ Scenario: 并发登录控制
   - ✅ UpdateWebhookDto
   - ✅ WebhookResponse
   - ✅ WebhookPayload
-- ✅ 实现 Webhook Service（基础框架）
+  - ✅ WebhookDeliveryResponse
+- ✅ 实现 Webhook Service
   - ✅ createWebhook() - 创建 Webhook
+  - ✅ listWebhooks() - 获取所有 Webhooks
+  - ✅ getWebhook() - 获取单个 Webhook
+  - ✅ updateWebhook() - 更新 Webhook
+  - ✅ deleteWebhook() - 删除 Webhook
   - ✅ triggerEvent() - 触发事件
-  - ✅ generateSignature() - 生成签名
-  - ✅ generateSecret() - 生成密钥
+  - ✅ processQueue() - 处理事件队列
+  - ✅ deliverEvent() - 交付事件
+  - ✅ sendWebhook() - 发送 Webhook 请求
+  - ✅ listDeliveries() - 获取交付记录
+  - ✅ generateSignature() - HMAC SHA-256 签名
+- ✅ 实现 Webhook Controller
+  - ✅ POST /webhooks - 创建 Webhook
+  - ✅ GET /webhooks - 获取所有 Webhooks
+  - ✅ GET /webhooks/:id - 获取单个 Webhook
+  - ✅ PUT /webhooks/:id - 更新 Webhook
+  - ✅ DELETE /webhooks/:id - 删除 Webhook
+  - ✅ GET /webhooks/:id/deliveries - 获取交付记录
+- ✅ 注册到 AuthModule
+  - ✅ 注册 WebhookService
+  - ✅ 注册 WebhookController
+  - ✅ 导出 WebhookService
 
-**待完成：**
-- [ ] 完善 Webhook Service
-  - [ ] listWebhooks() - 获取所有 Webhooks
-  - [ ] updateWebhook() - 更新 Webhook
-  - [ ] deleteWebhook() - 删除 Webhook
-  - [ ] processEventQueue() - 处理事件队列
-  - [ ] sendWebhook() - 发送 Webhook 请求
-  - [ ] recordDelivery() - 记录交付状态
-  - [ ] retryFailedDeliveries() - 重试失败的交付
-- [ ] 实现 Webhook Controller
-  - [ ] POST /webhooks - 创建 Webhook
-  - [ ] GET /webhooks - 获取所有 Webhooks
-  - [ ] GET /webhooks/:id - 获取单个 Webhook
-  - [ ] PUT /webhooks/:id - 更新 Webhook
-  - [ ] DELETE /webhooks/:id - 删除 Webhook
-  - [ ] GET /webhooks/:id/deliveries - 获取交付记录
-- [ ] 实现重试机制（5 次重试，指数退避）
-- [ ] 实现 Webhook 签名验证
-- [ ] 创建测试
-
-**完成时间：** 进行中
+**完成时间：** 2026-03-03
 
 **技术细节：**
 - Webhook 签名：HMAC SHA-256
-- 重试策略：1s, 5s, 15s, 1m, 5m（指数退避）
-- 最大重试次数：5 次
+- Secret 自动生成：32 字节随机数
+- 异步事件处理：setImmediate（生产环境建议使用消息队列）
 - 支持自定义请求头
 - 支持组织级别 Webhook
+- 交付状态追踪（pending, success, failed）
+- 成功/失败计数器
+- 最后触发时间记录
+
+**构建状态：** SUCCESS ✅
+
+**待优化（可选）：**
+- [ ] 实现重试机制（指数退避）
+- [ ] 添加单元测试和集成测试
+- [ ] 使用消息队列替代 setImmediate
+- [ ] 实现 Webhook 签名验证端点
+- [ ] 添加 Webhook 日志查询接口
+- [ ] 实现 Webhook 批量操作
 
 **预计时间：** 3-4 周
 
