@@ -93,6 +93,7 @@ describe("SessionController", () => {
         message: "获取 Session 配置成功",
         sessionTimeout: 604800,
         sessionTimeoutDays: 7,
+        allowConcurrentSessions: true,
       };
 
       mockSessionService.getSessionConfig.mockResolvedValue(mockResponse);
@@ -114,6 +115,7 @@ describe("SessionController", () => {
         message: "获取 Session 配置成功",
         sessionTimeout: 604800,
         sessionTimeoutDays: 7,
+        allowConcurrentSessions: true,
       };
 
       mockSessionService.getSessionConfig.mockResolvedValue(mockResponse);
@@ -138,6 +140,7 @@ describe("SessionController", () => {
         message: "Session 配置已更新",
         sessionTimeout: 2592000,
         sessionTimeoutDays: 30,
+        allowConcurrentSessions: true,
       };
 
       mockSessionService.updateSessionConfig.mockResolvedValue(mockResponse);
@@ -162,6 +165,7 @@ describe("SessionController", () => {
         message: "Session 配置已更新",
         sessionTimeout: 3600,
         sessionTimeoutDays: 0.04,
+        allowConcurrentSessions: true,
       };
 
       mockSessionService.updateSessionConfig.mockResolvedValue(mockResponse);

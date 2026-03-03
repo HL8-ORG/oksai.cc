@@ -1,7 +1,7 @@
 import process from "node:process";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { twoFactor } from "better-auth/plugins";
+import { organization, twoFactor } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -77,6 +77,15 @@ export function createAuth(databaseUrl: string) {
 
     // 插件配置
     plugins: [
+      // 组织管理插件
+      // 文档：https://better-auth.com/docs/plugins/organization
+      organization({
+        // 允许用户创建组织
+        allowUserToCreateOrganization: true,
+        // 组织成员限制
+        maximumMembers: 100,
+      }),
+
       // 双因素认证插件
       // 文档：https://better-auth.com/docs/plugins/2fa
       twoFactor({

@@ -2,8 +2,8 @@
  * 组织管理服务
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import type { Auth } from "@oksai/auth-config";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import type { OrganizationAuthAPI } from "@oksai/nestjs-better-auth";
 
 /**
  * 组织管理服务
@@ -14,8 +14,11 @@ import type { Auth } from "@oksai/auth-config";
 @Injectable()
 export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
+  private readonly authAPI: OrganizationAuthAPI;
 
-  constructor(private readonly auth: Auth) {}
+  constructor(authAPI: OrganizationAuthAPI) {
+    this.authAPI = authAPI;
+  }
 
   /**
    * 创建组织
@@ -27,7 +30,7 @@ export class OrganizationService {
     try {
       this.logger.log(`创建组织: ${data.name} by ${userId}`);
 
-      const result = await this.auth.api.createOrganization({
+      const result = await (this.authAPI as any).createOrganization({
         body: {
           name: data.name,
           slug: data.slug,
@@ -55,7 +58,7 @@ export class OrganizationService {
    */
   async getOrganization(organizationId: string, userId: string) {
     try {
-      const result = await this.auth.api.getOrganization({
+      const result = await (this.authAPI as any).getOrganization({
         query: {
           organizationId,
         },
@@ -82,7 +85,7 @@ export class OrganizationService {
    */
   async listOrganizations(userId: string) {
     try {
-      const result = await this.auth.api.listOrganizations({
+      const result = await (this.authAPI as any).listOrganizations({
         headers: {
           "x-user-id": userId,
         } as any,
@@ -110,7 +113,7 @@ export class OrganizationService {
     try {
       this.logger.log(`更新组织: ${organizationId} by ${userId}`);
 
-      const result = await this.auth.api.updateOrganization({
+      const result = await (this.authAPI as any).updateOrganization({
         body: {
           organizationId,
           data,
@@ -138,7 +141,7 @@ export class OrganizationService {
     try {
       this.logger.log(`删除组织: ${organizationId} by ${userId}`);
 
-      await this.auth.api.deleteOrganization({
+      await (this.authAPI as any).deleteOrganization({
         body: {
           organizationId,
         },
@@ -166,7 +169,7 @@ export class OrganizationService {
     try {
       this.logger.log(`邀请成员: ${email} to ${organizationId} by ${userId}`);
 
-      const result = await this.auth.api.inviteMember({
+      const result = await (this.authAPI as any).inviteMember({
         body: {
           organizationId,
           email,
@@ -195,7 +198,7 @@ export class OrganizationService {
     try {
       this.logger.log(`接受邀请: ${invitationId} by ${userId}`);
 
-      const result = await this.auth.api.acceptInvitation({
+      const result = await (this.authAPI as any).acceptInvitation({
         body: {
           invitationId,
         },
@@ -222,7 +225,7 @@ export class OrganizationService {
     try {
       this.logger.log(`拒绝邀请: ${invitationId} by ${userId}`);
 
-      await this.auth.api.rejectInvitation({
+      await (this.authAPI as any).rejectInvitation({
         body: {
           invitationId,
         },
@@ -249,7 +252,7 @@ export class OrganizationService {
     try {
       this.logger.log(`移除成员: ${memberId} from ${organizationId} by ${userId}`);
 
-      await this.auth.api.removeMember({
+      await (this.authAPI as any).removeMember({
         body: {
           organizationId,
           memberId,
@@ -278,7 +281,7 @@ export class OrganizationService {
     try {
       this.logger.log(`更新成员角色: ${memberId} to ${role} by ${userId}`);
 
-      const result = await this.auth.api.updateMemberRole({
+      const result = await (this.authAPI as any).updateMemberRole({
         body: {
           organizationId,
           memberId,
@@ -305,7 +308,7 @@ export class OrganizationService {
    */
   async listMembers(organizationId: string, userId: string) {
     try {
-      const result = await this.auth.api.listMembers({
+      const result = await (this.authAPI as any).listMembers({
         query: {
           organizationId,
         },
@@ -331,7 +334,7 @@ export class OrganizationService {
     try {
       this.logger.log(`设置活动组织: ${organizationId} for ${userId}`);
 
-      const result = await this.auth.api.setActiveOrganization({
+      const result = await (this.authAPI as any).setActiveOrganization({
         body: {
           organizationId,
         },
@@ -355,7 +358,7 @@ export class OrganizationService {
    */
   async listInvitations(userId: string) {
     try {
-      const result = await this.auth.api.listInvitations({
+      const result = await (this.authAPI as any).listInvitations({
         headers: {
           "x-user-id": userId,
         } as any,

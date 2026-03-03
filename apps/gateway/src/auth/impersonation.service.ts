@@ -2,13 +2,7 @@
  * 用户模拟服务
  */
 
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { db, users } from "@oksai/database";
 import { eq } from "drizzle-orm";
 import type { ImpersonateUserDto, ImpersonateUserResponse, ImpersonationSession } from "./impersonation.dto";
@@ -62,10 +56,10 @@ export class ImpersonationService {
       const session: ImpersonationSession = {
         impersonatorId: adminUserId,
         impersonatorEmail: admin.email,
-        impersonatorName: admin.name,
+        impersonatorName: admin.name ?? undefined,
         targetUserId: targetUser.id,
         targetUserEmail: targetUser.email,
-        targetUserName: targetUser.name,
+        targetUserName: targetUser.name ?? undefined,
         reason: dto.reason,
         startedAt: new Date(),
         sessionId,
@@ -82,7 +76,7 @@ export class ImpersonationService {
         impersonatedUser: {
           id: targetUser.id,
           email: targetUser.email,
-          name: targetUser.name,
+          name: targetUser.name ?? undefined,
         },
         session: {
           id: sessionId,
@@ -92,7 +86,7 @@ export class ImpersonationService {
         impersonator: {
           id: admin.id,
           email: admin.email,
-          name: admin.name,
+          name: admin.name ?? undefined,
         },
       };
     } catch (error) {

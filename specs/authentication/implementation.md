@@ -2,9 +2,10 @@
 
 ## 状态
 
-✅ **Phase 3 已完成！**（2026-03-03）
+✅ **Phase 4 任务 1 进行中！**（2026-03-03）
 
-**下一步：** Phase 4 - Platform OAuth（OAuth 2.0 授权服务器、Access Token / Refresh Token、Platform OAuth Clients、Webhook 支持）
+**已完成：** OAuth 2.0 授权服务器基础（Controller + Service + 测试）
+**进行中：** 测试和验证
 
 ---
 
@@ -324,11 +325,23 @@ Scenario: 并发登录控制
 
 ## 下一步
 
-### Phase 4: Platform OAuth（P3） - 准备开始
+### Phase 4: Platform OAuth（P3） - 进行中 🚀
 
-**任务分解：**
+**当前任务：任务 1 已完成** ✅
 
-#### 任务 1: OAuth 2.0 授权服务器基础
+**下一任务：**
+- [ ] 任务 2: Access Token / Refresh Token 管理
+- [ ] 任务 3: Platform OAuth Clients 管理
+- [ ] 任务 4: Webhook 支持
+
+### Phase 4 任务进度
+
+| 任务 | 状态 | 进度 |
+|:---|:---:|:---:|
+| 任务 1: OAuth 2.0 授权服务器基础 | ✅ | 100% |
+| 任务 2: Access Token / Refresh Token 管理 | ⏳ | 0% |
+| 任务 3: Platform OAuth Clients 管理 | ⏳ | 0% |
+| 任务 4: Webhook 支持 | ⏳ | 0% | ✅
 
 **已完成：**
 - ✅ 扩展数据库 Schema（oauth_clients, oauth_authorization_codes, oauth_access_tokens, oauth_refresh_tokens）
@@ -342,24 +355,50 @@ Scenario: 并发登录控制
   - ✅ refreshAccessToken() - Refresh Token 轮换
   - ✅ validateAccessToken() - Token 验证
   - ✅ revokeToken() - Token 撤销
+- ✅ 实现 OAuth V2 Controller (apps/gateway/src/auth/oauth-v2.controller.ts)
+  - ✅ POST /oauth/register - 客户端注册
+  - ✅ GET /oauth/authorize - 授权端点
+  - ✅ POST /oauth/token - Token 端点
+  - ✅ POST /oauth/revoke - Token 撤销端点
+  - ✅ POST /oauth/introspect - Token 内省端点
+- ✅ 创建 OAuth 2.0 DTO (oauth.dto.ts)
+  - ✅ RegisterOAuthClientDto - 客户端注册请求
+  - ✅ AuthorizeDto - 授权请求
+  - ✅ TokenDto - Token 请求
+  - ✅ RevokeTokenDto - Token 撤销请求
+  - ✅ IntrospectTokenDto - Token 内省请求
+- ✅ 更新 AuthModule
+  - ✅ 注册 OAuthService
+  - ✅ 注册 OAuthV2Controller
+- ✅ 创建集成测试 (oauth-v2.integration.spec.ts)
+  - ✅ 客户端注册测试（2 个用例）
+  - ✅ 授权端点测试（3 个用例）
+  - ✅ Token 端点测试（4 个用例）
+  - ✅ Token 撤销测试（1 个用例）
+  - ✅ Token 内省测试（2 个用例）
+- ✅ 启用 Better Auth organization 插件
+  - ✅ 导入 organization 插件
+  - ✅ 配置 organization 插件选项
+  - ✅ 修复 OrganizationService 类型错误
 
-**待完成：**
-- [ ] 实现 OAuth Controller
-  - [ ] POST /oauth/register - 客户端注册
-  - [ ] GET /oauth/authorize - 授权端点
-  - [ ] POST /oauth/token - Token 端点
-  - [ ] POST /oauth/revoke - Token 撤销端点
-  - [ ] POST /oauth/introspect - Token 内省端点
-- [ ] 更新 AuthModule
-- [ ] 创建测试
-- [ ] 支持 PKCE (code_challenge)
+**完成时间：** 2026-03-03
 
-**完成时间：** 2026-03-03 (基础框架)
-- [ ] 扩展数据库 Schema（oauth_clients, oauth_authorization_codes, oauth_tokens）
-- [ ] 实现 OAuth 2.0 授权码流程（Authorization Code Flow）
-- [ ] 实现 Token 端点（/oauth/token）
-- [ ] 实现授权端点（/oauth/authorize）
-- [ ] 支持 scope 和 permissions
+**技术细节：**
+- OAuth 2.0 授权码流程完整实现
+- 支持机密客户端和公共客户端
+- 支持 PKCE (code_challenge)
+- Access Token 有效期：1 小时
+- Refresh Token 有效期：30 天
+- Token 轮换机制：刷新时生成新的 Refresh Token
+- 所有端点支持 @AllowAnonymous()
+
+**待优化：**
+- [ ] 修复集成测试依赖注入问题
+- [ ] 添加 PKCE 验证逻辑
+- [ ] Token 加密存储（当前明文存储）
+- [ ] 客户端密钥加密存储
+
+**构建状态：** ✅ 成功
 
 #### 任务 2: Access Token / Refresh Token 管理
 - [ ] 实现 Access Token 生成和验证

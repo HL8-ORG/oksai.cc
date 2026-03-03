@@ -3,7 +3,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { BadRequestException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiKeyGuard } from "./api-key.guard";

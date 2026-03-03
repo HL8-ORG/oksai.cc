@@ -1,13 +1,19 @@
 import type { ExecutionContext } from "@nestjs/common";
-import type { GqlExecutionContext as GqlExecutionContextType } from "@nestjs/graphql";
 
-let GqlExecutionContext: typeof GqlExecutionContextType | undefined;
+// biome-ignore lint/suspicious/noExplicitAny: GqlExecutionContext comes from optional @nestjs/graphql dependency
+let GqlExecutionContext: any;
 
-function getGqlExecutionContext(): typeof GqlExecutionContextType {
+function getGqlExecutionContext(): any {
   if (!GqlExecutionContext) {
-    GqlExecutionContext = require("@nestjs/graphql").GqlExecutionContext;
+    try {
+      GqlExecutionContext = require("@nestjs/graphql").GqlExecutionContext;
+    } catch (error) {
+      throw new Error(
+        "@nestjs/graphql is not installed. Please install it to use GraphQL context: npm install @nestjs/graphql graphql"
+      );
+    }
   }
-  return GqlExecutionContext as typeof GqlExecutionContextType;
+  return GqlExecutionContext;
 }
 
 /**

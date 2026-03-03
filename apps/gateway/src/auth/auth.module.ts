@@ -10,6 +10,8 @@ import { auth } from "./auth";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { OAuthController } from "./oauth.controller";
+import { OAuthService } from "./oauth.service";
+import { OAuthV2Controller } from "./oauth-v2.controller";
 import { OrganizationController } from "./organization.controller";
 import { OrganizationService } from "./organization.service";
 import { SessionController } from "./session.controller";
@@ -32,7 +34,14 @@ import { SessionService } from "./session.service";
  */
 @Module({
   imports: [CacheModule],
-  controllers: [AuthController, OAuthController, ApiKeyController, SessionController, OrganizationController],
+  controllers: [
+    AuthController,
+    OAuthController,
+    OAuthV2Controller,
+    ApiKeyController,
+    SessionController,
+    OrganizationController,
+  ],
   providers: [
     {
       provide: AuthService,
@@ -43,6 +52,7 @@ import { SessionService } from "./session.service";
       inject: [SessionService],
     },
     ApiKeyService,
+    OAuthService,
     SessionService,
     {
       provide: OrganizationService,
@@ -51,6 +61,6 @@ import { SessionService } from "./session.service";
       },
     },
   ],
-  exports: [AuthService, ApiKeyService, SessionService, OrganizationService],
+  exports: [AuthService, ApiKeyService, OAuthService, SessionService, OrganizationService],
 })
 export class AuthFeatureModule {}
