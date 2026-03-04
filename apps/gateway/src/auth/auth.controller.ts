@@ -4,6 +4,7 @@
 
 import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post } from "@nestjs/common";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
+import { RateLimit, RateLimitPresets } from "../common/rate-limit.decorator";
 import type {
   DisableTwoFactorDto,
   EnableTwoFactorDto,
@@ -47,6 +48,7 @@ export class AuthController {
   @Post("sign-up/email")
   @AllowAnonymous()
   @HttpCode(HttpStatus.CREATED)
+  @RateLimit(RateLimitPresets.REGISTER)
   async signUp(@Body() dto: SignUpDto): Promise<AuthResponse> {
     return this.authService.signUp(dto);
   }
@@ -65,6 +67,7 @@ export class AuthController {
   @Post("sign-in/email")
   @AllowAnonymous()
   @HttpCode(HttpStatus.OK)
+  @RateLimit(RateLimitPresets.LOGIN)
   async signIn(@Body() dto: SignInDto): Promise<AuthResponse> {
     return this.authService.signIn(dto);
   }
@@ -101,6 +104,7 @@ export class AuthController {
   @Post("forgot-password")
   @AllowAnonymous()
   @HttpCode(HttpStatus.OK)
+  @RateLimit(RateLimitPresets.PASSWORD_RESET)
   async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<AuthResponse> {
     return this.authService.forgotPassword(dto);
   }
@@ -119,6 +123,7 @@ export class AuthController {
   @Post("reset-password")
   @AllowAnonymous()
   @HttpCode(HttpStatus.OK)
+  @RateLimit(RateLimitPresets.PASSWORD_RESET)
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<AuthResponse> {
     return this.authService.resetPassword(dto);
   }

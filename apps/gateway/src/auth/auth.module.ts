@@ -4,6 +4,7 @@
 
 import { Module } from "@nestjs/common";
 import { CacheModule } from "../common/cache.module";
+import { CacheService } from "../common/cache.service";
 import { ApiKeyController } from "./api-key.controller";
 import { ApiKeyService } from "./api-key.service";
 import { auth } from "./auth";
@@ -56,7 +57,13 @@ import { WebhookService } from "./webhook.service";
       inject: [SessionService],
     },
     ApiKeyService,
-    OAuthService,
+    {
+      provide: OAuthService,
+      useFactory: (cacheService: CacheService) => {
+        return new OAuthService(cacheService);
+      },
+      inject: [CacheService],
+    },
     SessionService,
     WebhookService,
     {

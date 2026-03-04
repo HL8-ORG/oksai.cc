@@ -396,25 +396,132 @@ Scenario: 并发登录控制
   - 文件：apps/gateway/src/auth/oauth-v2.integration.spec.ts
   - 原因：OAuthService 依赖真实数据库，测试环境缺少初始化
   - 解决方案：添加测试数据库配置或使用 mock 服务
-- [ ] 添加 PKCE 验证逻辑
-- [ ] Token 加密存储（当前明文存储）
-- [ ] 客户端密钥加密存储
+  - 优先级：P3（技术债务，不影响功能）
+
+**完成时间：** 2026-03-04
 
 **构建状态：** ✅ 成功
 
-#### 任务 2: Access Token / Refresh Token 管理
-- [ ] 实现 Access Token 生成和验证
-- [ ] 实现 Refresh Token 轮换机制
-- [ ] 实现 Token 撤销端点（/oauth/revoke）
-- [ ] 实现 Token 内省端点（/oauth/introspect）
-- [ ] Token 安全存储（加密）
+#### 任务 1.1: PKCE 验证逻辑 ✅
 
-#### 任务 3: Platform OAuth Clients 管理
-- [ ] 创建 OAuth Client 管理界面
-- [ ] 实现 Client 注册和配置
-- [ ] 支持 Redirect URI 验证
-- [ ] 支持 Client Credentials Flow
-- [ ] Client 密钥管理（加密存储）
+**已完成：**
+- ✅ 创建 `oauth-crypto.util.ts` 工具函数
+  - ✅ `generateCodeVerifier()` - 生成 code_verifier
+  - ✅ `generateCodeChallenge()` - 生成 code_challenge（支持 plain 和 S256）
+  - ✅ `verifyCodeVerifier()` - 验证 PKCE
+- ✅ 在 `OAuthService.exchangeAccessToken()` 中集成 PKCE 验证
+  - ✅ 检查授权码是否存在 `code_challenge`
+  - ✅ 验证客户端提供的 `code_verifier` 是否匹配
+  - ✅ 支持 `plain` 和 `S256` 方法（默认 S256）
+
+**完成时间：** 2026-03-04
+
+#### 任务 1.2: Token 和 Client Secret 加密存储 ✅
+
+**已完成：**
+- ✅ 创建 `encryption.util.ts` 加密工具类
+  - ✅ 使用 AES-256-GCM 算法进行加密
+  - ✅ `encrypt()` - 加密数据（格式：salt:iv:authTag:ciphertext）
+  - ✅ `decrypt()` - 解密数据
+  - ✅ `hash()` / `verifyHash()` - 单向哈希（可选）
+  - ✅ 环境变量配置（`OAUTH_ENCRYPTION_KEY`）
+- ✅ 在 `OAuthService` 中集成加密功能
+  - ✅ 构造函数中初始化加密工具（可选，向后兼容）
+  - ✅ `registerClient()` - 加密存储 Client Secret
+  - ✅ `exchangeAccessToken()` - 加密存储 Access Token 和 Refresh Token
+  - ✅ `refreshAccessToken()` - 解密验证 Refresh Token，加密存储新 Token
+  - ✅ `validateAccessToken()` - 解密验证 Access Token
+  - ✅ Client Secret 验证 - 解密后比较
+
+**完成时间：** 2026-03-04
+
+**技术细节：**
+- 加密算法：AES-256-GCM（认证加密）
+- 密钥长度：32 字节（256 位）
+- IV 长度：16 字节
+- Salt 长度：64 字节
+- Auth Tag 长度：16 字节
+- 向后兼容：未配置密钥时明文存储（不推荐生产环境）
+
+**安全性：**
+- ✅ Token 和 Client Secret 加密存储
+- ✅ 支持 PKCE（防止授权码拦截攻击）
+- ✅ 加密功能可选（向后兼容）
+- ⚠️ 性能影响：Token 验证需要遍历解密（建议生产环境使用缓存）
+
+**配置要求：**
+```bash
+# .env
+OAUTH_ENCRYPTION_KEY=your-32-char-encryption-key-here
+```
+
+#### 任务 2: Access Token / Refresh Token 管理
+
+**已完成：**
+- ✅ 实现 Access Token 生成和验证（带加密）
+- ✅ 实现 Refresh Token 轮换机制（带加密）
+- ✅ 实现 Token 撤销端点（/oauth/revoke）
+- ✅ 实现 Token 内省端点（/oauth/introspect）
+- ✅ Token 安全存储（AES-256-GCM 加密）
+
+**完成时间：** 2026-03-04（与任务 1 一起完成）
+
+**状态：** ✅ 完全完成
+
+#### 任务 3: Platform OAuth Clients 管理 ✅
+
+**已完成：**
+- ✅ 创建 OAuth Client 管理界面 API
+  - ✅ `oauth-client.dto.ts` - DTO 定义
+  - ✅ `oauth-client.controller.ts` - 管理 Controller
+  - ✅ 6 个管理 API 端点
+    - POST /oauth/clients - 创建客户端
+    - GET /oauth/clients - 获取客户端列表
+    - GET /oauth/clients/:id - 获取客户端详情
+    - PUT /oauth/clients/:id - 更新客户端
+    - DELETE /oauth/clients/:id - 删除客户端
+    - POST /oauth/clients/:id/rotate-secret - 轮换密钥
+- ✅ 扩展 OAuthService 管理方法
+  - ✅ `createClient()` - 创建客户端
+  - ✅ `listClients()` - 获取客户端列表
+  - ✅ `getClientById()` - 根据 ID 获取客户端
+  - ✅ `updateClient()` - 更新客户端信息
+  - ✅ `deleteClient()` - 删除（停用）客户端
+  - ✅ `rotateClientSecret()` - 轮换客户端密钥
+
+**完成时间：** 2026-03-04
+
+**状态：** ✅ 完全完成
+
+#### 任务 3.1: Redirect URI 验证 ✅
+
+**已完成：**
+- ✅ 创建 `redirect-uri.util.ts` 验证工具
+  - ✅ `validateRedirectUri()` - 验证 redirect_uri 是否匹配
+  - ✅ `isValidRedirectUriFormat()` - 验证 URI 格式
+  - ✅ `isLocalRedirectUri()` - 检查是否是本地 URI
+  - ✅ `normalizeRedirectUri()` - 规范化 URI
+  - ✅ `validateRedirectUriList()` - 验证 URI 列表
+  - ✅ `matchWildcardPattern()` - 通配符匹配（私有）
+- ✅ 集成到 OAuthService
+  - ✅ `generateAuthorizationCode()` - 使用严格验证
+  - ✅ `createClient()` - 创建时验证 redirect_uris
+  - ✅ `exchangeAccessToken()` - 严格匹配验证
+
+**完成时间：** 2026-03-04
+
+**技术细节：**
+- 支持精确匹配和通配符匹配
+- 支持自定义协议（myapp://）
+- 防止开放重定向攻击
+- 生产环境可禁用 localhost
+- 自动规范化 URI（排序查询参数、移除片段）
+
+**安全性：**
+- ✅ 严格的协议、主机、端口、路径验证
+- ✅ 防止片段标识符注入
+- ✅ 防止开放重定向攻击
+- ✅ 支持通配符但限制范围
 
 #### 任务 4: Webhook 支持 ✅
 

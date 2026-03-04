@@ -1,10 +1,12 @@
 /**
  * OAuth 2.0 集成测试
  *
- * TODO: 修复 NestJS 依赖注入问题
- * 问题：this.oauthService 在 Controller 中为 undefined
- * 原因：测试模块的 provider 配置需要进一步调查
- * 优先级：P1（技术债务）
+ * TODO: 修复 NestJS 依赖注入问题（技术债务 P3）
+ * 问题：OAuthService 有复杂的依赖（数据库、加密工具等）
+ * 建议方案：
+ * 1. 使用真实的测试数据库（推荐）
+ * 2. 或者完全重写为单元测试（使用 mock）
+ * 优先级：P3（不影响核心功能）
  */
 
 import type { INestApplication } from "@nestjs/common";
@@ -24,7 +26,7 @@ const mockOAuthService = {
   revokeToken: vi.fn(),
 };
 
-describe.skip("OAuth 2.0 Integration", () => {
+describe("OAuth 2.0 Controller", () => {
   let app: INestApplication;
 
   beforeAll(async () => {

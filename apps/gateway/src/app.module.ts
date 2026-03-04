@@ -1,5 +1,7 @@
+import process from "node:process";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { AuthModule } from "@oksai/nestjs-better-auth";
 import { AppController } from "./app.controller";
@@ -7,6 +9,9 @@ import { AppService } from "./app.service";
 import { auth } from "./auth/auth";
 import { AuthFeatureModule } from "./auth/auth.module";
 import { UserController } from "./auth/user.controller";
+import { CacheModule } from "./common/cache.module";
+import { CacheMonitorController } from "./common/cache-monitor.controller";
+import { CustomThrottlerGuard } from "./common/custom-throttler.guard";
 import { HealthController } from "./health/health.controller";
 
 /**
@@ -48,8 +53,23 @@ import { HealthController } from "./health/health.controller";
 
     // 认证功能模块
     AuthFeatureModule,
+
+    // 缓存模块（支持 Redis）
+    CacheModule.forRoot({
+      redisEnabled: process.env.REDIS_ENABLED === "true",
+      redisUrl: process.env.REDIS_URL,
+      max: 10000,
+      ttl: 60000,
+      enableStats: true,
+    }),
   ],
-  controllers: [AppController, HealthController, UserController],
-  providers: [AppService],
+  controllers: [AppController, HealthController, UserController, CacheMonitorController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: CustomThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
