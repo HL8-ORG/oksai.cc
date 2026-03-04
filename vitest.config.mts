@@ -4,7 +4,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["libs/auth/**/*.spec.ts", "libs/auth/**/*.integration.spec.ts", "libs/database/**/*.spec.ts", "apps/gateway/**/*.spec.ts"],
+    include: [
+      "libs/auth/**/*.spec.ts",
+      "libs/auth/**/*.integration.spec.ts",
+      "libs/database/**/*.spec.ts",
+      "libs/shared/**/*.spec.ts",
+      "apps/gateway/**/*.spec.ts",
+    ],
     exclude: ["node_modules", "dist", "apps/web-admin/**"],
     coverage: {
       provider: "v8",

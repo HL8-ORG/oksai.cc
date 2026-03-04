@@ -1,5 +1,5 @@
 {
-  "name": "@oksai/source",
+  "name": "@oksai/root",
   "version": "0.0.1",
   "license": "MIT",
   "private": true,
@@ -30,28 +30,31 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.4",
+    "@mikro-orm/cli": "^6.6.8",
+    "@mikro-orm/migrations": "^6.6.8",
     "@nx/js": "22.5.1",
     "@nx/node": "^22.5.3",
     "@nx/vite": "22.5.1",
     "@nx/vitest": "22.5.1",
     "@nx/web": "22.5.1",
     "@nx/webpack": "^22.5.3",
-    "@swc-node/register": "1.11.1",
-    "@swc/core": "1.15.8",
-    "@swc/helpers": "0.5.18",
-    "@types/node": "20.19.9",
-    "@vitest/coverage-v8": "4.0.18",
-    "@vitest/ui": "4.0.18",
-    "drizzle-kit": "^0.24.0",
+    "@swc-node/register": "catalog:",
+    "@swc/core": "catalog:",
+    "@swc/helpers": "catalog:",
+    "@types/node": "catalog:",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
+    "drizzle-kit": "catalog:",
     "husky": "^9.1.7",
     "jiti": "2.4.2",
     "lint-staged": "^16.3.1",
     "nx": "22.5.1",
     "tslib": "^2.3.0",
-    "typescript": "~5.9.2",
+    "typescript": "catalog:",
     "verdaccio": "^6.0.5",
-    "vite": "^7.0.0",
-    "vitest": "4.0.18"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "nx": {
     "includedScripts": [],
@@ -67,9 +70,15 @@
     }
   },
   "dependencies": {
-    "@nestjs/passport": "^11.0.5",
-    "lru-cache": "^11.2.6",
-    "passport": "^0.7.0",
-    "passport-headerapikey": "^1.2.2"
+    "@better-auth/api-key": "catalog:",
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/nestjs": "^6.1.1",
+    "@mikro-orm/postgresql": "^6.6.8",
+    "@mikro-orm/reflection": "^6.6.8",
+    "@nestjs/passport": "catalog:",
+    "lru-cache": "catalog:",
+    "passport": "catalog:",
+    "passport-headerapikey": "catalog:",
+    "tsconfig-paths": "^4.2.0"
   }
 }

@@ -9,15 +9,19 @@
     "noEmit": true
   },
   "references": [
-    {
-      "path": "./libs/notification/email"
-    },
-    {
-      "path": "./libs/auth/config"
-    },
-    {
-      "path": "./apps/gateway"
-    }
+    { "path": "./apps/gateway" },
+    { "path": "./apps/web-admin" },
+    { "path": "./libs/database" },
+    { "path": "./libs/notification/email" },
+    { "path": "./libs/shared/better-auth-mikro-orm" },
+    { "path": "./libs/shared/config" },
+    { "path": "./libs/shared/constants" },
+    { "path": "./libs/shared/context" },
+    { "path": "./libs/shared/kernel" },
+    { "path": "./libs/shared/logger" },
+    { "path": "./libs/shared/nestjs-better-auth" },
+    { "path": "./libs/shared/types" },
+    { "path": "./libs/shared/utils" }
   ],
   "exclude": ["node_modules", "dist", "apps"]
 }

@@ -23,14 +23,15 @@
   },
   "files": {
     "includes": [
-      "apps/**/*",
-      "libs/**/*",
+      "apps/**/*.{ts,tsx,js,jsx,mts,mjs}",
+      "libs/**/*.{ts,tsx,js,jsx,mts,mjs}",
       "!**/node_modules",
       "!**/.next",
       "!**/.turbo",
       "!**/dist",
       "!**/build",
       "!**/public",
+      "!**/.output",
       "!**/*.d.ts",
       "!*.lock",
       "!*.log",
@@ -42,7 +43,8 @@
       "!forks",
       "!specs",
       "!docs",
-      "!scripts"
+      "!scripts",
+      "!**/example-usage.ts"
     ],
     "maxSize": 2097152
   },
@@ -58,6 +60,12 @@
       "jsxQuoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "es5"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "allowWrongLineComments": true
     }
   },
   "linter": {
@@ -93,8 +101,8 @@
       "linter": {
         "rules": {
           "nursery": {
-            "useExplicitType": "info",
-            "noTernary": "info",
+            "useExplicitType": "off",
+            "noTernary": "off",
             "useSortedClasses": {
               "level": "warn",
               "options": {
@@ -158,13 +166,17 @@
         "**/*.test.tsx",
         "**/*.spec.ts",
         "**/*.e2e-spec.ts",
-        "**/*.integration-test.ts"
+        "**/*.integration-test.ts",
+        "**/*.integration.spec.ts"
       ],
       "linter": {
         "rules": {
           "complexity": {
             "useArrowFunction": "off",
             "noExcessiveLinesPerFunction": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off"
           }
         }
       }

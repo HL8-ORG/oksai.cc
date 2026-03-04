@@ -17,7 +17,7 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../../libs/auth/nestjs-better-auth"
+      "path": "../../libs/shared/nestjs-better-auth"
     },
     {
       "path": "../../libs/database"
