@@ -1,0 +1,34 @@
+{
+	"name": "@oksai/kernel",
+	"version": "0.1.0",
+	"description": "DDD 核心基类 - 聚合根、实体、值对象、领域事件、Result 模式",
+	"license": "AGPL-3.0",
+	"private": true,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"build:watch": "tsc -p tsconfig.build.json --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest watch",
+		"test:coverage": "vitest run --coverage",
+		"lint": "biome check --write .",
+		"lint:check": "biome check .",
+		"format": "biome format --write .",
+		"clean": "rimraf dist coverage"
+	},
+	"peerDependencies": {
+		"reflect-metadata": "^0.2.0"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

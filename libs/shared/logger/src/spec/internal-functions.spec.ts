@@ -1,0 +1,474 @@
+import {
+  computeLogLevel,
+  getRequestIdFromReq,
+  resolveOptionalDependency,
+  serializeError,
+  serializeRequest,
+  serializeResponse,
+} from "../lib/logger.serializer";
+
+describe("serializeRequest", () => {
+  it("应该提取 method 和 url", () => {
+    const req = {
+      method: "GET",
+      url: "/api/test",
+    };
+
+    const result = serializeRequest(req);
+
+    expect(result.method).toBe("GET");
+    expect(result.url).toBe("/api/test");
+  });
+
+  it("应该处理 null 请求", () => {
+    const result = serializeRequest(null);
+
+    expect(result).toEqual({
+      method: undefined,
+      url: undefined,
+    });
+  });
+
+  it("应该处理 undefined 请求", () => {
+    const result = serializeRequest(undefined);
+
+    expect(result).toEqual({
+      method: undefined,
+      url: undefined,
+    });
+  });
+
+  it("应该处理空对象", () => {
+    const result = serializeRequest({});
+
+    expect(result.method).toBe("");
+    expect(result.url).toBe("");
+  });
+
+  it("应该提取 query 参数", () => {
+    const req = {
+      method: "GET",
+      url: "/api/test",
+      query: { id: "123", name: "test" },
+    };
+
+    const result = serializeRequest(req);
+
+    expect(result.query).toEqual({ id: "123", name: "test" });
+  });
+
+  it("应该提取关键 headers", () => {
+    const req = {
+      method: "GET",
+      url: "/api/test",
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "Mozilla/5.0",
+        "x-request-id": "req-123",
+      },
+    };
+
+    const result = serializeRequest(req);
+
+    expect(result.headers).toEqual({
+      "content-type": "application/json",
+      "user-agent": "Mozilla/5.0",
+      "x-forwarded-for": "",
+      "x-request-id": "req-123",
+    });
+  });
+
+  it("应该提取 remoteAddress", () => {
+    const req = {
+      method: "GET",
+      url: "/api/test",
+      ip: "192.168.1.1",
+    };
+
+    const result = serializeRequest(req);
+
+    expect(result.remoteAddress).toBe("192.168.1.1");
+  });
+
+  it("应该从 socket 获取 remoteAddress", () => {
+    const req = {
+      method: "GET",
+      url: "/api/test",
+      socket: { remoteAddress: "10.0.0.1" },
+    };
+
+    const result = serializeRequest(req);
+
+    expect(result.remoteAddress).toBe("10.0.0.1");
+  });
+});
+
+describe("serializeResponse", () => {
+  it("应该提取 statusCode", () => {
+    const res = { statusCode: 200 };
+
+    const result = serializeResponse(res);
+
+    expect(result.statusCode).toBe(200);
+  });
+
+  it("应该处理 null 响应", () => {
+    const result = serializeResponse(null);
+
+    expect(result.statusCode).toBe(200);
+  });
+
+  it("应该处理 undefined 响应", () => {
+    const result = serializeResponse(undefined);
+
+    expect(result.statusCode).toBe(200);
+  });
+
+  it("应该处理空对象", () => {
+    const result = serializeResponse({});
+
+    expect(result.statusCode).toBe(200);
+  });
+
+  it("应该提取 _contentLength", () => {
+    const res = {
+      statusCode: 200,
+      _contentLength: 1234,
+    };
+
+    const result = serializeResponse(res);
+
+    expect(result.contentLength).toBe(1234);
+  });
+
+  it("应该从 getHeaders 提取 content-length", () => {
+    const res = {
+      statusCode: 200,
+      getHeaders: () => ({ "content-length": 5678 }),
+    };
+
+    const result = serializeResponse(res);
+
+    expect(result.contentLength).toBe(5678);
+  });
+});
+
+describe("serializeError", () => {
+  it("应该序列化 Error 对象", () => {
+    const err = new Error("测试错误");
+
+    const result = serializeError(err, false);
+
+    expect(result.type).toBe("Error");
+    expect(result.message).toBe("测试错误");
+    expect(result.stack).toBeDefined();
+  });
+
+  it("生产环境不应该返回堆栈", () => {
+    const err = new Error("测试错误");
+
+    const result = serializeError(err, true);
+
+    expect(result.stack).toBeUndefined();
+  });
+
+  it("应该处理 null", () => {
+    const result = serializeError(null);
+
+    expect(result.type).toBe("UnknownError");
+    expect(result.message).toBe("Unknown error");
+  });
+
+  it("应该处理 undefined", () => {
+    const result = serializeError(undefined);
+
+    expect(result.type).toBe("UnknownError");
+  });
+
+  it("应该处理字符串错误", () => {
+    const result = serializeError("简单错误消息");
+
+    expect(result.type).toBe("StringError");
+    expect(result.message).toBe("简单错误消息");
+  });
+
+  it("应该提取错误代码", () => {
+    const err = new Error("数据库错误") as Error & { code: string };
+    err.code = "ECONNREFUSED";
+
+    const result = serializeError(err, true);
+
+    expect(result.code).toBe("ECONNREFUSED");
+  });
+
+  it("应该提取错误详情", () => {
+    const err = new Error("验证错误") as Error & { details: unknown };
+    err.details = { field: "email", message: "无效邮箱" };
+
+    const result = serializeError(err, true);
+
+    expect(result.details).toEqual({ field: "email", message: "无效邮箱" });
+  });
+
+  it("应该保留错误类型名称", () => {
+    class CustomError extends Error {
+      constructor(message: string) {
+        super(message);
+        this.name = "CustomError";
+      }
+    }
+
+    const err = new CustomError("自定义错误");
+
+    const result = serializeError(err, true);
+
+    expect(result.type).toBe("CustomError");
+  });
+});
+
+describe("computeLogLevel", () => {
+  describe("2xx 状态码", () => {
+    it("200 应该返回 info", () => {
+      expect(computeLogLevel({}, { statusCode: 200 })).toBe("info");
+    });
+
+    it("201 应该返回 info", () => {
+      expect(computeLogLevel({}, { statusCode: 201 })).toBe("info");
+    });
+
+    it("204 应该返回 info", () => {
+      expect(computeLogLevel({}, { statusCode: 204 })).toBe("info");
+    });
+  });
+
+  describe("3xx 状态码", () => {
+    it("301 应该返回 info", () => {
+      expect(computeLogLevel({}, { statusCode: 301 })).toBe("info");
+    });
+
+    it("302 应该返回 info", () => {
+      expect(computeLogLevel({}, { statusCode: 302 })).toBe("info");
+    });
+
+    it("304 应该返回 info", () => {
+      expect(computeLogLevel({}, { statusCode: 304 })).toBe("info");
+    });
+  });
+
+  describe("4xx 状态码", () => {
+    it("400 应该返回 warn", () => {
+      expect(computeLogLevel({}, { statusCode: 400 })).toBe("warn");
+    });
+
+    it("401 应该返回 warn", () => {
+      expect(computeLogLevel({}, { statusCode: 401 })).toBe("warn");
+    });
+
+    it("404 应该返回 warn", () => {
+      expect(computeLogLevel({}, { statusCode: 404 })).toBe("warn");
+    });
+
+    it("499 应该返回 warn", () => {
+      expect(computeLogLevel({}, { statusCode: 499 })).toBe("warn");
+    });
+  });
+
+  describe("5xx 状态码", () => {
+    it("500 应该返回 error", () => {
+      expect(computeLogLevel({}, { statusCode: 500 })).toBe("error");
+    });
+
+    it("502 应该返回 error", () => {
+      expect(computeLogLevel({}, { statusCode: 502 })).toBe("error");
+    });
+
+    it("503 应该返回 error", () => {
+      expect(computeLogLevel({}, { statusCode: 503 })).toBe("error");
+    });
+  });
+
+  describe("错误对象", () => {
+    it("有错误时应该返回 error，即使状态码是 200", () => {
+      expect(computeLogLevel({}, { statusCode: 200 }, new Error("test"))).toBe("error");
+    });
+
+    it("有错误时应该返回 error，即使状态码是 400", () => {
+      expect(computeLogLevel({}, { statusCode: 400 }, new Error("test"))).toBe("error");
+    });
+
+    it("UnhandledPromiseRejection 应该返回 fatal", () => {
+      class UnhandledPromiseRejection extends Error {
+        constructor() {
+          super("unhandled");
+          this.name = "UnhandledPromiseRejection";
+        }
+      }
+
+      expect(computeLogLevel({}, { statusCode: 500 }, new UnhandledPromiseRejection())).toBe("fatal");
+    });
+  });
+
+  describe("边界情况", () => {
+    it("应该处理 null 响应对象", () => {
+      expect(computeLogLevel({}, null)).toBe("info");
+    });
+
+    it("应该处理 undefined 响应对象", () => {
+      expect(computeLogLevel({}, undefined)).toBe("info");
+    });
+
+    it("应该处理空响应对象", () => {
+      expect(computeLogLevel({}, {})).toBe("info");
+    });
+
+    it("应该处理 statusCode 为字符串", () => {
+      expect(computeLogLevel({}, { statusCode: "500" as unknown as number })).toBe("error");
+    });
+  });
+});
+
+describe("getRequestIdFromReq", () => {
+  describe("从 headers 提取", () => {
+    it("应该从 x-request-id header 提取", () => {
+      const req = {
+        headers: {
+          "x-request-id": "req-123",
+        },
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("req-123");
+    });
+
+    it("应该从 x-correlation-id header 提取（当没有 x-request-id 时）", () => {
+      const req = {
+        headers: {
+          "x-correlation-id": "corr-456",
+        },
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("corr-456");
+    });
+
+    it("x-request-id 应该优先于 x-correlation-id", () => {
+      const req = {
+        headers: {
+          "x-request-id": "req-123",
+          "x-correlation-id": "corr-456",
+        },
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("req-123");
+    });
+  });
+
+  describe("从请求对象属性提取", () => {
+    it("应该从 req.id 提取（当没有 headers 时）", () => {
+      const req = {
+        id: "req-id-789",
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("req-id-789");
+    });
+
+    it("应该从 req.requestId 提取（当没有 id 时）", () => {
+      const req = {
+        requestId: "custom-req-111",
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("custom-req-111");
+    });
+
+    it("req.id 应该优先于 req.requestId", () => {
+      const req = {
+        id: "req-id-789",
+        requestId: "custom-req-111",
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("req-id-789");
+    });
+  });
+
+  describe("优先级测试", () => {
+    it("headers 应该优先于请求对象属性", () => {
+      const req = {
+        headers: {
+          "x-request-id": "header-req",
+        },
+        id: "prop-id",
+        requestId: "prop-requestId",
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("header-req");
+    });
+  });
+
+  describe("边界情况", () => {
+    it("应该处理 null 请求", () => {
+      expect(getRequestIdFromReq(null)).toBe("unknown");
+    });
+
+    it("应该处理 undefined 请求", () => {
+      expect(getRequestIdFromReq(undefined)).toBe("unknown");
+    });
+
+    it("应该处理空对象", () => {
+      expect(getRequestIdFromReq({})).toBe("unknown");
+    });
+
+    it("应该处理没有 headers 的请求", () => {
+      const req = {};
+      expect(getRequestIdFromReq(req)).toBe("unknown");
+    });
+
+    it("应该处理 headers 为 null", () => {
+      const req = { headers: null };
+      expect(getRequestIdFromReq(req)).toBe("unknown");
+    });
+
+    it("应该处理空 headers", () => {
+      const req = { headers: {} };
+      expect(getRequestIdFromReq(req)).toBe("unknown");
+    });
+
+    it("应该将非字符串值转换为字符串", () => {
+      const req = {
+        headers: {
+          "x-request-id": 12345,
+        },
+      };
+
+      expect(getRequestIdFromReq(req)).toBe("12345");
+    });
+  });
+});
+
+describe("resolveOptionalDependency", () => {
+  describe("成功解析", () => {
+    it("应该成功解析已安装的包", () => {
+      const result = resolveOptionalDependency("typescript");
+
+      expect(result).not.toBeNull();
+      expect(result).toContain("typescript");
+    });
+
+    it("应该返回绝对路径", () => {
+      const result = resolveOptionalDependency("typescript");
+
+      expect(result).toMatch(/^\//);
+    });
+  });
+
+  describe("解析失败", () => {
+    it("应该对不存在的包返回 null", () => {
+      const result = resolveOptionalDependency("non-existent-package-xyz-123");
+
+      expect(result).toBeNull();
+    });
+
+    it("应该对无效包名返回 null", () => {
+      const result = resolveOptionalDependency("@@invalid@@");
+
+      expect(result).toBeNull();
+    });
+  });
+});

@@ -1,0 +1,48 @@
+{
+	"name": "@oksai/logger",
+	"version": "0.2.0",
+	"description": "日志模块 - 基于 Pino 的结构化日志，集成多租户上下文",
+	"license": "AGPL-3.0",
+	"private": true,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"build:watch": "tsc -p tsconfig.build.json --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest watch",
+		"test:coverage": "vitest run --coverage",
+		"lint": "biome check --write .",
+		"lint:check": "biome check .",
+		"format": "biome format --write .",
+		"clean": "rimraf dist coverage"
+	},
+	"dependencies": {
+		"@nestjs/common": "catalog:",
+		"@nestjs/core": "catalog:",
+		"@oksai/config": "workspace:*",
+		"@oksai/constants": "workspace:*",
+		"@oksai/context": "workspace:*",
+		"nestjs-pino": "catalog:",
+		"pino": "catalog:"
+	},
+	"devDependencies": {
+		"pino-pretty": "catalog:"
+	},
+	"peerDependencies": {
+		"@nestjs/common": "^11.0.0",
+		"@nestjs/core": "^11.0.0",
+		"@oksai/context": "workspace:*"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}
