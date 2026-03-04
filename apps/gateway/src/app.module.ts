@@ -1,12 +1,13 @@
 import process from "node:process";
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { ConfigModule, ConfigService } from "@oksai/config";
+import { LoggerModule } from "@oksai/logger";
 import { AuthModule } from "@oksai/nestjs-better-auth";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { auth } from "./auth/auth";
+import { createAuthInstance } from "./auth/auth";
 import { AuthFeatureModule } from "./auth/auth.module";
 import { UserController } from "./auth/user.controller";
 import { CacheModule } from "./common/cache.module";
@@ -19,7 +20,8 @@ import { HealthController } from "./health/health.controller";
  *
  * @description
  * 应用根模块，配置：
- * - ConfigModule: 全局配置管理
+ * - ConfigModule: 全局配置管理（基于 @oksai/config）
+ * - LoggerModule: 全局日志管理（基于 @oksai/logger）
  * - ThrottlerModule: API 限流保护
  * - AuthModule: Better Auth 认证集成
  * - AuthFeatureModule: 认证功能模块（注册/登录/邮箱验证等）
@@ -29,32 +31,35 @@ import { HealthController } from "./health/health.controller";
  */
 @Module({
   imports: [
-    // 配置模块
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
     }),
 
-    // 限流保护
+    LoggerModule.forRoot({
+      isGlobal: true,
+      pretty: process.env.NODE_ENV !== "production",
+      level: process.env.LOG_LEVEL || "info",
+    }),
+
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 60 秒
-        limit: 100, // 最多 100 次请求
+        ttl: 60000,
+        limit: 100,
       },
     ]),
 
-    // Better Auth 集成
-    AuthModule.forRoot({
-      auth,
-      // isGlobal: true (默认值，全局模块)
-      // disableGlobalAuthGuard: false (默认值，启用全局守卫)
-      // disableTrustedOriginsCors: false (默认值，自动配置 CORS)
+    AuthModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const auth = createAuthInstance(configService);
+        return { auth };
+      },
+      inject: [ConfigService],
     }),
 
-    // 认证功能模块
     AuthFeatureModule,
 
-    // 缓存模块（支持 Redis）
     CacheModule.forRoot({
       redisEnabled: process.env.REDIS_ENABLED === "true",
       redisUrl: process.env.REDIS_URL,
@@ -66,9 +71,10 @@ import { HealthController } from "./health/health.controller";
   controllers: [AppController, HealthController, UserController, CacheMonitorController],
   providers: [
     AppService,
+    CustomThrottlerGuard,
     {
       provide: APP_GUARD,
-      useClass: CustomThrottlerGuard,
+      useExisting: CustomThrottlerGuard,
     },
   ],
 })

@@ -4,7 +4,7 @@
  * @module common/cache.service
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, Optional } from "@nestjs/common";
 import { LRUCache } from "lru-cache";
 
 /**
@@ -59,7 +59,7 @@ export class CacheService {
    *
    * @param options - 缓存配置选项
    */
-  constructor(options: CacheOptions = {}) {
+  constructor(@Optional() options: CacheOptions = {}) {
     const { max = 1000, ttl = 60000, enableStats = false } = options;
 
     this.cache = new LRUCache<string, any>({

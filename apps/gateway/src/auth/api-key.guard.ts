@@ -1,40 +1,35 @@
 /**
- * API Key 认证守卫
- *
- * @description
- * 从请求头中提取并验证 API Key
+ * API Key 认证守卫（Better Auth 版本）
  */
 
-import { createHash } from "node:crypto";
 import { type CanActivate, type ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { apiKeys, db } from "@oksai/database";
-import { eq } from "drizzle-orm";
 import type { Request } from "express";
+import { auth } from "./auth";
 
 /**
  * API Key 验证结果
  */
 export interface ApiKeyPayload {
+  id: string;
   userId: string;
-  apiKeyId: string;
-  tenantId?: string | null;
+  organizationId?: string | null;
+  name?: string | null;
+  prefix?: string;
+  enabled: boolean;
+  expiresAt?: Date | null;
+  permissions?: Record<string, string[]> | null;
+  metadata?: any;
+  remaining?: number | null;
+  rateLimitEnabled?: boolean;
 }
 
 /**
  * API Key 认证守卫
  *
- * @description
- * 从请求头 X-API-Key 中提取 API Key，验证其有效性并将用户信息附加到请求对象。
- *
- * API Key 格式：oks_<random_string>
- * 存储方式：SHA256 hash
- *
  * @example
- * // 在 Controller 中使用
  * @UseGuards(ApiKeyGuard)
  * @Get('protected')
  * getProtectedData(@Request() req) {
- *   // req.apiKey 包含 API Key 信息
  *   return { userId: req.apiKey.userId };
  * }
  */
@@ -42,7 +37,7 @@ export interface ApiKeyPayload {
 export class ApiKeyGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const apiKey = request.headers["x-api-key"] as string;
+    const apiKey = this.extractApiKey(request);
 
     if (!apiKey) {
       throw new UnauthorizedException("缺少 API Key");
@@ -54,69 +49,53 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException("无效的 API Key");
     }
 
-    // 将 API Key 信息附加到请求对象
     request.apiKey = payload;
     return true;
   }
 
-  /**
-   * 验证 API Key
-   *
-   * @description
-   * 1. 检查 API Key 格式（必须以 oks_ 开头）
-   * 2. 计算 SHA256 hash
-   * 3. 查询数据库验证
-   * 4. 检查是否过期或撤销
-   * 5. 更新最后使用时间
-   *
-   * @param apiKey - 原始 API Key
-   * @returns API Key Payload 或 null
-   */
+  private extractApiKey(request: Request): string | null {
+    // 方式 1: X-API-Key 请求头
+    const apiKeyHeader = request.headers["x-api-key"] as string;
+    if (apiKeyHeader) {
+      return apiKeyHeader;
+    }
+
+    // 方式 2: Authorization: Bearer <api-key>
+    const authorization = request.headers.authorization;
+    if (authorization?.startsWith("Bearer ")) {
+      return authorization.substring(7);
+    }
+
+    return null;
+  }
+
   private async validateApiKey(apiKey: string): Promise<ApiKeyPayload | null> {
     try {
-      // 1. 检查格式
-      if (!apiKey || !apiKey.startsWith("oks_")) {
+      // 使用 Better Auth API 验证
+      const result = await (auth.api as any).verifyApiKey({
+        body: {
+          key: apiKey,
+        },
+      });
+
+      if (!result.valid || !result.key) {
         return null;
       }
 
-      // 2. 计算 hash
-      const hashedKey = createHash("sha256").update(apiKey).digest("hex");
-
-      // 3. 查询数据库
-      const result = await db
-        .select()
-        .from(apiKeys)
-        .where(eq((apiKeys as any).hashedKey, hashedKey))
-        .limit(1);
-
-      const keyRecord = result[0];
-      if (!keyRecord) {
-        return null;
-      }
-
-      // 4. 检查是否过期
-      if (keyRecord.expiresAt && new Date() > keyRecord.expiresAt) {
-        return null;
-      }
-
-      // 5. 检查是否撤销
-      if ((keyRecord as any).revokedAt) {
-        return null;
-      }
-
-      // 6. 更新最后使用时间（异步执行，不阻塞请求）
-      db.update(apiKeys)
-        .set({ lastUsedAt: new Date() } as any)
-        .where(eq(apiKeys.id, keyRecord.id))
-        .execute()
-        .catch(() => {
-          // 忽略更新失败
-        });
+      const keyData = result.key;
 
       return {
-        userId: (keyRecord as any).userId,
-        apiKeyId: keyRecord.id,
-        tenantId: (keyRecord as any).tenantId,
+        id: keyData.id,
+        userId: keyData.referenceId,
+        organizationId: null,
+        name: keyData.name || null,
+        prefix: keyData.prefix || keyData.start || undefined,
+        enabled: keyData.enabled,
+        expiresAt: keyData.expiresAt ? new Date(keyData.expiresAt) : null,
+        permissions: keyData.permissions || null,
+        metadata: keyData.metadata,
+        remaining: keyData.remaining,
+        rateLimitEnabled: keyData.rateLimitEnabled,
       };
     } catch (error) {
       console.error("[ApiKeyGuard] Validation error:", error);

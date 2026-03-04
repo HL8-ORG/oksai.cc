@@ -16,7 +16,6 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
-import type { OAuthService } from "./oauth.service";
 import type {
   CreateOAuthClientDto,
   OAuthClientCreatedResponse,
@@ -25,6 +24,7 @@ import type {
   RotateClientSecretResponse,
   UpdateOAuthClientDto,
 } from "./oauth-client.dto";
+import { OAuthService } from "./oauth.service";
 
 /**
  * OAuth Client 管理 Controller

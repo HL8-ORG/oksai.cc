@@ -8,7 +8,7 @@
 
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import process from "node:process";
-import type { ConfigService } from "@nestjs/config";
+import type { ConfigService } from "@oksai/config";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;

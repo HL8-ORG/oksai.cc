@@ -4,7 +4,7 @@
 
 import { type ExecutionContext, HttpException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CustomThrottlerGuard } from "./custom-throttler.guard";
 import type { RateLimitConfig } from "./rate-limit.decorator";
 
@@ -95,7 +95,7 @@ describe("CustomThrottlerGuard", () => {
 
       try {
         await guard.canActivate(mockExecutionContext);
-        fail("应该抛出异常");
+        expect(true).toBe(false); // 不应该到达这里
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
         const httpError = error as HttpException;
@@ -118,7 +118,7 @@ describe("CustomThrottlerGuard", () => {
 
       try {
         await guard.canActivate(mockExecutionContext);
-        fail("应该抛出异常");
+        expect(true).toBe(false); // 不应该到达这里
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
         const httpError = error as HttpException;
@@ -151,7 +151,7 @@ describe("CustomThrottlerGuard", () => {
 
       try {
         await guard.canActivate(mockExecutionContext);
-        fail("应该抛出异常");
+        expect(true).toBe(false); // 不应该到达这里
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
         expect((error as HttpException).getStatus()).toBe(429);
@@ -168,7 +168,7 @@ describe("CustomThrottlerGuard", () => {
 
       try {
         await guard.canActivate(mockExecutionContext);
-        fail("应该抛出异常");
+        expect(true).toBe(false); // 不应该到达这里
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
         expect((error as HttpException).getStatus()).toBe(429);

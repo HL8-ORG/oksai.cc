@@ -3,6 +3,8 @@
  *
  * @description
  * 展示如何配置 Better Auth 支持多种登录方式和插件
+ *
+ * 注意：此文件仅作为示例参考，不会被编译到生产代码中
  */
 
 import process from "node:process";
@@ -14,7 +16,13 @@ import postgres from "postgres";
 /**
  * 基础配置示例
  */
-export function createBasicAuth(databaseUrl: string, secret: string, baseUrl: string, corsOrigin: string) {
+// biome-ignore lint/suspicious/noExplicitAny: 示例文件，类型断言可接受
+export function createBasicAuth(
+  databaseUrl: string,
+  secret: string,
+  baseUrl: string,
+  corsOrigin: string
+): any {
   const client = postgres(databaseUrl);
   const db = drizzle(client);
 
@@ -45,12 +53,13 @@ export function createBasicAuth(databaseUrl: string, secret: string, baseUrl: st
  *
  * 注意：需要安装相应的 Better Auth 插件
  */
+// biome-ignore lint/suspicious/noExplicitAny: 示例文件，类型断言可接受
 export function createAdvancedAuth(
   databaseUrl: string,
   secret: string,
   baseUrl: string,
   corsOrigins: string[]
-) {
+): any {
   const client = postgres(databaseUrl);
   const db = drizzle(client);
 
@@ -69,12 +78,12 @@ export function createAdvancedAuth(
     // OAuth 提供商
     socialProviders: {
       github: {
-        clientId: process.env.GITHUB_CLIENT_ID!,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+        clientId: process.env.GITHUB_CLIENT_ID || "",
+        clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
       },
       google: {
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        clientId: process.env.GOOGLE_CLIENT_ID || "",
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       },
     },
 

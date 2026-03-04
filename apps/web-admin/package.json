@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite dev --config vite.config.app.ts",
     "build": "vite build --config vite.config.app.ts",
-    "preview": "vite preview --config vite.config.app.ts"
+    "preview": "vite preview --config vite.config.app.ts",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.1",

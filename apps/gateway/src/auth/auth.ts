@@ -1,25 +1,47 @@
-import process from "node:process";
+import type { ConfigService } from "@oksai/config";
 import { createAuth } from "./auth.config";
+
+/**
+ * Better Auth 实例管理
+ *
+ * @description
+ * 提供全局的 Better Auth 实例访问
+ * 通过 createAuthInstance 创建实例，通过 auth 导出访问
+ */
+
+let authInstance: any = null;
+
+/**
+ * 创建并设置 Better Auth 实例
+ *
+ * @description
+ * 使用 ConfigService 创建配置好的 Better Auth 实例
+ * 此函数由 AuthModule.forRootAsync 调用
+ *
+ * @param configService - 配置服务实例
+ * @returns Better Auth 实例
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Better Auth 类型过于复杂
+export function createAuthInstance(configService: ConfigService): any {
+  authInstance = createAuth(configService);
+  return authInstance;
+}
 
 /**
  * Better Auth 实例
  *
  * @description
- * 导出配置好的 Better Auth 实例，供 AuthModule 使用。
- *
- * 环境变量（自动读取）：
- * - BETTER_AUTH_SECRET: 认证密钥（至少32字符）
- * - BETTER_AUTH_URL: 应用基础 URL
- * - DATABASE_URL: 数据库连接字符串
- * - GITHUB_CLIENT_ID/SECRET: GitHub OAuth（可选）
- * - GOOGLE_CLIENT_ID/SECRET: Google OAuth（可选）
- * - CORS_ORIGIN: 允许的 CORS 来源
- *
- * Better Auth 会自动读取 BETTER_AUTH_SECRET 和 BETTER_AUTH_URL 环境变量，
- * 无需在配置中显式设置。
- *
- * @see https://better-auth.com/docs/reference/options
+ * 全局的 Better Auth 实例，供其他模块使用
+ * 注意：必须通过 createAuthInstance 初始化后才能访问
  */
-export const auth = createAuth(
-  process.env.DATABASE_URL || "postgresql://oksai:oksai_dev_password@localhost:5432/oksai"
-);
+// biome-ignore lint/suspicious/noExplicitAny: Better Auth 类型过于复杂
+export const auth: any = new Proxy({} as any, {
+  get(_target, prop) {
+    if (!authInstance) {
+      throw new Error("Auth 实例未初始化。请确保 AuthModule.forRootAsync 已正确配置。");
+    }
+    return authInstance[prop];
+  },
+});
+
+export type AuthInstance = ReturnType<typeof createAuthInstance>;

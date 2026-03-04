@@ -5,7 +5,7 @@
 import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
 import type { RegisterOAuthClientDto } from "./oauth.dto";
-import type { OAuthService } from "./oauth.service";
+import { OAuthService } from "./oauth.service";
 
 /**
  * OAuth 2.0 控制器

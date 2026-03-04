@@ -4,7 +4,7 @@
  * @module common/redis-cache.service
  */
 
-import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit, Optional } from "@nestjs/common";
 import Redis from "ioredis";
 import type { CacheOptions, CacheStats } from "./cache.service";
 
@@ -27,7 +27,7 @@ export class RedisCacheService implements OnModuleInit, OnModuleDestroy {
   private hits = 0;
   private misses = 0;
 
-  constructor(options: CacheOptions & { redisUrl?: string } = {}) {
+  constructor(@Optional() options: CacheOptions & { redisUrl?: string } = {}) {
     const { redisUrl } = options;
 
     if (redisUrl) {

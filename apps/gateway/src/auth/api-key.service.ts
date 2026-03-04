@@ -41,8 +41,8 @@ export class ApiKeyService {
       // 3. 提取前缀（用于快速识别）
       const prefix = apiKey.substring(0, 11); // "oks_" + 前7位
 
-      // 4. 解析过期时间
-      const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : null;
+      // 4. 解析过期时间（expiresIn 是秒数）
+      const expiresAt = dto.expiresIn ? new Date(Date.now() + dto.expiresIn * 1000) : null;
 
       // 5. 存储到数据库
       const result = await db

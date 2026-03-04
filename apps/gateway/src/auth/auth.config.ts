@@ -1,7 +1,8 @@
-import process from "node:process";
+import { apiKey } from "@better-auth/api-key";
+import type { ConfigService } from "@oksai/config";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { organization, twoFactor } from "better-auth/plugins";
+import { admin, organization, twoFactor } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -17,107 +18,108 @@ import postgres from "postgres";
  * - 会话管理（支持 Redis 缓存）
  * - 安全策略（CORS、CSRF、Rate Limiting）
  *
- * 环境变量（推荐）：
- * - BETTER_AUTH_SECRET: 认证密钥（至少32字符）
- * - BETTER_AUTH_URL: 应用基础 URL
- * - DATABASE_URL: 数据库连接字符串
- * - REDIS_URL: Redis 连接字符串（可选）
+ * 环境变量（通过 ConfigService 读取）：
+ * - DATABASE_URL: 数据库连接字符串（必需）
+ * - BETTER_AUTH_SECRET: 认证密钥（可选，Better Auth 自动读取）
+ * - BETTER_AUTH_URL: 应用基础 URL（可选，Better Auth 自动读取）
+ * - GITHUB_CLIENT_ID/SECRET: GitHub OAuth（可选）
+ * - GOOGLE_CLIENT_ID/SECRET: Google OAuth（可选）
+ * - NODE_ENV: 环境（production/development）
  *
  * @see https://better-auth.com/docs/integrations/nestjs
  * @see https://better-auth.com/docs/reference/options
  * @see https://better-auth.com/docs/plugins/2fa
  */
-export function createAuth(databaseUrl: string) {
-  // 创建数据库连接
+// biome-ignore lint/suspicious/noExplicitAny: Better Auth 返回类型过于复杂，无法显式声明
+export function createAuth(configService: ConfigService): any {
+  const databaseUrl = configService.getRequired("DATABASE_URL");
+  const nodeEnv = configService.get("NODE_ENV") || "development";
+
+  const githubClientId = configService.get("GITHUB_CLIENT_ID");
+  const githubClientSecret = configService.get("GITHUB_CLIENT_SECRET");
+  const googleClientId = configService.get("GOOGLE_CLIENT_ID");
+  const googleClientSecret = configService.get("GOOGLE_CLIENT_SECRET");
+
   const client = postgres(databaseUrl);
   const db = drizzle(client);
 
   return betterAuth({
-    // 数据库适配器
     database: drizzleAdapter(db, {
       provider: "pg",
     }),
 
-    // 邮箱/密码登录配置
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false, // 开发环境不强制验证邮箱
+      requireEmailVerification: false,
     },
 
-    // OAuth 社交登录配置
     socialProviders: {
-      // GitHub OAuth
-      // 文档：https://better-auth.com/docs/authentication/github
-      // 创建应用：https://github.com/settings/developers
-      // 回调 URL：http://localhost:3000/api/auth/callback/github
-      github: {
-        clientId: process.env.GITHUB_CLIENT_ID || "",
-        clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-      },
-
-      // Google OAuth
-      // 文档：https://better-auth.com/docs/authentication/google
-      // 创建应用：https://console.cloud.google.com/apis/credentials
-      // 回调 URL：http://localhost:3000/api/auth/callback/google
-      google: {
-        clientId: process.env.GOOGLE_CLIENT_ID || "",
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      },
+      ...(githubClientId && githubClientSecret
+        ? {
+            github: {
+              clientId: githubClientId,
+              clientSecret: githubClientSecret,
+            },
+          }
+        : {}),
+      ...(googleClientId && googleClientSecret
+        ? {
+            google: {
+              clientId: googleClientId,
+              clientSecret: googleClientSecret,
+            },
+          }
+        : {}),
     },
 
-    // 会话配置
     session: {
-      expiresIn: 60 * 60 * 24 * 7, // 7 天过期
-      updateAge: 60 * 60 * 24, // 每天更新一次
+      expiresIn: 60 * 60 * 24 * 7,
+      updateAge: 60 * 60 * 24,
       cookieCache: {
         enabled: true,
-        maxAge: 60 * 5, // 5 分钟缓存
+        maxAge: 60 * 5,
       },
     },
 
-    // 插件配置
     plugins: [
-      // 组织管理插件
-      // 文档：https://better-auth.com/docs/plugins/organization
+      apiKey() as any,
+
+      admin({
+        defaultRole: "user",
+        adminRole: "admin",
+        allowImpersonatingAdmins: false,
+        bannedUserMessage: "您的账号已被封禁，如有疑问请联系客服",
+        defaultBanReason: "违反服务条款",
+      }) as any,
+
       organization({
-        // 允许用户创建组织
         allowUserToCreateOrganization: true,
-        // 组织成员限制
         maximumMembers: 100,
       }),
 
-      // 双因素认证插件
-      // 文档：https://better-auth.com/docs/plugins/2fa
       twoFactor({
         issuer: "oksai.cc",
         totpOptions: {
-          digits: 6, // 6 位验证码
-          period: 30, // 30 秒有效期
+          digits: 6,
+          period: 30,
         },
-        backupCodesCount: 10, // 10 个备用码
+        backupCodesCount: 10,
       }),
     ],
 
-    // 高级安全配置
     advanced: {
-      // 使用安全的随机 ID 生成器
       generateId: false,
-
-      // Cookie 安全配置
-      useSecureCookies: process.env.NODE_ENV === "production",
-
-      // IP 地址提取（用于代理环境）
+      useSecureCookies: nodeEnv === "production",
       ipAddress: {
         ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
       },
     },
 
-    // 速率限制
     rateLimit: {
       enabled: true,
-      window: 60, // 60 秒窗口
-      max: 100, // 最多 100 次请求
-      storage: "database", // 使用数据库存储
+      window: 60,
+      max: 100,
+      storage: "database",
     },
   });
 }

@@ -30,25 +30,24 @@ function TwoFactorSetupPage() {
 
   useEffect(() => {
     // 开始 2FA 设置流程
+    const startTwoFactorSetup = async () => {
+      try {
+        setIsLoading(true);
+        // Better Auth 2FA API
+        const result = await authClient.twoFactor.enable();
+        if (result) {
+          setQrCode(result.qrCode || "");
+          setSecret(result.secret || "");
+          setStep("verify");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "启动 2FA 设置失败");
+      } finally {
+        setIsLoading(false);
+      }
+    };
     startTwoFactorSetup();
   }, []);
-
-  const startTwoFactorSetup = async () => {
-    try {
-      setIsLoading(true);
-      // Better Auth 2FA API
-      const result = await authClient.twoFactor.enable();
-      if (result) {
-        setQrCode(result.qrCode || "");
-        setSecret(result.secret || "");
-        setStep("verify");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "启动 2FA 设置失败");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();

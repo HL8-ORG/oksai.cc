@@ -3,11 +3,11 @@
  */
 
 import { Module } from "@nestjs/common";
+import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
 import { CacheModule } from "../common/cache.module";
 import { CacheService } from "../common/cache.service";
+import { AdminController } from "./admin.controller";
 import { ApiKeyController } from "./api-key.controller";
-import { ApiKeyService } from "./api-key.service";
-import { auth } from "./auth";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { OAuthController } from "./oauth.controller";
@@ -31,13 +31,14 @@ import { WebhookService } from "./webhook.service";
  * - Magic Link 登录
  * - OAuth 社交登录（Google、GitHub）
  * - 2FA 双因素认证
- * - API Key 认证
+ * - API Key 认证（使用 Better Auth 插件）
  * - Session 管理
  * - 组织/团队管理
  * - Webhook 事件通知
+ * - Admin 管理（使用 Better Auth Admin 插件）
  */
 @Module({
-  imports: [CacheModule],
+  imports: [CacheModule.forRoot()],
   controllers: [
     AuthController,
     OAuthController,
@@ -46,17 +47,16 @@ import { WebhookService } from "./webhook.service";
     SessionController,
     OrganizationController,
     WebhookController,
+    AdminController,
   ],
   providers: [
     {
       provide: AuthService,
-      useFactory: (sessionService: SessionService) => {
-        // 类型断言以兼容 Better Auth API
-        return new AuthService(auth.api as any, sessionService);
+      useFactory: (betterAuthService: BetterAuthService, sessionService: SessionService) => {
+        return new AuthService(betterAuthService.api as any, sessionService);
       },
-      inject: [SessionService],
+      inject: [BetterAuthService, SessionService],
     },
-    ApiKeyService,
     {
       provide: OAuthService,
       useFactory: (cacheService: CacheService) => {
@@ -64,15 +64,22 @@ import { WebhookService } from "./webhook.service";
       },
       inject: [CacheService],
     },
-    SessionService,
+    {
+      provide: SessionService,
+      useFactory: (cacheService: CacheService) => {
+        return new SessionService(cacheService);
+      },
+      inject: [CacheService],
+    },
     WebhookService,
     {
       provide: OrganizationService,
-      useFactory: () => {
-        return new OrganizationService(auth.api as any);
+      useFactory: (betterAuthService: BetterAuthService) => {
+        return new OrganizationService(betterAuthService.api as any);
       },
+      inject: [BetterAuthService],
     },
   ],
-  exports: [AuthService, ApiKeyService, OAuthService, SessionService, OrganizationService, WebhookService],
+  exports: [AuthService, OAuthService, SessionService, OrganizationService, WebhookService],
 })
 export class AuthFeatureModule {}

@@ -4,7 +4,7 @@
 
 import { Injectable, Logger } from "@nestjs/common";
 import { db, oauthAccessTokens, oauthRefreshTokens } from "@oksai/database";
-import { and, eq, gt, or } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 
 @Injectable()
 export class TokenBlacklistService {
@@ -24,7 +24,6 @@ export class TokenBlacklistService {
       .update(oauthAccessTokens)
       .set({
         revokedAt: new Date(),
-        revokedReason: reason,
       })
       .where(and(eq(oauthAccessTokens.userId, userId), eq(oauthAccessTokens.revokedAt, null as any)));
 
@@ -33,7 +32,6 @@ export class TokenBlacklistService {
       .update(oauthRefreshTokens)
       .set({
         revokedAt: new Date(),
-        revokedReason: reason,
       })
       .where(and(eq(oauthRefreshTokens.userId, userId), eq(oauthRefreshTokens.revokedAt, null as any)));
   }
@@ -51,7 +49,6 @@ export class TokenBlacklistService {
       .update(oauthAccessTokens)
       .set({
         revokedAt: new Date(),
-        revokedReason: reason,
       })
       .where(and(eq(oauthAccessTokens.clientId, clientId), eq(oauthAccessTokens.revokedAt, null as any)));
 
@@ -59,7 +56,6 @@ export class TokenBlacklistService {
       .update(oauthRefreshTokens)
       .set({
         revokedAt: new Date(),
-        revokedReason: reason,
       })
       .where(and(eq(oauthRefreshTokens.clientId, clientId), eq(oauthRefreshTokens.revokedAt, null as any)));
   }
