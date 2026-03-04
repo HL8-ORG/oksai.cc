@@ -66,6 +66,12 @@ export const users = pgTable(
     // 角色和权限（Better Auth admin 插件 + 自定义）
     role: text("role").default("user").notNull(), // Better Auth: user, admin；自定义: OWNER, ADMIN, MEMBER, VIEWER
 
+    // Admin 插件字段（Better Auth Admin Plugin）
+    banned: boolean("banned").default(false).notNull(), // 是否被封禁
+    banReason: text("ban_reason"), // 封禁原因
+    bannedAt: timestamp("banned_at"), // 封禁时间
+    banExpires: timestamp("ban_expires"), // 封禁过期时间
+
     // 2FA（Better Auth 2FA 插件）
     twoFactorEnabled: boolean("two_factor_enabled").default(false).notNull(),
 

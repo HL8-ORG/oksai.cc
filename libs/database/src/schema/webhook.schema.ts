@@ -2,7 +2,7 @@
  * Webhook 数据库 Schema
  */
 
-import { boolean, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 /**
  * Webhook 事件类型枚举

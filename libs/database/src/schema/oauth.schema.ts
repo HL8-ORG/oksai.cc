@@ -2,7 +2,7 @@
  * OAuth 2.0 数据库 Schema
  */
 
-import { boolean, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
  * OAuth Client 类型枚举

@@ -58,14 +58,20 @@ export class EmailService {
     try {
       const from = this.config.fromName ? `${this.config.fromName} <${this.config.from}>` : this.config.from;
 
+      // 辅助函数：格式化邮件地址
+      const formatAddress = (addr: string | string[] | undefined): string | undefined => {
+        if (!addr) return undefined;
+        return Array.isArray(addr) ? addr.join(", ") : addr;
+      };
+
       const info = await this.transporter.sendMail({
         from,
-        to: Array.isArray(options.to) ? options.to.join(", ") : options.to,
+        to: formatAddress(options.to),
         subject: options.subject,
         text: options.text,
         html: options.html,
-        cc: options.cc ? (Array.isArray(options.cc) ? options.cc.join(", ") : options.cc) : undefined,
-        bcc: options.bcc ? (Array.isArray(options.bcc) ? options.bcc.join(", ") : options.bcc) : undefined,
+        cc: formatAddress(options.cc),
+        bcc: formatAddress(options.bcc),
         attachments: options.attachments,
       });
 

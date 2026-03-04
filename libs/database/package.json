@@ -14,20 +14,20 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
+    "build": "tsup src/index.ts --format esm --dts --tsconfig tsconfig.build.json",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.1",
-    "postgres": "^3.4.0"
+    "drizzle-orm": "catalog:",
+    "postgres": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "drizzle-kit": "^0.31.9",
-    "tsup": "^8.0.0",
-    "typescript": "~5.9.2"
+    "@types/node": "catalog:",
+    "drizzle-kit": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:"
   }
 }

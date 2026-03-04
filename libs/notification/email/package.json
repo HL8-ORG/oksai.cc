@@ -16,7 +16,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts --tsconfig tsconfig.build.json",
     "build:watch": "tsup src/index.ts --format cjs,esm --dts --watch",
     "check": "biome check .",
     "check:fix": "biome check --write .",
