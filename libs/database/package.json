@@ -15,10 +15,7 @@
   },
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs,esm --dts --external @oksai/kernel --external ts-morph --external @ts-morph/common --external @mikro-orm/reflection",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:push": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio"
+		"clean": "pnpm exec rimraf dist coverage"
 	},
   "dependencies": {
     "@mikro-orm/core": "catalog:",
@@ -26,12 +23,11 @@
     "@mikro-orm/postgresql": "^6.6.8",
     "@nestjs/common": "catalog:",
     "@oksai/kernel": "workspace:*",
-    "drizzle-orm": "catalog:",
     "postgres": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "drizzle-kit": "catalog:",
+    "rimraf": "^6.0.1",
     "tsup": "catalog:",
     "typescript": "catalog:"
   }
