@@ -68,8 +68,87 @@ export const mikroOrmAdapter = (
           }
         : undefined,
       supportsJSON,
+      supportsArrays: true, // MikroORM 支持数组类型（PostgreSQL）
+      supportsUUIDs: true, // MikroORM 支持 UUID 类型（PostgreSQL）
       adapterId: "mikro-orm-adapter",
       adapterName: "Mikro ORM Adapter",
+      // 提供真实事务支持（使用 MikroORM 的 transactional）
+      transaction: async <R>(callback: (trx: any) => Promise<R>) => {
+        const em = orm.em.fork();
+        return em.transactional(async () => {
+          // 在事务内，创建一个使用同一个 EntityManager 的适配器
+          const { getEntityMetadata, getFieldPath, normalizeInput, normalizeOutput, normalizeWhereClauses } =
+            createAdapterUtils(orm);
+
+          const transactionalAdapter = {
+            async create({ model, data, select }: any) {
+              const metadata = getEntityMetadata(model);
+              const input = normalizeInput(metadata, data);
+              const entity = em.create(metadata.class, input);
+              await em.persistAndFlush(entity);
+              return normalizeOutput(metadata, entity, select);
+            },
+
+            async count({ model, where }: any): Promise<number> {
+              const metadata = getEntityMetadata(model);
+              return em.count(metadata.class, normalizeWhereClauses(metadata, where));
+            },
+
+            async findOne({ model, where, select }: any) {
+              const metadata = getEntityMetadata(model);
+              const entity = await em.findOne(metadata.class, normalizeWhereClauses(metadata, where));
+              if (!entity) return null;
+              return normalizeOutput(metadata, entity, select);
+            },
+
+            async findMany({ model, where, limit, offset, sortBy }: any) {
+              const metadata = getEntityMetadata(model);
+              const options: FindOptions<any> = { limit, offset };
+              if (sortBy) {
+                const path = getFieldPath(metadata, sortBy.field);
+                dset(options, ["orderBy", ...path], sortBy.direction);
+              }
+              const rows = await em.find(metadata.class, normalizeWhereClauses(metadata, where), options);
+              return rows.map((row: any) => normalizeOutput(metadata, row));
+            },
+
+            async update({ model, where, update }: any) {
+              const metadata = getEntityMetadata(model);
+              const entity = await em.findOne(metadata.class, normalizeWhereClauses(metadata, where));
+              if (!entity) return null;
+              em.assign(entity, normalizeInput(metadata, update));
+              await em.flush();
+              return normalizeOutput(metadata, entity);
+            },
+
+            async updateMany({ model, where, update }: any) {
+              const metadata = getEntityMetadata(model);
+              return em.nativeUpdate(
+                metadata.class,
+                normalizeWhereClauses(metadata, where),
+                normalizeInput(metadata, update)
+              );
+            },
+
+            async delete({ model, where }: any) {
+              const metadata = getEntityMetadata(model);
+              const entity = await em.findOne(metadata.class, normalizeWhereClauses(metadata, where), {
+                fields: ["id"],
+              });
+              if (entity) {
+                await em.removeAndFlush(entity);
+              }
+            },
+
+            async deleteMany({ model, where }: any) {
+              const metadata = getEntityMetadata(model);
+              return em.nativeDelete(metadata.class, normalizeWhereClauses(metadata, where));
+            },
+          };
+
+          return callback(transactionalAdapter);
+        });
+      },
     },
 
     adapter() {

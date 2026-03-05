@@ -41,6 +41,7 @@
 	},
 	"devDependencies": {
 		"@mikro-orm/core": "catalog:",
+		"@mikro-orm/postgresql": "catalog:",
 		"better-auth": "catalog:",
 		"vitest": "catalog:"
 	},

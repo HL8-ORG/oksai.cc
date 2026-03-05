@@ -383,6 +383,28 @@ describe("createAdapterUtils", () => {
         { field: "age", operator: "ne" as const, value: 0 },
       ]);
       expect(resultNe.age.$ne).toBe(0);
+
+      // not_in
+      const resultNotIn = utils.normalizeWhereClauses(metadata, [
+        { field: "age", operator: "not_in" as const, value: [18, 21, 30] },
+      ]);
+      expect(resultNotIn.age.$nin).toEqual([18, 21, 30]);
+    });
+
+    it("not_in 操作符应该验证数组类型", () => {
+      const userMetadata = createMockEntityMetadata("User", "user", [
+        { name: "age", kind: ReferenceKind.SCALAR },
+      ]);
+      const mockOrm = createMockOrm([{ name: "User", metadata: userMetadata }]);
+      const utils = createAdapterUtils(mockOrm);
+      const metadata = utils.getEntityMetadata("User");
+
+      // 非数组值应该抛出错误
+      expect(() =>
+        utils.normalizeWhereClauses(metadata, [
+          { field: "age", operator: "not_in" as const, value: "not-an-array" },
+        ])
+      ).toThrow(); // 只检查是否抛出错误，不检查具体类型
     });
 
     it("当 where 为空时应该返回空对象", () => {

@@ -2,7 +2,6 @@ import type { EntityMetadata, EntityProperty, MikroORM } from "@mikro-orm/core";
 import { ReferenceKind, serialize } from "@mikro-orm/core";
 import type { Where } from "better-auth";
 import { dset } from "dset";
-
 import { createAdapterError } from "./createAdapterError.js";
 
 /**
@@ -62,7 +61,19 @@ export interface AdapterUtils {
    * @param metadata - 实体元数据
    * @param where - 要规范化的 where 子句列表
    */
-  normalizeWhereClauses(metadata: EntityMetadata, where?: Where[]): Record<string, any>;
+  /**
+   * 将 Better Auth 的 join 参数转换为 MikroORM 的 populate 选项
+   *
+   * @param metadata - 实体元数据
+   * @param join - Better Auth 的 join 参数
+   * @param options - Better Auth 选项
+   * @returns MikroORM populate 选项
+   */
+  convertJoinToPopulate: (
+    metadata: EntityMetadata,
+    join: Record<string, { relation?: string; limit?: number; fields?: string[] }> | undefined,
+    options?: { advanced?: { database?: { defaultFindManyLimit?: number } } }
+  ) => string[] | undefined;
 }
 
 /**
@@ -319,6 +330,11 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
       switch (w.operator) {
         case "in":
           return createWhereInClause(w.field, path, w.value);
+        case "not_in":
+          if (!Array.isArray(w.value)) {
+            createAdapterError(`使用 $not_in 操作符时，"${w.field}" 字段的值必须是数组。`);
+          }
+          return createWhereClause(path, w.value, "$nin");
         case "contains":
           return createWhereClause(path, `%${w.value}%`, "$like");
         case "starts_with":
@@ -347,6 +363,13 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
           return createWhereInClause(field, path, value, result);
         }
 
+        if (operator === "not_in") {
+          if (!Array.isArray(value)) {
+            createAdapterError(`使用 $not_in 操作符时，"${field}" 字段的值必须是数组。`);
+          }
+          return createWhereClause(path, value, "$nin", result);
+        }
+
         return createWhereClause(path, value, "eq", result);
       });
 
@@ -361,6 +384,62 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
     return result;
   };
 
+  /**
+   * 将 Better Auth 的 join 参数转换为 MikroORM 的 populate 选项
+   *
+   * @param metadata - 实体元数据
+   * @param join - Better Auth 的 join 参数
+   * @param options - Better Auth 选项
+   * @returns MikroORM populate 选项
+   */
+  const convertJoinToPopulate = (
+    metadata: EntityMetadata,
+    join: Record<string, { relation?: string; limit?: number; fields?: string[] }> | undefined,
+    options?: { advanced?: { database?: { defaultFindManyLimit?: number } } }
+  ): string[] | undefined => {
+    if (!join || Object.keys(join).length === 0) {
+      return undefined;
+    }
+
+    const populate: string[] = [];
+    const joinEntries = Object.entries(join);
+
+    for (const [modelName, joinAttr] of joinEntries) {
+      // 获取关联的限制数
+      const limit = joinAttr.limit ?? options?.advanced?.database?.defaultFindManyLimit ?? 100;
+
+      // 尝试匹配关联属性
+      const relationField = Object.values(metadata.properties).find((prop) => {
+        // 检查是否是关联类型
+        if (
+          prop.kind === ReferenceKind.ONE_TO_ONE ||
+          prop.kind === ReferenceKind.ONE_TO_MANY ||
+          prop.kind === ReferenceKind.MANY_TO_ONE ||
+          prop.kind === ReferenceKind.MANY_TO_MANY
+        ) {
+          // 匹配关联实体的名称
+          const relatedEntityName = normalizeEntityName(modelName);
+          const propEntityName = normalizeEntityName(prop.type);
+          return propEntityName === relatedEntityName;
+        }
+        return false;
+      });
+
+      if (relationField) {
+        // 对于 1:m 关系，MikroORM 会自动处理 limit
+        populate.push(relationField.name);
+      } else {
+        // 如果找不到精确匹配，尝试使用 model 名称作为字段名
+        const fieldName = modelName.toLowerCase();
+        if (metadata.properties[fieldName]) {
+          populate.push(fieldName);
+        }
+      }
+    }
+
+    return populate.length > 0 ? populate : undefined;
+  };
+
   return {
     getEntityMetadata,
     normalizeEntityName,
@@ -368,5 +447,6 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
     normalizeInput,
     normalizeOutput,
     normalizeWhereClauses,
+    convertJoinToPopulate,
   };
 }
