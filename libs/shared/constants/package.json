@@ -15,7 +15,7 @@
 		}
 	},
 	"scripts": {
-		"build": "pnpm exec tsup src/index.ts --format cjs,esm && pnpm exec tsc --emitDeclarationOnly --outDir dist",
+		"build": "pnpm exec tsup src/index.ts --format cjs,esm && pnpm exec tsc -p tsconfig.build.json --emitDeclarationOnly",
 		"build:watch": "pnpm exec tsup src/index.ts --format cjs,esm --watch",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",

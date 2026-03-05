@@ -3,6 +3,7 @@
  */
 
 import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
+import { ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
 import type { RegisterOAuthClientDto } from "./oauth.dto";
 import { OAuthService } from "./oauth.service";
@@ -20,6 +21,12 @@ import { OAuthService } from "./oauth.service";
  * - POST /oauth/revoke - Token 撤销端点
  * - POST /oauth/introspect - Token 内省端点
  */
+@ApiTags("OAuth 2.0")
+@ApiHeader({
+  name: "x-user-id",
+  description: "用户 ID（用于认证）",
+  required: false,
+})
 @Controller("oauth")
 export class OAuthV2Controller {
   constructor(private readonly oauthService: OAuthService) {}
@@ -38,6 +45,22 @@ export class OAuthV2Controller {
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
   @AllowAnonymous()
+  @ApiOperation({ summary: "注册 OAuth 客户端", description: "注册新的 OAuth 客户端应用" })
+  @ApiResponse({
+    status: 201,
+    description: "客户端注册成功",
+    schema: {
+      example: {
+        id: "xxx",
+        clientId: "xxx",
+        clientSecret: "xxx",
+        name: "My App",
+        redirectUris: ["http://localhost:3000/callback"],
+        allowedScopes: ["read", "write"],
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: "参数错误" })
   async registerClient(@Headers("x-user-id") userId: string, @Body() dto: RegisterOAuthClientDto) {
     return this.oauthService.registerClient({
       name: dto.name,
@@ -63,6 +86,25 @@ export class OAuthV2Controller {
    */
   @Get("authorize")
   @AllowAnonymous()
+  @ApiOperation({ summary: "OAuth 授权端点", description: "OAuth 2.0 授权端点，返回授权码" })
+  @ApiQuery({ name: "client_id", description: "客户端 ID", type: "string", required: true })
+  @ApiQuery({ name: "redirect_uri", description: "回调 URI", type: "string", required: true })
+  @ApiQuery({ name: "scope", description: "权限范围", type: "string", required: true })
+  @ApiQuery({ name: "state", description: "状态参数（防止 CSRF）", type: "string", required: false })
+  @ApiQuery({ name: "code_challenge", description: "PKCE Code Challenge", type: "string", required: false })
+  @ApiQuery({
+    name: "code_challenge_method",
+    description: "PKCE 方法（S256/plain）",
+    type: "string",
+    required: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "授权成功",
+    schema: { example: { code: "xxx", expires_in: 600, expires_at: "2026-03-06T06:00:00Z" } },
+  })
+  @ApiResponse({ status: 400, description: "参数错误" })
+  @ApiResponse({ status: 401, description: "未认证" })
   async authorize(
     @Query("client_id") clientId: string,
     @Query("redirect_uri") redirectUri: string,
@@ -102,6 +144,22 @@ export class OAuthV2Controller {
   @Post("token")
   @HttpCode(HttpStatus.OK)
   @AllowAnonymous()
+  @ApiOperation({ summary: "OAuth Token 端点", description: "交换授权码或刷新令牌以获取 Access Token" })
+  @ApiResponse({
+    status: 200,
+    description: "Token 交换成功",
+    schema: {
+      example: {
+        access_token: "xxx",
+        token_type: "Bearer",
+        expires_in: 3600,
+        refresh_token: "xxx",
+        scope: "read write",
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: "参数错误或无效的 grant_type" })
+  @ApiResponse({ status: 401, description: "客户端认证失败" })
   async token(
     @Body()
     body: {
@@ -166,6 +224,13 @@ export class OAuthV2Controller {
   @Post("revoke")
   @HttpCode(HttpStatus.OK)
   @AllowAnonymous()
+  @ApiOperation({ summary: "Token 撤销", description: "撤销 Access Token 或 Refresh Token" })
+  @ApiResponse({
+    status: 200,
+    description: "撤销成功",
+    schema: { example: { success: true, message: "Token 已撤销" } },
+  })
+  @ApiResponse({ status: 400, description: "参数错误" })
   async revoke(
     @Body()
     body: { token: string; token_type_hint?: string }
@@ -192,6 +257,20 @@ export class OAuthV2Controller {
   @Post("introspect")
   @HttpCode(HttpStatus.OK)
   @AllowAnonymous()
+  @ApiOperation({ summary: "Token 内省", description: "验证和获取 Token 信息" })
+  @ApiResponse({
+    status: 200,
+    description: "内省成功",
+    schema: {
+      example: {
+        active: true,
+        user_id: "xxx",
+        client_id: "xxx",
+        scope: "read write",
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: "Token 无效", schema: { example: { active: false } } })
   async introspect(
     @Body()
     body: { token: string }

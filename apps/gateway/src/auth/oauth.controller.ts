@@ -6,6 +6,7 @@
 
 import process from "node:process";
 import { Controller, Get } from "@nestjs/common";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
 import type { OAuthProviderStatus } from "./auth.dto";
 
@@ -15,6 +16,7 @@ import type { OAuthProviderStatus } from "./auth.dto";
  * 提供以下功能：
  * - GET /auth/oauth/providers - 获取可用的 OAuth Provider 列表
  */
+@ApiTags("OAuth 认证")
 @Controller("auth/oauth")
 export class OAuthController {
   /**
@@ -34,6 +36,22 @@ export class OAuthController {
    */
   @Get("providers")
   @AllowAnonymous()
+  @ApiOperation({
+    summary: "获取 OAuth Provider 列表",
+    description: "返回所有已配置的 OAuth Provider 及其状态",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: {
+      example: {
+        providers: [
+          { provider: "google", enabled: true, callbackURL: "/api/auth/callback/google" },
+          { provider: "github", enabled: false, callbackURL: "/api/auth/callback/github" },
+        ],
+      },
+    },
+  })
   getProviders(): { providers: OAuthProviderStatus[] } {
     const providers: OAuthProviderStatus[] = [
       {

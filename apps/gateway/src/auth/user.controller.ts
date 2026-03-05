@@ -1,4 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AllowAnonymous, OptionalAuth, Session, type UserSession } from "@oksai/nestjs-better-auth";
 
 /**
@@ -10,6 +11,7 @@ import { AllowAnonymous, OptionalAuth, Session, type UserSession } from "@oksai/
  * - @AllowAnonymous() - 允许匿名访问
  * - @OptionalAuth() - 可选认证
  */
+@ApiTags("用户")
 @Controller("users")
 export class UserController {
   /**
@@ -26,6 +28,13 @@ export class UserController {
    * Response: { user: { id: "xxx", email: "user@example.com", ... } }
    */
   @Get("me")
+  @ApiOperation({ summary: "获取当前用户信息", description: "返回当前已认证用户的会话信息" })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: { example: { user: { id: "xxx", email: "user@example.com" } } },
+  })
+  @ApiResponse({ status: 401, description: "未认证" })
   async getProfile(@Session() session: UserSession) {
     return { user: session.user };
   }
@@ -42,6 +51,8 @@ export class UserController {
    */
   @Get("public")
   @AllowAnonymous()
+  @ApiOperation({ summary: "公开路由示例", description: "演示允许匿名访问的路由" })
+  @ApiResponse({ status: 200, description: "成功", schema: { example: { message: "Public route" } } })
   async getPublic() {
     return { message: "Public route" };
   }
@@ -61,6 +72,8 @@ export class UserController {
    */
   @Get("optional")
   @OptionalAuth()
+  @ApiOperation({ summary: "可选认证路由示例", description: "演示可选认证的路由" })
+  @ApiResponse({ status: 200, description: "成功", schema: { example: { authenticated: true } } })
   async getOptional(@Session() session: UserSession) {
     return { authenticated: !!session };
   }

@@ -1,5 +1,55 @@
 # Workflow 翻译决策
 
+## 通用决策
+
+以下是适用于所有功能的通用决策：
+
+### UDR-001：优先使用共享模块
+
+当需要使用以下功能时，优先使用 `libs/shared` 目录下的共享模块：
+
+| 功能类型 | 共享模块 | 使用场景 |
+|---------|---------|---------|
+| 日志 | `@oksai/logger` | 统一日志记录、结构化日志 |
+| 异常 | `@oksai/exceptions` | 统一异常处理、DDD 分层异常 |
+| 契约 | `@oksai/constants` | 错误码、事件名称、API 契约 |
+| 配置 | `@oksai/config` | 环境配置、配置验证 |
+| 上下文 | `@oksai/context` | 租户上下文、请求上下文 |
+
+**示例：**
+```typescript
+// ✅ 推荐
+import { OksaiLoggerService } from "@oksai/logger";
+import { InfrastructureException } from "@oksai/exceptions";
+
+// ❌ 避免
+import { Logger } from "@nestjs/common";
+```
+
+### UDR-002：文档管理规范
+
+**决策**
+当需要创建开发文档时，优先在当前项目的 `docs` 目录下创建。
+
+**文档结构：**
+- 功能文档：`specs/{feature}/docs/`
+- 应用文档：`apps/{app}/docs/`
+- 库文档：`libs/{lib}/docs/`
+
+**示例：**
+```
+# ✅ 推荐
+specs/workflow-translation/docs/translation-flow.md
+libs/shared/i18n/docs/multi-language-support.md
+
+# ❌ 避免
+docs/workflow-translation.md  # 应在 spec 的 docs 目录
+```
+
+---
+
+## 功能特定决策
+
 ## ADR-001：预翻译 vs 按需翻译
 
 ### 背景

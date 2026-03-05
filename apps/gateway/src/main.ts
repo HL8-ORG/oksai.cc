@@ -5,6 +5,7 @@ import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { ConfigService } from "@oksai/config";
 import { OksaiLoggerService } from "@oksai/logger";
+import { setupSwagger } from "@oksai/nestjs-utils";
 import { AppModule } from "./app.module";
 
 /**
@@ -49,10 +50,25 @@ async function bootstrap() {
   );
 
   const port = configService.get<number>("PORT") ?? 3000;
+
+  // 配置 Swagger API 文档
+  const swaggerPath = await setupSwagger(app, {
+    enabled: true,
+    title: "OksAI Gateway API",
+    description: "OksAI 平台 API 文档",
+    version: "1.0.0",
+    swaggerPath: "swagger",
+    enableScalar: true,
+    scalarPath: "docs",
+  });
+
   await app.listen(port);
 
   logger.log(`🚀 Gateway running on http://localhost:${port}`);
-  logger.log(`📚 API Docs: http://localhost:${port}/api`);
+  if (swaggerPath) {
+    logger.log(`📖 Swagger UI: http://localhost:${port}/${swaggerPath}`);
+    logger.log(`📚 Scalar UI: http://localhost:${port}/docs`);
+  }
   logger.log(`🔐 Auth endpoint: http://localhost:${port}/api/auth`);
   logger.log(`🎨 Login page: http://localhost:${port}/login.html`);
 }

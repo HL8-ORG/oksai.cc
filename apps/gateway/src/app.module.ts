@@ -1,9 +1,11 @@
 import process from "node:process";
 import { MikroORM } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ConfigModule, ConfigService } from "@oksai/config";
+import { MikroOrmDatabaseModule } from "@oksai/database";
+import { GlobalExceptionFilter } from "@oksai/exceptions";
 import { LoggerModule } from "@oksai/logger";
 import { AuthModule } from "@oksai/nestjs-better-auth";
 import { AppController } from "./app.controller";
@@ -14,6 +16,7 @@ import { UserController } from "./auth/user.controller";
 import { CacheModule } from "./common/cache.module";
 import { CacheMonitorController } from "./common/cache-monitor.controller";
 import { CustomThrottlerGuard } from "./common/custom-throttler.guard";
+import { ExceptionExampleController } from "./examples/exception-example.controller";
 import { HealthController } from "./health/health.controller";
 
 /**
@@ -50,6 +53,8 @@ import { HealthController } from "./health/health.controller";
       },
     ]),
 
+    MikroOrmDatabaseModule,
+
     AuthModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService, orm: MikroORM) => {
@@ -73,13 +78,23 @@ import { HealthController } from "./health/health.controller";
       enableStats: true,
     }),
   ],
-  controllers: [AppController, HealthController, UserController, CacheMonitorController],
+  controllers: [
+    AppController,
+    HealthController,
+    UserController,
+    CacheMonitorController,
+    ExceptionExampleController,
+  ],
   providers: [
     AppService,
     CustomThrottlerGuard,
     {
       provide: APP_GUARD,
       useExisting: CustomThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })

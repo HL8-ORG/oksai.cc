@@ -13,6 +13,7 @@
  */
 
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
+import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto, UpdateApiKeyDto } from "./api-key.dto";
 import { auth } from "./auth";
 
@@ -26,6 +27,7 @@ import { auth } from "./auth";
  *
  * @see https://better-auth.com/docs/plugins/api-key
  */
+@ApiTags("API Key 管理")
 @Controller("api-keys")
 export class ApiKeyController {
   /**
@@ -59,6 +61,23 @@ export class ApiKeyController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "创建 API Key", description: "创建新的 API Key，完整 Key 仅显示一次" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiBody({
+    schema: {
+      example: {
+        name: "My API Key",
+        expiresIn: 31536000,
+        permissions: { user: ["read", "write"] },
+        metadata: { project: "demo" },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "创建成功",
+    schema: { example: { id: "xxx", key: "api-key_xxx" } },
+  })
   async createApiKey(@Body() dto: CreateApiKeyDto): Promise<ApiKeyResponse> {
     // TODO: 从 session 中提取 userId
     // 临时方案：使用硬编码的 userId
@@ -118,6 +137,16 @@ export class ApiKeyController {
    * }
    */
   @Get()
+  @ApiOperation({
+    summary: "获取 API Key 列表",
+    description: "获取当前用户的所有 API Keys（支持分页和排序）",
+  })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: { example: { success: true, apiKeys: [], total: 25 } },
+  })
   async listApiKeys(
     @Query("limit") limit?: number,
     @Query("offset") offset?: number,
@@ -170,6 +199,11 @@ export class ApiKeyController {
    * }
    */
   @Get(":id")
+  @ApiOperation({ summary: "获取单个 API Key", description: "获取指定 API Key 的详细信息" })
+  @ApiParam({ name: "id", description: "API Key ID" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({ status: 200, description: "成功", schema: { example: { id: "xxx", name: "My API Key" } } })
+  @ApiResponse({ status: 404, description: "API Key 不存在" })
   async getApiKey(@Param("id") apiKeyId: string): Promise<ApiKeyResponse> {
     // 使用 Better Auth API 获取 API Key（临时使用 as any 绕过类型检查）
     const result = await (auth.api as any).getApiKey({
@@ -218,6 +252,11 @@ export class ApiKeyController {
    * }
    */
   @Put(":id")
+  @ApiOperation({ summary: "更新 API Key", description: "更新 API Key 的属性（名称、权限、元数据等）" })
+  @ApiParam({ name: "id", description: "API Key ID" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiBody({ schema: { example: { name: "New Name", permissions: { user: ["read"] } } } })
+  @ApiResponse({ status: 200, description: "成功", schema: { example: { id: "xxx", name: "New Name" } } })
   async updateApiKey(@Param("id") apiKeyId: string, @Body() dto: UpdateApiKeyDto): Promise<ApiKeyResponse> {
     // 使用 Better Auth API 更新 API Key（临时使用 as any 绕过类型检查）
     const result = await (auth.api as any).updateApiKey({
@@ -269,6 +308,14 @@ export class ApiKeyController {
    */
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "删除 API Key", description: "删除（撤销）指定的 API Key，删除后立即失效" })
+  @ApiParam({ name: "id", description: "API Key ID" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: { example: { success: true, message: "API Key 已删除" } },
+  })
   async deleteApiKey(@Param("id") apiKeyId: string): Promise<{ success: boolean; message: string }> {
     // 使用 Better Auth API 删除 API Key（临时使用 as any 绕过类型检查）
     await (auth.api as any).deleteApiKey({

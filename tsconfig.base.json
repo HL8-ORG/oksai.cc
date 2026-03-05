@@ -30,7 +30,8 @@
       "@oksai/database": ["libs/database/src/index.ts"],
       "@oksai/email": ["libs/notification/email/src/index.ts"],
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
-      "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"]
+      "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
+      "@oksai/nestjs-utils": ["libs/shared/nestjs-utils/src/index.ts"]
     }
   }
 }

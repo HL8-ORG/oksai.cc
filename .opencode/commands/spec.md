@@ -62,6 +62,15 @@ $ARGUMENTS
    ```bash
    cp -r specs/_templates specs/{feature-name}
    ```
+   
+   模板包含以下核心文件：
+   - `design.md` - 技术设计（Source of Truth）
+   - `testing.md` - 测试计划（测试金字塔、覆盖率目标）
+   - `workflow.md` - 开发流程（用户故事→BDD→TDD）
+   - `implementation.md` - 实现进度跟踪
+   - `decisions.md` - 架构决策记录
+   - `prompts.md` - 常用提示词
+   
 4. **更新 AGENTS.md**：将 `{功能名称}` 替换为实际名称
 5. **引导用户填写 design.md**：
    - 询问功能描述
@@ -70,12 +79,21 @@ $ARGUMENTS
 6. **初始化 implementation.md**：
    - 状态设为 `未开始`
    - 填写下一步计划
+7. **提示用户规划测试和流程**：
+   - 填写 `testing.md` 确定测试策略
+   - 参考 `workflow.md` 了解开发流程
 
 **输出示例：**
 
 ```
 [spec] 创建新功能 spec: user-profile
 [spec] 目录已创建: specs/user-profile/
+[spec] 模板文件已复制:
+  - design.md (技术设计)
+  - testing.md (测试计划)
+  - workflow.md (开发流程)
+  - implementation.md (进度跟踪)
+  - decisions.md (决策记录)
 [spec] 请描述该功能要实现什么？
 ```
 
@@ -265,6 +283,98 @@ $ARGUMENTS
 
 ---
 
+---
+
+## 模板使用指南
+
+### testing.md - 测试计划
+
+**用途：** 规划测试策略和覆盖率目标
+
+**何时填写：** 开始编写测试前
+
+**关键内容：**
+- 测试策略（测试金字塔：单元 70% / 集成 20% / E2E 10%）
+- 各层测试用例规划
+- BDD 场景定义
+- Mock 策略
+- 测试覆盖率目标
+
+**示例：**
+```markdown
+## 单元测试（70%）
+
+| 组件 | 测试文件 | 测试用例 | 状态 |
+|:---|:---|:---|:---:|
+| User | `user.aggregate.spec.ts` | 创建、验证、业务规则 | ⏳ |
+```
+
+### workflow.md - 开发工作流程
+
+**用途：** 定义从需求到实现的完整流程
+
+**何时参考：** 开始开发前
+
+**关键流程：**
+1. **用户故事** → 业务需求（作为...我想要...以便于...）
+2. **BDD 场景** → 验收标准（Given-When-Then）
+3. **TDD 循环** → 测试驱动开发（Red-Green-Refactor）
+4. **代码实现** → 领域代码 + 基础设施
+
+**推荐工作流程：**
+```bash
+# 1. 编写用户故事
+# 在 design.md 中使用 "作为...我想要...以便于..." 格式
+
+# 2. 编写 BDD 场景
+# 创建 features/{feature}.feature 文件
+
+# 3. TDD 循环
+pnpm vitest watch  # 启动测试监听
+# 🔴 Red: 编写失败的测试
+# 🟢 Green: 编写最简实现
+# 🔵 Refactor: 优化代码
+
+# 4. 验证覆盖率
+pnpm vitest run --coverage
+```
+
+---
+
+## 模板文件说明
+
+创建新 spec 时会复制以下模板文件：
+
+| 模板文件 | 用途 | 使用时机 | 必填 |
+|---------|------|---------|------|
+| `AGENTS.md` | AI 助手指南 | 创建时自动生成 | ✅ |
+| `design.md` | 技术设计文档 | 开始实现前 | ✅ |
+| `implementation.md` | 实现进度跟踪 | 每次开发会话 | ✅ |
+| `decisions.md` | 架构决策记录 | 做技术决策时 | ⭕ |
+| `prompts.md` | 常用提示词 | 发现新模式时 | ⭕ |
+| `testing.md` | 测试计划 | 编写测试前 | ✅ |
+| `workflow.md` | 开发工作流程 | 开始开发前 | ✅ |
+| `future-work.md` | 后续工作 | 功能完成后 | ⭕ |
+
+### testing.md 包含内容
+
+- 测试策略（测试金字塔：单元 70%、集成 20%、E2E 10%）
+- 测试用例表格
+- BDD 场景规划
+- 覆盖率目标
+- Mock 策略
+- 测试命令
+
+### workflow.md 包含内容
+
+- 用户故事模板和示例
+- BDD 场景编写指南（Given-When-Then）
+- TDD 循环流程（Red-Green-Refactor）
+- DDD 分层实现指南
+- 代码 Review 检查清单
+
+---
+
 ## 模板变量
 
 创建新 spec 时，替换以下模板变量：
@@ -287,11 +397,24 @@ specs/{feature-name}/
 ├── implementation.md   # 实现进度跟踪
 ├── decisions.md        # 架构决策记录（ADR）
 ├── prompts.md          # 常用提示词
+├── testing.md          # 测试计划（测试金字塔 + 覆盖率目标）
+├── workflow.md         # 开发工作流程（用户故事 → BDD → TDD）
 ├── future-work.md      # 后续工作
 └── docs/
     ├── README.md       # 带截图的文档
     └── screenshots/    # 截图目录
 ```
+
+### 核心文件说明
+
+| 文件 | 用途 | 更新时机 |
+|------|------|----------|
+| `design.md` | 技术设计文档，所有实现的原点 | 开始实现前 |
+| `implementation.md` | 实现进度跟踪 | 每次开发会话 |
+| `testing.md` | 测试计划和覆盖率目标 | 编写测试前 |
+| `workflow.md` | 开发流程（用户故事→BDD→TDD） | 开始开发前 |
+| `decisions.md` | 架构决策记录（ADR） | 做技术决策时 |
+| `prompts.md` | 常用 AI 提示词 | 发现新模式时 |
 
 ---
 
@@ -310,10 +433,77 @@ specs/{feature-name}/
 ## 最佳实践
 
 1. **开始新功能前**：先用 `/spec new` 创建 spec
-2. **实现过程中**：定期更新 `implementation.md`
-3. **做技术决策时**：记录到 `decisions.md`
-4. **功能完成后**：用 `/spec docs` 生成文档
-5. **新会话开始时**：用 `/spec continue` 恢复上下文
+2. **实现前规划**：
+   - 填写 `design.md` 明确设计
+   - 阅读 `workflow.md` 了解开发流程
+   - 规划 `testing.md` 测试策略
+3. **实现过程中**：定期更新 `implementation.md`
+4. **做技术决策时**：记录到 `decisions.md`
+5. **编写测试时**：参考 `testing.md` 的测试计划
+6. **功能完成后**：用 `/spec docs` 生成文档
+7. **新会话开始时**：用 `/spec continue` 恢复上下文
+
+### 推荐工作流
+
+```
+1. /spec new <feature>          # 创建 spec
+2. 填写 design.md               # 明确设计
+3. 阅读 workflow.md             # 了解流程
+4. 规划 testing.md              # 制定测试计划
+5. 开始 TDD 开发                # Red-Green-Refactor
+6. 更新 implementation.md       # 记录进度
+7. /spec docs <feature>         # 生成文档
+```
+
+---
+
+## 测试覆盖要求
+
+每个功能 spec 应包含完整的测试计划（`testing.md`）：
+
+### 测试金字塔
+
+```
+      /\
+     /E2E\      10% - 关键业务流程
+    /------\
+   / 集成  \    20% - 组件协作
+  /----------\
+ /   单元测试  \ 70% - 领域逻辑
+/--------------\
+```
+
+### 覆盖率目标
+
+- 领域层：> 90%
+- 应用层：> 85%
+- 总体：> 80%
+
+### 测试文件命名规范
+
+```
+{entity}.aggregate.spec.ts       # 聚合根测试
+{value-object}.vo.spec.ts        # 值对象测试
+{command}.handler.spec.ts        # 命令处理器测试
+{repository}.repository.int-spec.ts  # Repository 集成测试
+{feature}.e2e-spec.ts            # E2E 测试
+```
+
+---
+
+## 自定义模板
+
+可以自定义 `specs/_templates/` 中的模板文件以适应项目需求：
+
+### 添加新模板文件
+
+1. 创建 `specs/_templates/{new-template}.md`
+2. 在本命令文档中添加说明
+3. 更新 `AGENTS.md` 模板以引用新文件
+
+### 修改现有模板
+
+编辑 `specs/_templates/` 中的文件，更改会应用到所有新创建的 spec。
 
 ---
 

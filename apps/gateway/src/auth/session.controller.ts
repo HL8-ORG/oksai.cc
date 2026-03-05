@@ -1,7 +1,3 @@
-/**
- * Session 管理控制器
- */
-
 import {
   Body,
   Controller,
@@ -14,6 +10,7 @@ import {
   Post,
   Put,
 } from "@nestjs/common";
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./session.dto";
 import { SessionService } from "./session.service";
 
@@ -25,6 +22,7 @@ import { SessionService } from "./session.service";
  *
  * 所有接口需要用户认证（通过 Bearer Token）
  */
+@ApiTags("会话管理")
 @Controller("sessions")
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
@@ -41,6 +39,12 @@ export class SessionController {
    * Response: { success: true, sessions: [...], currentSessionId: "..." }
    */
   @Get()
+  @ApiOperation({
+    summary: "获取所有活跃 Session",
+    description: "获取当前用户的所有活跃会话（包括其他设备）",
+  })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({ status: 200, description: "成功", schema: { example: { success: true, sessions: [] } } })
   async listSessions(@Headers("authorization") _authorization: string): Promise<SessionListResponse> {
     // TODO: 从 token 中提取 userId 和 sessionToken
     const userId = "temp-user-id";
@@ -60,6 +64,13 @@ export class SessionController {
    * Response: { success: true, sessionTimeout: 604800, sessionTimeoutDays: 7 }
    */
   @Get("config")
+  @ApiOperation({ summary: "获取 Session 配置", description: "获取当前用户的会话超时配置" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: { example: { success: true, sessionTimeout: 604800 } },
+  })
   async getConfig(@Headers("authorization") _authorization: string): Promise<SessionConfigResponse> {
     // TODO: 从 token 中提取 userId
     const userId = "temp-user-id";
@@ -79,6 +90,13 @@ export class SessionController {
    * Response: { success: true, sessionTimeout: 86400, sessionTimeoutDays: 1, allowConcurrentSessions: false }
    */
   @Put("config")
+  @ApiOperation({ summary: "更新 Session 配置", description: "更新当前用户的会话超时配置和并发登录设置" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: { example: { success: true, sessionTimeout: 86400 } },
+  })
   async updateConfig(
     @Headers("authorization") _authorization: string,
     @Body() dto: UpdateSessionConfigDto
@@ -101,6 +119,13 @@ export class SessionController {
    */
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "撤销指定 Session", description: "撤销指定的会话，使其立即失效（登出特定设备）" })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({
+    status: 200,
+    description: "成功",
+    schema: { example: { success: true, message: "Session 已撤销" } },
+  })
   async revokeSession(
     @Headers("authorization") _authorization: string,
     @Param("id") sessionId: string
@@ -127,6 +152,12 @@ export class SessionController {
    */
   @Post("revoke-others")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "撤销所有其他 Session",
+    description: "撤销除当前会话外的所有其他会话（登出其他设备）",
+  })
+  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiResponse({ status: 200, description: "成功", schema: { example: { success: true, count: 3 } } })
   async revokeOtherSessions(
     @Headers("authorization") _authorization: string
   ): Promise<{ success: boolean; message: string; count: number }> {

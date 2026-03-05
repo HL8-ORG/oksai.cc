@@ -4,7 +4,6 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
-import { MikroOrmDatabaseModule } from "@oksai/database";
 import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
 import { CacheModule } from "../common/cache.module";
 import { CacheService } from "../common/cache.service";
@@ -43,7 +42,7 @@ import { WebhookService } from "./webhook.service";
  * 如需自定义认证端点，请使用不同的路由前缀（如 /auth-v2）避免冲突。
  */
 @Module({
-  imports: [MikroOrmDatabaseModule, CacheModule.forRoot()],
+  imports: [CacheModule.forRoot()],
   controllers: [
     // AuthController, // 已禁用：与 Better Auth 原生 API 冲突
     OAuthController,
