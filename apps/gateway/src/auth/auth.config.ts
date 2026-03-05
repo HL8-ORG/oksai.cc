@@ -1,5 +1,5 @@
 import { apiKey } from "@better-auth/api-key";
-import type { ConfigService } from "@oksai/config";
+import { ConfigService } from "@oksai/config";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin, organization, twoFactor } from "better-auth/plugins";

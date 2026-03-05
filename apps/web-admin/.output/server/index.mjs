@@ -863,145 +863,145 @@ const headers = ((m) => function headersRouteRule(event) {
 	for (const [key, value] of Object.entries(m.options || {})) event.res.headers.set(key, value);
 });
 var public_assets_data_default = {
-	"/assets/2fa-setup-B2eTLdh4.js": {
+	"/assets/2fa-setup-DQXbVFA4.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"14a4-u6Nu+BkZ3Myo2qjUIJKVlngzvWw\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"14a4-lc54O00zdNFq/bnghJY+ut6L+1I\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 5284,
-		"path": "../public/assets/2fa-setup-B2eTLdh4.js"
+		"path": "../public/assets/2fa-setup-DQXbVFA4.js"
 	},
-	"/assets/B5PP2USH-DgbT_KBH.js": {
+	"/assets/B5PP2USH-VlChKS6K.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"1df-mkeXCHkuqN8WOtslJPaEzNcTreM\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"1df-V5plr0RH0fnrTGwCxICXV9EC/Fs\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 479,
-		"path": "../public/assets/B5PP2USH-DgbT_KBH.js"
+		"path": "../public/assets/B5PP2USH-VlChKS6K.js"
 	},
-	"/assets/HNLWDMU5-DDsGWNE1.js": {
+	"/assets/HNLWDMU5-BIgmj413.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"37059-4jL/LobC5c3/14VnGpWS8XS2MoY\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"37059-Tn1e7uKZIqj1Lx0NixT7orhZm04\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 225369,
-		"path": "../public/assets/HNLWDMU5-DDsGWNE1.js"
+		"path": "../public/assets/HNLWDMU5-BIgmj413.js"
 	},
-	"/assets/WI32IQVE-G5kJZRua.js": {
+	"/assets/WI32IQVE-CxBKtYVX.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"245-MJ/+T7G2x2R9wn/zMllMXY3iLMA\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"245-3HVN6oXTI90QmZgiF9pWSx2jo6s\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 581,
-		"path": "../public/assets/WI32IQVE-G5kJZRua.js"
+		"path": "../public/assets/WI32IQVE-CxBKtYVX.js"
 	},
 	"/assets/auth-client-D4ztjdlr.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"1b826-L1JdmJsSxcGdy8KI+99XYgSrzyU\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 112678,
 		"path": "../public/assets/auth-client-D4ztjdlr.js"
 	},
 	"/assets/button-BdKOeLR3.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"bd7-kRXyPzdzkfIM1iOobdN9Z/oR0Ag\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 3031,
 		"path": "../public/assets/button-BdKOeLR3.js"
 	},
-	"/assets/dashboard-CcLiYydg.js": {
+	"/assets/dashboard-C7mZwooy.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"c38-iPDoqxcBnQneBS12A9aLF/ERd2w\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"c38-dAt+QxTN1jhDq7LxRya1LdthiMU\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 3128,
-		"path": "../public/assets/dashboard-CcLiYydg.js"
+		"path": "../public/assets/dashboard-C7mZwooy.js"
 	},
-	"/assets/forgot-password-a7VIDY4F.js": {
+	"/assets/forgot-password-B3M1xhFf.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"da5-EqkBLua+FQwFH6FE8Ccw0TkK42A\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"da5-ECacVJr4Qzj33BsSJ0S7JmV9o8Q\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 3493,
-		"path": "../public/assets/forgot-password-a7VIDY4F.js"
+		"path": "../public/assets/forgot-password-B3M1xhFf.js"
 	},
 	"/assets/jsx-dev-runtime-DrCgFwTT.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"64f6-FrFa8XXTsLfbp632PxseNEloH6Y\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 25846,
 		"path": "../public/assets/jsx-dev-runtime-DrCgFwTT.js"
 	},
-	"/assets/label-CO4QpXJ4.js": {
+	"/assets/label-CFYU2Inl.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"6e9-2w4eqMs4Ro+ePruOniyz+TlBYoM\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
-		"size": 1769,
-		"path": "../public/assets/label-CO4QpXJ4.js"
+		"etag": "\"6eb-VFG0/Ae1abVCzBzSyyZpC2WSWRM\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
+		"size": 1771,
+		"path": "../public/assets/label-CFYU2Inl.js"
 	},
-	"/assets/link-Cm2Ql3Ju.js": {
+	"/assets/link-BadxUGOO.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"6b0e-rzsowyBJJEVYk5G3ccact0q1Mz0\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
-		"size": 27406,
-		"path": "../public/assets/link-Cm2Ql3Ju.js"
+		"etag": "\"6b16-v7puvdLKTQzqSeRJ1TaQjGj7DbM\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
+		"size": 27414,
+		"path": "../public/assets/link-BadxUGOO.js"
 	},
-	"/assets/login-DRqAH1nl.js": {
+	"/assets/login-DgT1KfZe.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"d12-KO99NAMvIP2rUeI97oq3/sfeKvs\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"d12-cU8mmi2aDYnWMmZeqNoR5VnKDrE\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 3346,
-		"path": "../public/assets/login-DRqAH1nl.js"
+		"path": "../public/assets/login-DgT1KfZe.js"
 	},
 	"/assets/main-cv0Z84pI.css": {
 		"type": "text/css; charset=utf-8",
 		"etag": "\"56a0-lYw6795dK96iBUhN+AR3EG0Gcs0\"",
-		"mtime": "2026-03-04T14:32:20.986Z",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 22176,
 		"path": "../public/assets/main-cv0Z84pI.css"
 	},
-	"/assets/preload-helper-ByhBU-Yx.js": {
+	"/assets/preload-helper-DfcWfDPz.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"1c7d-qgVr7o0Ux96zPxK90/1LnD7s8Vw\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"1c7d-6NpjAGk1R/Hu4m2P1/ijRfrqjvA\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 7293,
-		"path": "../public/assets/preload-helper-ByhBU-Yx.js"
+		"path": "../public/assets/preload-helper-DfcWfDPz.js"
 	},
-	"/assets/register-CWWK9Vmj.js": {
+	"/assets/register-CrxF4g2p.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"146f-QheEie5sOkYNN8VxUq7cFbk7NLY\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"146f-CfSKA/qdOLB+mFJrliX9OuIhtuk\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 5231,
-		"path": "../public/assets/register-CWWK9Vmj.js"
+		"path": "../public/assets/register-CrxF4g2p.js"
 	},
-	"/assets/reset-password-DB1SJiMT.js": {
+	"/assets/reset-password-zXZrrhV7.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"f01-V+TrikZDr4zlJaUex88CxNgjPAs\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"etag": "\"f01-NxBmJRMSnVJRI5ihxXxKwG/o3ro\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 3841,
-		"path": "../public/assets/reset-password-DB1SJiMT.js"
+		"path": "../public/assets/reset-password-zXZrrhV7.js"
 	},
 	"/assets/routes-Ctgrcs5I.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"302-FuLc6JU6RRk3M2ycrCxC2CM8RrU\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 770,
 		"path": "../public/assets/routes-Ctgrcs5I.js"
 	},
 	"/assets/useNavigate-CaCzksYQ.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"ea-YpNpi9eUnoQAN0LaxbyutTjqxEg\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 234,
 		"path": "../public/assets/useNavigate-CaCzksYQ.js"
 	},
-	"/assets/verify-email-Dp0KIIUF.js": {
+	"/assets/verify-email-Bt512RE2.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"94b-/OPnXeO4gTlzB0wNygk4bS8d4o4\"",
-		"mtime": "2026-03-04T14:32:20.986Z",
+		"etag": "\"94b-QLCSdHiVoLq725sq0dqM73CSrBw\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
 		"size": 2379,
-		"path": "../public/assets/verify-email-Dp0KIIUF.js"
+		"path": "../public/assets/verify-email-Bt512RE2.js"
 	},
-	"/assets/main-6Umj3mSk.js": {
+	"/assets/main-DyXVAF3B.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"8669b-7laF6E0TbBcoT1XMd21SfMTg/Wc\"",
-		"mtime": "2026-03-04T14:32:20.975Z",
-		"size": 550555,
-		"path": "../public/assets/main-6Umj3mSk.js"
+		"etag": "\"87dd9-zCEcf4/RHvg7xR5srX9o4anFW/c\"",
+		"mtime": "2026-03-05T04:38:36.849Z",
+		"size": 556505,
+		"path": "../public/assets/main-DyXVAF3B.js"
 	}
 };
 function readAsset(id) {
@@ -1081,11 +1081,11 @@ const findRouteRules = /* @__PURE__ */ (() => {
 		return r;
 	};
 })();
-var _lazy_vee42C = defineLazyEventHandler(() => Promise.resolve().then(() => ssr_renderer_exports));
+var _lazy_knhltg = defineLazyEventHandler(() => Promise.resolve().then(() => ssr_renderer_exports));
 const findRoute = /* @__PURE__ */ (() => {
 	const data = {
 		route: "/**",
-		handler: _lazy_vee42C
+		handler: _lazy_knhltg
 	};
 	return ((_m, p) => {
 		return {

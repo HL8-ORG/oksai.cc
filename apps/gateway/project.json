@@ -7,6 +7,7 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build"],
       "options": {
         "cwd": "apps/gateway",
         "command": "nest build"

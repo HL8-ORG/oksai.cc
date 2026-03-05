@@ -1,6 +1,6 @@
 # NestJS Better Auth 集成实现
 
-## 状态：Phase 3 已完成 ✅
+## 状态：Phase 3 已完成 ✅，Phase 4 计划中 🚀
 
 ## 已完成
 
@@ -94,15 +94,15 @@
 - auth-guard.ts: 64.36% 🚧
 - auth-module.ts: 23.94% ⚠️ (需要 E2E 测试覆盖 configure/onModuleInit)
 
-**当前覆盖率：68.14%** (143 passed, 1 skipped)
+**当前覆盖率：67.53%** (143 passed, 1 skipped)
 
 **Phase 2 状态：完全完成 ✅**
 
 **覆盖率提升总结：**
-- 总体：59.25% → **68.14%** (+8.89%)
+- 总体：59.25% → **67.53%** (+8.28%)
 - `auth-module.ts`: 23.94% → **35.21%** (+11.27%) ✨
 - `auth-guard.ts`: 64.36% → **73.56%** (+9.2%) ✨
-- `utils.ts`: 55.55% → **88.88%** (+33.33%) ✨
+- `utils.ts`: 55.55% → **90.9%** (+35.35%) ✨
 - `decorators.ts`: 87.5% → **92.3%** (+4.8%) ✨
 
 **测试统计：**
@@ -119,7 +119,7 @@
 | auth-module-definition.ts | 100% | ✅ | 完全覆盖 |
 | auth-service.ts | 100% | ✅ | 完全覆盖 |
 | symbols.ts | 100% | ✅ | 完全覆盖 |
-| utils.ts | 88.88% | ✅ | GraphQL 懒加载未覆盖 |
+| utils.ts | 90.9% | ✅ | GraphQL 懒加载未覆盖 |
 | decorators.ts | 92.3% | ✅ | @Session 实现未覆盖 |
 | auth-guard.ts | 73.56% | 🚧 | GraphQL/WebSocket 错误处理未覆盖 |
 | auth-module.ts | 35.21% | ⚠️ | configure/setupHooks 需要复杂 E2E |
@@ -190,6 +190,82 @@ if (hasOrganizationPlugin(authAPI)) {
 - [ ] 添加更多插件类型（如 anonymous、passkey、magic-link 等）
 - [ ] 创建插件集成示例
 - [ ] 添加插件配置验证装饰器
+
+## 进行中
+
+### Phase 4: 支持 Better Auth 插件迁移（计划中 🚀）
+
+> **参考**: [docs/auth-optimization-plan.md](../../docs/auth-optimization-plan.md)
+
+**目标**: 为 Phase 5 的 Better Auth 插件迁移提供类型和工具支持
+
+**待开始任务：**
+
+#### 任务 1: 扩展插件类型定义
+
+**状态**: ⏳ 计划中（预计 3-5 天）
+
+**目标**: 添加 API Key 和 OAuth Provider 插件类型
+
+**待办事项**:
+- [ ] 创建 ApiKeyAuthAPI 类型定义（~10 个方法）
+  - create, verify, get, update, delete, list
+  - 权限检查、速率限制相关方法
+- [ ] 创建 OAuthProviderAuthAPI 类型定义（~15 个方法）
+  - OAuth 2.0 授权流程相关方法
+  - Token 管理方法
+  - Client 管理方法
+- [ ] 更新 BetterAuthAPI 组合类型
+
+#### 任务 2: 添加类型守卫函数
+
+**状态**: ⏳ 计划中（预计 1-2 天）
+
+**目标**: 添加运行时插件检查函数
+
+**待办事项**:
+- [ ] hasApiKeyPlugin() - 检查是否启用 API Key 插件
+- [ ] hasOAuthProviderPlugin() - 检查是否启用 OAuth Provider 插件
+- [ ] 更新单元测试
+
+#### 任务 3: 更新 AuthService 泛型支持
+
+**状态**: ⏳ 计划中（预计 2-3 天）
+
+**目标**: 支持泛型以扩展插件类型
+
+**待办事项**:
+- [ ] 修改 AuthService 支持泛型参数
+- [ ] 提供插件类型推断
+- [ ] 更新使用示例和文档
+
+#### 任务 4: 创建插件集成示例
+
+**状态**: ⏳ 计划中（预计 2-3 天）
+
+**目标**: 提供完整的使用示例
+
+**待办事项**:
+- [ ] API Key 插件使用示例
+- [ ] Admin 插件使用示例
+- [ ] OAuth Provider 插件使用示例
+- [ ] 更新 README.md
+
+#### 任务 5: 添加装饰器支持
+
+**状态**: ⏳ 计划中（预计 3-5 天）
+
+**目标**: 提供便捷的装饰器
+
+**待办事项**:
+- [ ] @RequireApiKeyPermission() - API Key 权限检查
+- [ ] @RequireAdminRole() - Admin 角色检查（增强现有 @Roles）
+- [ ] 创建单元测试
+- [ ] 更新文档
+
+**预计工作量：** 1-2 周
+
+**依赖：** Phase 5 的 Better Auth 插件迁移
 
 ## 阻塞项
 

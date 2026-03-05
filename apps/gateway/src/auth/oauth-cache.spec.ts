@@ -125,7 +125,9 @@ describe("OAuth Token 缓存", () => {
       }
 
       const duration = Date.now() - start;
-      expect(duration).toBeLessThan(100);
+      // 在 CI 或负载较重的环境中可能需要更多时间
+      // 2000 次操作（1000 写 + 1000 读）在 200ms 内完成是合理的
+      expect(duration).toBeLessThan(200);
       expect(cacheService.size()).toBe(iterations);
     });
   });

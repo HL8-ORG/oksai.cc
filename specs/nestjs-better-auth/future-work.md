@@ -1,10 +1,88 @@
 # NestJS Better Auth 集成后续工作
 
-从 Phase 1 实现中延期的想法与增强项。
+从 Phase 1-3 实现中延期的想法与增强项。
 
-**当前状态：** Phase 1 已完成 ✅ (2024-03-02)  
-**测试覆盖率：** 67.5%（86 个测试，100% 通过）  
-**下一阶段：** Phase 2 - 增强功能（预计 1-2 周）
+**当前状态：** Phase 3 已完成 ✅ (2026-03-03)  
+**测试覆盖率：** 67.53%（143 个测试，100% 通过）  
+**下一阶段：** Phase 4 - 支持 Better Auth 插件迁移（预计 1-2 周）
+
+---
+
+## 🎯 Phase 4: 支持 Better Auth 插件迁移（高优先级）
+
+> **参考**: [docs/auth-optimization-plan.md](../../docs/auth-optimization-plan.md)
+
+**目标**: 为 Phase 5 的 Better Auth 插件迁移提供类型和工具支持
+
+### 4.1 扩展插件类型定义（P1） - 3-5 天
+
+**目标**: 添加 API Key 和 OAuth Provider 插件类型
+
+**待添加类型**:
+- ApiKeyAuthAPI（~10 个方法）
+  - create, verify, get, update, delete, list
+  - 权限检查、速率限制相关方法
+- OAuthProviderAuthAPI（~15 个方法）
+  - OAuth 2.0 授权流程相关方法
+  - Token 管理方法
+  - Client 管理方法
+
+**预期收益**:
+- 支持 Phase 5 的 API Key 和 OAuth Provider 插件迁移
+- 完整的 TypeScript 类型支持
+- 更好的开发体验
+
+### 4.2 添加类型守卫函数（P1） - 1-2 天
+
+**目标**: 添加运行时插件检查函数
+
+**待添加函数**:
+- hasApiKeyPlugin()
+- hasOAuthProviderPlugin()
+
+**预期收益**:
+- 运行时安全检查
+- 类型推断支持
+
+### 4.3 更新 AuthService 泛型支持（P1） - 2-3 天
+
+**目标**: 支持泛型以扩展插件类型
+
+**改进方案**:
+- 修改 AuthService 支持泛型参数
+- 提供插件类型推断
+- 更新使用示例
+
+**预期收益**:
+- 灵活的插件类型扩展
+- 更好的类型安全
+
+### 4.4 创建插件集成示例（P2） - 2-3 天
+
+**目标**: 提供完整的使用示例
+
+**待创建示例**:
+- API Key 插件使用示例
+- Admin 插件使用示例
+- OAuth Provider 插件使用示例
+
+**预期收益**:
+- 降低学习成本
+- 最佳实践参考
+
+### 4.5 添加装饰器支持（P2） - 3-5 天
+
+**目标**: 提供便捷的装饰器
+
+**待添加装饰器**:
+- @RequireApiKeyPermission() - API Key 权限检查
+- @RequireAdminRole() - Admin 角色检查（增强现有 @Roles）
+
+**预期收益**:
+- 更简洁的权限控制
+- 声明式 API
+
+---
 
 ## 增强项
 

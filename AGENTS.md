@@ -146,12 +146,31 @@ pnpm vitest run -t "Decorators"
 
 ### Database Commands
 
+**MikroORM (推荐使用)**:
 ```bash
+# MikroORM 命令
+pnpm mikro-orm schema:update   # 更新 Schema（开发环境）
+pnpm mikro-orm migration:create # 创建迁移文件
+pnpm mikro-orm migration:up     # 运行迁移
+pnpm mikro-orm migration:down   # 回滚迁移
+pnpm mikro-orm migration:pending # 查看待执行迁移
+```
+
+**Drizzle (兼容旧 Schema)**:
+```bash
+# Drizzle 命令（保留用于旧代码参考）
 pnpm db:generate  # Generate Drizzle schema migrations
 pnpm db:migrate   # Run migrations
 pnpm db:push      # Push schema changes directly
 pnpm db:studio    # Open Drizzle Studio
 ```
+
+**说明**:
+- 项目正在从 Drizzle 迁移到 MikroORM
+- 新功能请使用 MikroORM Entity 和 Repository
+- 旧代码暂时保留 Drizzle Schema 作为参考
+- 详见：`docs/mikro-orm-migration-overall-progress.md`
+
 
 ### Development Commands
 

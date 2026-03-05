@@ -4551,6 +4551,277 @@ function RouterProvider({ router, ...rest }) {
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Matches, {})
 	});
 }
+function Asset({ tag, attrs, children, nonce }) {
+	switch (tag) {
+		case "title": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("title", {
+			...attrs,
+			suppressHydrationWarning: true,
+			children
+		});
+		case "meta": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("meta", {
+			...attrs,
+			suppressHydrationWarning: true
+		});
+		case "link": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("link", {
+			...attrs,
+			nonce,
+			suppressHydrationWarning: true
+		});
+		case "style": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", {
+			...attrs,
+			dangerouslySetInnerHTML: { __html: children },
+			nonce
+		});
+		case "script": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Script, {
+			attrs,
+			children
+		});
+		default: return null;
+	}
+}
+function Script({ attrs, children }) {
+	useRouter();
+	useHydrated();
+	const dataScript = typeof attrs?.type === "string" && attrs.type !== "" && attrs.type !== "text/javascript" && attrs.type !== "module";
+	import_react.useEffect(() => {
+		if (dataScript) return;
+		if (attrs?.src) {
+			const normSrc = (() => {
+				try {
+					const base = document.baseURI || window.location.href;
+					return new URL(attrs.src, base).href;
+				} catch {
+					return attrs.src;
+				}
+			})();
+			if (Array.from(document.querySelectorAll("script[src]")).find((el) => el.src === normSrc)) return;
+			const script = document.createElement("script");
+			for (const [key, value] of Object.entries(attrs)) if (key !== "suppressHydrationWarning" && value !== void 0 && value !== false) script.setAttribute(key, typeof value === "boolean" ? "" : String(value));
+			document.head.appendChild(script);
+			return () => {
+				if (script.parentNode) script.parentNode.removeChild(script);
+			};
+		}
+		if (typeof children === "string") {
+			const typeAttr = typeof attrs?.type === "string" ? attrs.type : "text/javascript";
+			const nonceAttr = typeof attrs?.nonce === "string" ? attrs.nonce : void 0;
+			if (Array.from(document.querySelectorAll("script:not([src])")).find((el) => {
+				if (!(el instanceof HTMLScriptElement)) return false;
+				const sType = el.getAttribute("type") ?? "text/javascript";
+				const sNonce = el.getAttribute("nonce") ?? void 0;
+				return el.textContent === children && sType === typeAttr && sNonce === nonceAttr;
+			})) return;
+			const script = document.createElement("script");
+			script.textContent = children;
+			if (attrs) {
+				for (const [key, value] of Object.entries(attrs)) if (key !== "suppressHydrationWarning" && value !== void 0 && value !== false) script.setAttribute(key, typeof value === "boolean" ? "" : String(value));
+			}
+			document.head.appendChild(script);
+			return () => {
+				if (script.parentNode) script.parentNode.removeChild(script);
+			};
+		}
+	}, [
+		attrs,
+		children,
+		dataScript
+	]);
+	if (attrs?.src) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+		...attrs,
+		suppressHydrationWarning: true
+	});
+	if (typeof children === "string") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+		...attrs,
+		dangerouslySetInnerHTML: { __html: children },
+		suppressHydrationWarning: true
+	});
+	return null;
+}
+var useTags = () => {
+	const router = useRouter();
+	const nonce = router.options.ssr?.nonce;
+	const routeMeta = useRouterState({ select: (state) => {
+		return state.matches.map((match) => match.meta).filter(Boolean);
+	} });
+	const meta = import_react.useMemo(() => {
+		const resultMeta = [];
+		const metaByAttribute = {};
+		let title;
+		for (let i = routeMeta.length - 1; i >= 0; i--) {
+			const metas = routeMeta[i];
+			for (let j = metas.length - 1; j >= 0; j--) {
+				const m = metas[j];
+				if (!m) continue;
+				if (m.title) {
+					if (!title) title = {
+						tag: "title",
+						children: m.title
+					};
+				} else if ("script:ld+json" in m) try {
+					const json = JSON.stringify(m["script:ld+json"]);
+					resultMeta.push({
+						tag: "script",
+						attrs: { type: "application/ld+json" },
+						children: escapeHtml(json)
+					});
+				} catch {}
+				else {
+					const attribute = m.name ?? m.property;
+					if (attribute) if (metaByAttribute[attribute]) continue;
+					else metaByAttribute[attribute] = true;
+					resultMeta.push({
+						tag: "meta",
+						attrs: {
+							...m,
+							nonce
+						}
+					});
+				}
+			}
+		}
+		if (title) resultMeta.push(title);
+		if (nonce) resultMeta.push({
+			tag: "meta",
+			attrs: {
+				property: "csp-nonce",
+				content: nonce
+			}
+		});
+		resultMeta.reverse();
+		return resultMeta;
+	}, [routeMeta, nonce]);
+	const links = useRouterState({
+		select: (state) => {
+			const constructed = state.matches.map((match) => match.links).filter(Boolean).flat(1).map((link) => ({
+				tag: "link",
+				attrs: {
+					...link,
+					nonce
+				}
+			}));
+			const manifest = router.ssr?.manifest;
+			const assets = state.matches.map((match) => manifest?.routes[match.routeId]?.assets ?? []).filter(Boolean).flat(1).filter((asset) => asset.tag === "link").map((asset) => ({
+				tag: "link",
+				attrs: {
+					...asset.attrs,
+					suppressHydrationWarning: true,
+					nonce
+				}
+			}));
+			return [...constructed, ...assets];
+		},
+		structuralSharing: true
+	});
+	const preloadLinks = useRouterState({
+		select: (state) => {
+			const preloadLinks2 = [];
+			state.matches.map((match) => router.looseRoutesById[match.routeId]).forEach((route) => router.ssr?.manifest?.routes[route.id]?.preloads?.filter(Boolean).forEach((preload) => {
+				preloadLinks2.push({
+					tag: "link",
+					attrs: {
+						rel: "modulepreload",
+						href: preload,
+						nonce
+					}
+				});
+			}));
+			return preloadLinks2;
+		},
+		structuralSharing: true
+	});
+	const styles = useRouterState({
+		select: (state) => state.matches.map((match) => match.styles).flat(1).filter(Boolean).map(({ children, ...attrs }) => ({
+			tag: "style",
+			attrs: {
+				...attrs,
+				nonce
+			},
+			children
+		})),
+		structuralSharing: true
+	});
+	const headScripts = useRouterState({
+		select: (state) => state.matches.map((match) => match.headScripts).flat(1).filter(Boolean).map(({ children, ...script }) => ({
+			tag: "script",
+			attrs: {
+				...script,
+				nonce
+			},
+			children
+		})),
+		structuralSharing: true
+	});
+	return uniqBy([
+		...meta,
+		...preloadLinks,
+		...links,
+		...styles,
+		...headScripts
+	], (d) => {
+		return JSON.stringify(d);
+	});
+};
+function uniqBy(arr, fn) {
+	const seen = /* @__PURE__ */ new Set();
+	return arr.filter((item) => {
+		const key = fn(item);
+		if (seen.has(key)) return false;
+		seen.add(key);
+		return true;
+	});
+}
+function HeadContent() {
+	const tags = useTags();
+	const nonce = useRouter().options.ssr?.nonce;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: tags.map((tag) => /* @__PURE__ */ (0, import_react.createElement)(Asset, {
+		...tag,
+		key: `tsr-meta-${JSON.stringify(tag)}`,
+		nonce
+	})) });
+}
+var Scripts = () => {
+	const router = useRouter();
+	const nonce = router.options.ssr?.nonce;
+	const assetScripts = useRouterState({
+		select: (state) => {
+			const assetScripts2 = [];
+			const manifest = router.ssr?.manifest;
+			if (!manifest) return [];
+			state.matches.map((match) => router.looseRoutesById[match.routeId]).forEach((route) => manifest.routes[route.id]?.assets?.filter((d) => d.tag === "script").forEach((asset) => {
+				assetScripts2.push({
+					tag: "script",
+					attrs: {
+						...asset.attrs,
+						nonce
+					},
+					children: asset.children
+				});
+			}));
+			return assetScripts2;
+		},
+		structuralSharing: true
+	});
+	const { scripts } = useRouterState({
+		select: (state) => ({ scripts: state.matches.map((match) => match.scripts).flat(1).filter(Boolean).map(({ children, ...script }) => ({
+			tag: "script",
+			attrs: {
+				...script,
+				suppressHydrationWarning: true,
+				nonce
+			},
+			children
+		})) }),
+		structuralSharing: true
+	});
+	let serverBufferedScript = void 0;
+	if (router.serverSsr) serverBufferedScript = router.serverSsr.takeBufferedScripts();
+	const allScripts = [...scripts, ...assetScripts];
+	if (serverBufferedScript) allScripts.unshift(serverBufferedScript);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: allScripts.map((asset, i) => /* @__PURE__ */ (0, import_react.createElement)(Asset, {
+		...asset,
+		key: `tsr-scripts-${asset.tag}-${i}`
+	})) });
+};
 function transformReadableStreamWithRouter(router, routerStream) {
 	return transformStreamWithRouter(router, routerStream);
 }
@@ -13006,4 +13277,4 @@ var renderRouterToStream = async ({ request, router, responseHeaders, children }
 	}
 	throw new Error("No renderToReadableStream or renderToPipeableStream found in react-dom/server. Ensure you are using a version of react-dom that supports streaming.");
 };
-export { lazyRouteComponent as a, Link as c, redirect as d, Outlet as i, useNavigate as l, RouterProvider as n, createFileRoute as o, createRouter as r, createRootRoute as s, renderRouterToStream as t, isRedirect as u };
+export { createRouter as a, createRootRoute as c, isRedirect as d, redirect as f, RouterProvider as i, Link as l, Scripts as n, lazyRouteComponent as o, HeadContent as r, createFileRoute as s, renderRouterToStream as t, useNavigate as u };

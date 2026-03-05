@@ -5,17 +5,19 @@
 	"license": "AGPL-3.0",
 	"private": true,
 	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"require": "./dist/index.js"
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs",
+			"default": "./dist/index.js"
 		}
 	},
 	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
-		"build:watch": "tsc -p tsconfig.build.json --watch",
+		"build": "pnpm exec tsup src/index.ts --format cjs,esm --dts --external @oksai/config --external @oksai/constants --external @oksai/context",
+		"build:watch": "pnpm exec tsup src/index.ts --format cjs,esm --dts --watch",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"test:watch": "vitest watch",
@@ -23,7 +25,7 @@
 		"lint": "biome check --write .",
 		"lint:check": "biome check .",
 		"format": "biome format --write .",
-		"clean": "rimraf dist coverage"
+		"clean": "pnpm exec rimraf dist coverage"
 	},
 	"dependencies": {
 		"@nestjs/common": "catalog:",
@@ -35,7 +37,8 @@
 		"pino": "catalog:"
 	},
 	"devDependencies": {
-		"pino-pretty": "catalog:"
+		"pino-pretty": "catalog:",
+		"tsup": "catalog:"
 	},
 	"peerDependencies": {
 		"@nestjs/common": "^11.0.0",

@@ -3,7 +3,7 @@ import { s as require_react } from "../_chunks/_libs/@radix-ui/react-collection.
 import { t as authClient } from "./auth-client--faTyJ3t.mjs";
 import { t as require_jsx_dev_runtime } from "../_libs/react.mjs";
 import { t as Button } from "./button-BVRpDERN.mjs";
-import { l as useNavigate } from "../_chunks/_libs/@tanstack/react-router.mjs";
+import { u as useNavigate } from "../_chunks/_libs/@tanstack/react-router.mjs";
 import { t as Route } from "./verify-email-DM25AiUN.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_dev_runtime = require_jsx_dev_runtime();

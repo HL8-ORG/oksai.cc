@@ -4,7 +4,7 @@ import { t as authClient } from "./auth-client--faTyJ3t.mjs";
 import { t as require_jsx_dev_runtime } from "../_libs/react.mjs";
 import { t as Button } from "./button-BVRpDERN.mjs";
 import { n as Label, t as Input } from "./label-DitaIUWu.mjs";
-import { c as Link } from "../_chunks/_libs/@tanstack/react-router.mjs";
+import { l as Link } from "../_chunks/_libs/@tanstack/react-router.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_dev_runtime = require_jsx_dev_runtime();
 var _jsxFileName = "/home/arligle/oks/oksai.cc/apps/web-admin/src/routes/forgot-password.tsx?tsr-split=component";

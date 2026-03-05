@@ -4,7 +4,7 @@ import { t as authClient } from "./auth-client--faTyJ3t.mjs";
 import { t as require_jsx_dev_runtime } from "../_libs/react.mjs";
 import { t as Button } from "./button-BVRpDERN.mjs";
 import { n as Label, t as Input } from "./label-DitaIUWu.mjs";
-import { l as useNavigate } from "../_chunks/_libs/@tanstack/react-router.mjs";
+import { u as useNavigate } from "../_chunks/_libs/@tanstack/react-router.mjs";
 import { t as Route } from "./reset-password-BUhSqR7P.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_dev_runtime = require_jsx_dev_runtime();

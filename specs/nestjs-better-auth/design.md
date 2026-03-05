@@ -76,6 +76,19 @@ Feature: NestJS Better Auth 集成
     When 开发者在控制器方法上添加 @OrgRoles(['owner']) 装饰器
     And 用户在当前组织中角色为 "member"
     Then 请求被拒绝，返回 403 Forbidden
+
+  Scenario: 开发者使用组合装饰器
+    Given AuthModule 已正确配置
+    And Better Auth organization 插件已启用
+    When 开发者在控制器方法上添加 @OwnerOnly() 装饰器
+    Then 等同于添加 @OrgRoles(['owner']) 装饰器
+    And 只有组织所有者可以访问
+
+  Scenario: 开发者在 Fastify 平台使用认证
+    Given AuthModule 配置为 platform: 'fastify'
+    When 应用启动
+    Then 自动使用 Fastify 中间件
+    And 认证功能正常工作
 ```
 
 ### 异常流程（Error Cases）
@@ -145,23 +158,43 @@ Feature: 认证边界条件处理
 
 ## 技术设计
 
-### 领域层
+### 架构模式
 
-**聚合根/实体**：
-- **AuthModule**: 认证模块，管理 Better Auth 集成
-- **AuthGuard**: 认证守卫，保护路由
+本库采用 **NestJS 标准模式** 而非复杂的 DDD/CQRS，以保持简洁和与 NestJS 生态的一致性：
 
-**值对象**：
-- **Session**: 会话对象，包含用户信息和令牌
-- **Role**: 角色值对象（user、admin）
-- **OrgRole**: 组织角色值对象（owner、admin、member）
+- **模块系统**：使用 ConfigurableModuleBuilder 构建动态模块
+- **守卫模式**：全局 AuthGuard + 装饰器控制
+- **中间件模式**：平台特定的中间件（Express/Fastify）
+- **装饰器模式**：元数据驱动认证逻辑
 
-**领域事件**：
-- **UserAuthenticatedEvent**: 用户认证成功事件
-- **RoleCheckFailedEvent**: 角色检查失败事件
-- **OrgRoleCheckFailedEvent**: 组织角色检查失败事件
+### 核心组件
 
-**业务规则**：
+**Module**：
+- **AuthModule**: NestJS 动态模块，注册守卫、中间件、钩子
+- **ConfigurableModuleBuilder**: 支持同步/异步配置
+
+**Guard**：
+- **AuthGuard**: 全局认证守卫，支持多种执行上下文
+  - HTTP/GraphQL/WebSocket/RPC 上下文自动识别
+  - 可选依赖懒加载（graphql、@nestjs/websockets）
+
+**Service**：
+- **AuthService**: 提供 Better Auth API 和实例访问
+- 支持泛型以扩展插件类型
+
+**Middleware**：
+- **SkipBodyParsingMiddleware**: Express 平台，跳过 Better Auth 路由的 body 解析
+- **SkipBodyParsingMiddlewareFastify**: Fastify 平台对应的中间件
+
+**类型定义**：
+- **UserSession**: 用户会话类型
+- **BaseAuthAPI**: 基础认证 API
+- **OrganizationAuthAPI**: 组织插件 API（13个方法）
+- **AdminAuthAPI**: 管理员插件 API（5个方法）
+- **TwoFactorAuthAPI**: 双因素认证插件 API（3个方法）
+
+### 业务规则
+
 - 默认所有路由需要认证
 - `@AllowAnonymous()` 允许匿名访问
 - `@OptionalAuth()` 允许无会话访问
@@ -170,51 +203,21 @@ Feature: 认证边界条件处理
 - 未认证用户访问受保护路由返回 401
 - 角色/权限不足返回 403
 
-### 应用层
-
-**Command**：
-- **RegisterAuthModuleCommand**: 注册认证模块命令
-- **ConfigureHooksCommand**: 配置钩子命令
-
-**Query**：
-- **GetSessionQuery**: 获取当前会话查询
-- **GetUserRolesQuery**: 获取用户角色查询
-- **GetOrgRolesQuery**: 获取组织角色查询
-
-**Handler**：
-- **AuthGuard**: 处理认证和授权逻辑
-- **AuthService**: 提供 Better Auth API 访问
-
-### 基础设施层
-
-**Module**：
-- **AuthModule**: NestJS 动态模块，注册守卫、中间件、钩子
-
-**Guard**：
-- **AuthGuard**: 全局认证守卫，支持多种执行上下文
-
-**Middleware**：
-- **SkipBodyParsingMiddleware**: 跳过 Better Auth 路由的 body 解析
-
-**Adapter**：
-- **HttpContextAdapter**: HTTP 上下文适配器
-- **GraphQLContextAdapter**: GraphQL 上下文适配器（懒加载）
-- **WebSocketContextAdapter**: WebSocket 上下文适配器（懒加载）
-- **RpcContextAdapter**: RPC 上下文适配器
-
 ### 模块结构
 
 ```
 libs/auth/nestjs-better-auth/src/
-├── index.ts                 # 公共导出
-├── auth-module.ts           # 主模块，注册中间件和钩子
-├── auth-module-definition.ts # 动态模块定义（ConfigurableModuleBuilder）
-├── auth-service.ts          # 提供 Better Auth API 访问
-├── auth-guard.ts            # 全局认证守卫
-├── decorators.ts            # 装饰器集合
-├── middlewares.ts           # Body 解析中间件
-├── utils.ts                 # 工具函数
-└── symbols.ts               # 元数据 Symbol 常量
+├── index.ts                   # 公共导出
+├── auth-module.ts             # 主模块，注册中间件和钩子
+├── auth-module-definition.ts  # 动态模块定义（ConfigurableModuleBuilder）
+├── auth-service.ts            # 提供 Better Auth API 访问
+├── auth-guard.ts              # 全局认证守卫
+├── decorators.ts              # 装饰器集合（8个基础 + 5个组合）
+├── better-auth-types.ts       # Better Auth 插件类型定义
+├── middlewares.ts             # Express Body 解析中间件
+├── middlewares-fastify.ts     # Fastify Body 解析中间件
+├── utils.ts                   # 工具函数（多上下文请求提取）
+└── symbols.ts                 # 元数据 Symbol 常量
 ```
 
 ### 模块配置选项
@@ -222,6 +225,7 @@ libs/auth/nestjs-better-auth/src/
 ```typescript
 interface AuthModuleOptions {
   auth: Auth; // Better Auth 实例
+  platform?: 'express' | 'fastify'; // 平台类型（自动检测）
   disableTrustedOriginsCors?: boolean; // 禁用自动 CORS 配置
   disableBodyParser?: boolean; // 禁用自定义 Body 解析
   enableRawBodyParser?: boolean; // 启用原始 Body（用于 webhook）
@@ -234,6 +238,8 @@ interface AuthModuleOptions {
 
 ### 装饰器设计
 
+#### 基础装饰器（8个）
+
 | 装饰器 | 用途 | 示例 |
 |:---|:---|:---|
 | `@AllowAnonymous()` | 允许匿名访问 | `@AllowAnonymous() @Get('public')` |
@@ -244,6 +250,16 @@ interface AuthModuleOptions {
 | `@Hook()` | 类装饰器，标记为钩子提供者 | `@Hook() export class MyHook` |
 | `@BeforeHook(path?)` | 认证路由前置钩子 | `@BeforeHook('/sign-in')` |
 | `@AfterHook(path?)` | 认证路由后置钩子 | `@AfterHook('/sign-in')` |
+
+#### 组合装饰器（5个便捷方法）
+
+| 装饰器 | 等价于 | 用途 |
+|:---|:---|:---|
+| `@AdminOnly()` | `@Roles(['admin'])` | 系统管理员专用 |
+| `@SuperAdminOnly()` | `@Roles(['superadmin'])` | 超级管理员专用 |
+| `@OwnerOnly()` | `@OrgRoles(['owner'])` | 组织所有者专用 |
+| `@OrgAdminOnly()` | `@OrgRoles(['owner', 'admin'])` | 组织管理员及以上 |
+| `@MemberOnly()` | `@OrgRoles(['owner', 'admin', 'member'])` | 组织成员及以上 |
 
 ### 认证守卫逻辑
 
@@ -267,10 +283,17 @@ interface AuthModuleOptions {
 | WebSocket | 从 handshake.headers 获取 | WsException |
 | RPC | 从 headers 获取 | Error |
 
+**平台自动检测**：通过 `HttpAdapterHost` 检测 Express/Fastify 平台
+
 ### 中间件设计
 
-- **SkipBodyParsingMiddleware**：跳过 Better Auth 路由的 body 解析（Better Auth 需要原始 body）
+#### Express 平台
+- **SkipBodyParsingMiddleware**：跳过 Better Auth 路由的 body 解析
 - 可选启用 `req.rawBody` 用于 webhook 签名验证
+
+#### Fastify 平台
+- **SkipBodyParsingMiddlewareFastify**：Fastify 版本的 body 解析中间件
+- 自动检测平台类型并应用对应中间件
 
 ## 边界情况
 
@@ -283,6 +306,7 @@ interface AuthModuleOptions {
 - **可选认证路由**：`@OptionalAuth()` 允许无会话访问，`@Session` 注入 null
 - **同时使用多个装饰器**：`@Roles()` 和 `@OrgRoles()` 同时检查
 - **禁用全局守卫**：需要手动使用 `@UseGuards(AuthGuard)`
+- **平台自动检测失败**：默认使用 Express，可通过 `platform` 选项强制指定
 
 ## 范围外
 
@@ -292,7 +316,6 @@ interface AuthModuleOptions {
 - 数据库适配器配置
 - 前端客户端集成
 - 自定义认证策略实现
-- Fastify 适配器支持（计划中）
 - Rate Limiting 集成（计划中）
 
 ## 测试策略
@@ -326,8 +349,24 @@ interface AuthModuleOptions {
 - WebSocket 集成测试
 
 **测试覆盖率**：
-- 当前：67.5%（86 个测试，100% 通过）
+- 当前：**67.53%**（143 个测试通过，1 个跳过）
+  - 单元测试：116 个
+  - E2E 测试：21 个
+  - WebSocket/GraphQL 测试：6 个
 - 目标：80%+
+
+**各文件覆盖率**：
+| 文件 | 覆盖率 | 状态 |
+|------|--------|------|
+| middlewares.ts | 100% | ✅ |
+| middlewares-fastify.ts | 100% | ✅ |
+| auth-module-definition.ts | 100% | ✅ |
+| auth-service.ts | 100% | ✅ |
+| symbols.ts | 100% | ✅ |
+| utils.ts | 90.9% | ✅ |
+| decorators.ts | 92.3% | ✅ |
+| auth-guard.ts | 73.56% | 🚧 |
+| auth-module.ts | 35.21% | ⚠️ |
 
 ## 实现计划
 
@@ -335,7 +374,7 @@ interface AuthModuleOptions {
 
 - [x] 动态模块定义（ConfigurableModuleBuilder）
 - [x] 全局认证守卫
-- [x] 装饰器系统（8 个装饰器）
+- [x] 装饰器系统（8 个基础装饰器）
 - [x] 中间件（SkipBodyParsingMiddleware）
 - [x] 多执行上下文支持（HTTP、GraphQL、WebSocket、RPC）
 - [x] 单元测试（86 个测试，100% 通过）
@@ -349,16 +388,65 @@ interface AuthModuleOptions {
 
 **完成时间：** 2026-03-03
 
-- [x] 提升测试覆盖率到 68%+（当前 68.14%）
-- [ ] 添加 E2E 测试示例项目（可选）
+- [x] 提升测试覆盖率到 67%+（当前 67.53%）
+- [x] 添加 E2E 测试（21 个测试）
 - [x] Fastify 适配器支持
-- [ ] ~~组织角色查询缓存~~ - 在 authentication 模块中实现
-- [x] 装饰器组合（@AdminOnly, @SuperAdminOnly, @OwnerOnly 等）
+  - [x] SkipBodyParsingMiddlewareFastify
+  - [x] 平台自动检测
+- [x] 装饰器组合（5个便捷装饰器）
+  - [x] @AdminOnly, @SuperAdminOnly
+  - [x] @OwnerOnly, @OrgAdminOnly, @MemberOnly
+- [x] 测试框架迁移（Jest → Vitest）
+- [x] 使用示例更新（7 个示例文件）
 
-**Phase 3: 高级特性（可选）**
+**Phase 3: Better Auth 插件类型支持（已完成 ✅）**
 
+**完成时间：** 2026-03-03
+
+- [x] Better Auth 插件类型定义（better-auth-types.ts）
+  - [x] OrganizationAuthAPI（13 个方法）
+  - [x] AdminAuthAPI（5 个方法）
+  - [x] TwoFactorAuthAPI（3 个方法）
+- [x] 类型守卫函数
+  - [x] hasOrganizationPlugin()
+  - [x] hasAdminPlugin()
+  - [x] hasTwoFactorPlugin()
+- [x] 构建优化（外部化可选依赖）
+- [x] 类型导出和使用示例
+
+**Phase 4: 支持 Better Auth 插件迁移（计划中 🚀）**
+
+> **参考**: [docs/auth-optimization-plan.md](../../docs/auth-optimization-plan.md)
+
+**目标**: 为 Phase 5 的 Better Auth 插件迁移提供类型和工具支持
+
+**待完成任务：**
+- [ ] 扩展插件类型定义
+  - [ ] ApiKeyAuthAPI - API Key 插件类型（~10 个方法）
+  - [ ] OAuthProviderAuthAPI - OAuth Provider 插件类型（~15 个方法）
+- [ ] 添加类型守卫函数
+  - [ ] hasApiKeyPlugin()
+  - [ ] hasOAuthProviderPlugin()
+- [ ] 更新 AuthService 泛型支持
+  - [ ] 支持泛型以扩展插件类型
+  - [ ] 提供插件类型推断
+- [ ] 创建插件集成示例
+  - [ ] API Key 插件使用示例
+  - [ ] Admin 插件使用示例
+  - [ ] OAuth Provider 插件使用示例
+- [ ] 添加装饰器支持
+  - [ ] @RequireApiKeyPermission() - API Key 权限检查
+  - [ ] @RequireAdminRole() - Admin 角色检查（增强现有 @Roles）
+
+**预计工作量：** 1-2 周
+
+**Phase 5: 高级特性（可选）**
+
+- [ ] 提升测试覆盖率到 80%+
+  - [ ] auth-module.ts E2E 测试
+  - [ ] GraphQL/WebSocket 错误处理测试
 - [ ] Rate Limiting 集成
-- [ ] 更多 Better Auth 插件支持
+- [ ] 更多 Better Auth 插件支持（anonymous、passkey、magic-link）
 - [ ] 会话事件系统
 - [ ] 性能监控集成
 

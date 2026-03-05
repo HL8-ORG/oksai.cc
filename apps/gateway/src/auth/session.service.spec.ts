@@ -5,7 +5,7 @@
 import { NotFoundException } from "@nestjs/common";
 import { db } from "@oksai/database";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CacheService } from "../common/cache.service";
+import { CacheService } from "../common/cache.service";
 import { SessionService } from "./session.service";
 
 // Mock 数据库

@@ -1,5 +1,5 @@
 import { i as require_jsx_runtime } from "../_chunks/_libs/@radix-ui/react-collection.mjs";
-import { n as RouterProvider, t as renderRouterToStream } from "../_chunks/_libs/@tanstack/react-router.mjs";
+import { i as RouterProvider, t as renderRouterToStream } from "../_chunks/_libs/@tanstack/react-router.mjs";
 import { t as defineHandlerCallback } from "../_chunks/_libs/@tanstack/router-core.mjs";
 import { PassThrough, Readable } from "node:stream";
 import { AsyncLocalStorage } from "node:async_hooks";
@@ -3994,7 +3994,7 @@ function getResponse() {
 	return getH3Event().res;
 }
 async function getStartManifest(matchedRoutes) {
-	const { tsrStartManifest } = await import("./_tanstack-start-manifest_v-CNJBrj2R.mjs");
+	const { tsrStartManifest } = await import("./_tanstack-start-manifest_v-Bv_HKEn3.mjs");
 	const startManifest = tsrStartManifest();
 	const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes["__root__"] || {};
 	rootRoute.assets = rootRoute.assets || [];
@@ -4433,7 +4433,7 @@ var entriesPromise;
 var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
-	const routerEntry = await import("./router-DBBgholi.mjs");
+	const routerEntry = await import("./router-wWjkAnx7.mjs");
 	return {
 		startEntry: await import("./start-iEQPJIA8.mjs"),
 		routerEntry

@@ -27,7 +27,7 @@
 		"build": "tsc -p tsconfig.build.json",
 		"build:watch": "tsc -p tsconfig.build.json --watch",
 		"typecheck": "tsc --noEmit",
-		"clean": "rimraf dist",
+		"clean": "pnpm exec rimraf dist",
 		"test": "vitest run",
 		"test:watch": "vitest watch",
 		"test:coverage": "vitest run --coverage"

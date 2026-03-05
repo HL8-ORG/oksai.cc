@@ -23,7 +23,7 @@
 		"lint": "biome check --write .",
 		"lint:check": "biome check .",
 		"format": "biome format --write .",
-		"clean": "rimraf dist coverage"
+		"clean": "pnpm exec rimraf dist coverage"
 	},
 	"peerDependencies": {
 		"reflect-metadata": "^0.2.0"

@@ -1,0 +1,44 @@
+{
+	"name": "@oksai/event-store",
+	"version": "0.1.0",
+	"description": "Event Store 实现 - 用于 Event Sourcing 架构",
+	"license": "AGPL-3.0",
+	"private": true,
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "pnpm exec tsup src/index.ts --format cjs,esm --dts --external @oksai/database --external @oksai/kernel",
+		"build:watch": "pnpm exec tsup src/index.ts --format cjs,esm --dts --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest watch",
+		"test:coverage": "vitest run --coverage",
+		"lint": "biome check --write .",
+		"lint:check": "biome check .",
+		"format": "biome format --write .",
+		"clean": "pnpm exec rimraf dist coverage"
+	},
+	"dependencies": {
+		"@mikro-orm/core": "catalog:",
+		"@oksai/database": "workspace:*",
+		"@oksai/kernel": "workspace:*"
+	},
+	"devDependencies": {
+		"tsup": "catalog:"
+	},
+	"peerDependencies": {
+		"reflect-metadata": "^0.2.0"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

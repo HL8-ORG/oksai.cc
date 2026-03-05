@@ -20,7 +20,7 @@
     "build:watch": "tsup src/index.ts --format cjs,esm --dts --watch",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "clean": "rimraf dist",
+    "clean": "pnpm exec rimraf dist",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

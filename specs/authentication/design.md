@@ -523,10 +523,15 @@ pnpm start:prod
 ### 外部依赖
 
 - **Better Auth**: 认证框架（核心依赖）
+- **Better Auth Plugins**: 官方插件生态（50+）
+  - `twoFactor` - 双因素认证（✅ 已使用）
+  - `organization` - 组织管理（✅ 已使用）
+  - `api-key` - API Key 管理（⏳ 计划迁移）
+  - `admin` - 用户管理、角色权限、模拟（⏳ 计划迁移）
+  - `oauth-provider` - OAuth 2.1 授权服务器（⏳ 计划迁移）
 - **Drizzle ORM**: 数据库 ORM
-- **Passport.js**: API Key 认证策略
 - **Nodemailer**: 邮件发送
-- **BoxyHQ Jackson**: SAML SSO（Phase 2）
+- **BoxyHQ Jackson**: SAML SSO（Phase 6）
 
 ## 实现计划
 
@@ -568,11 +573,133 @@ pnpm start:prod
 ### Phase 4: Platform OAuth（P3） - 部分完成 ⚠️
 
 - [x] OAuth 2.0 授权服务器（Controller + Service + 单元测试）
-- [ ] Access Token / Refresh Token 管理（待完善）
-- [ ] Platform OAuth Clients（待开发）
+- [x] Access Token / Refresh Token 管理
+- [x] Platform OAuth Clients 管理
 - [x] Webhook 支持
 
-**状态：** 任务 1 和 4 已完成，任务 2-3 待开发
+**状态：** ✅ 功能完成，计划迁移到 Better Auth OAuth Provider 插件
+
+### Phase 5: Better Auth 插件迁移（P0） - 计划中 🚀
+
+> **目标**: 将 Better Auth 插件利用率从 60% 提升到 90%+，减少 ~1,600 行自定义代码
+
+**参考**: [docs/auth-optimization-plan.md](../../docs/auth-optimization-plan.md)
+
+#### 任务 1: API Key 插件集成（P0） - 4 周
+
+**目标**: 使用 Better Auth API Key 插件替代自定义实现
+
+**当前实现**:
+- ⚠️ `api-key.service.ts` (128 行) - 自行实现
+- ⚠️ `api-key.guard.ts` - 自行验证逻辑
+
+**Better Auth 插件特性**:
+- ✅ 完整的生命周期管理（create/verify/update/delete/list）
+- ✅ 内置速率限制（Rate Limiting）
+- ✅ 自定义过期时间和 Refill 机制
+- ✅ 元数据支持（Metadata）
+- ✅ 权限系统（Permissions）
+- ✅ 组织级 API Keys
+- ✅ 多配置支持
+
+**迁移计划**:
+- [ ] 安装 `@better-auth/api-key` 插件
+- [ ] 配置 API Key 插件（prefix: "oks"，多配置支持）
+- [ ] 迁移 Controller 到 Better Auth API
+- [ ] 更新 Guard 使用 Better Auth API 验证
+- [ ] 数据迁移（⚠️ 需重新生成 Key）
+- [ ] 用户通知和文档更新
+
+**预计减少代码**: 128 行
+
+#### 任务 2: Admin 插件集成（P0） - 4 周
+
+**目标**: 使用 Better Auth Admin 插件替代自定义实现
+
+**当前实现**:
+- ⚠️ `impersonation.service.ts` (153 行) - 自行实现
+- ⚠️ 组织角色管理 - 自定义权限系统
+
+**Better Auth 插件特性**:
+- ✅ 用户管理（createUser/listUsers/getUser/updateUser/removeUser）
+- ✅ 角色与权限（setRole/hasPermission/checkRolePermission）
+- ✅ 用户状态管理（banUser/unbanUser）
+- ✅ 会话管理（listUserSessions/revokeUserSession）
+- ✅ 用户模拟（impersonateUser/stopImpersonating）
+  - 自动审计日志
+  - 会话持久化
+  - 可配置模拟时长
+- ✅ 完整的审计追踪
+
+**迁移计划**:
+- [ ] 配置 Admin 插件和 Access Control
+- [ ] 定义权限和角色（adminRole/superAdminRole/userRole）
+- [ ] 迁移 Admin Controller 到 Better Auth API
+- [ ] 迁移 Impersonation Service 到 Better Auth API
+- [ ] 数据迁移（用户角色）
+- [ ] 审计日志集成
+
+**预计减少代码**: 153 行
+
+#### 任务 3: OAuth Provider 插件迁移（P1） - 2 周评估
+
+**目标**: 评估并迁移到 Better Auth OAuth Provider 插件
+
+**当前实现**:
+- ⚠️ `oauth.service.ts` (852 行) - 自行实现 OAuth 2.0 服务器
+- ⚠️ OAuth Client 管理 - 自行实现
+
+**Better Auth 插件特性**:
+- ✅ OAuth 2.1 标准（authorization_code + PKCE）
+- ✅ OIDC 兼容（UserInfo/id_token）
+- ✅ 安全特性（Issuer Validation/Rate Limiting/Token 加密）
+- ✅ 动态客户端注册（RFC 7591）
+- ✅ JWT 支持（签名/JWKS 验证）
+- ✅ Well-Known 端点
+- ✅ MCP 认证支持
+
+**评估决策**:
+- [ ] 需求评估（是否需要完整 OAuth 2.0 服务器？）
+- [ ] ROI 分析（迁移成本 vs 收益）
+- [ ] 方案决策（保留 vs 迁移）
+
+**迁移计划**（如果决定迁移）:
+- [ ] 配置 OAuth Provider 插件
+- [ ] 迁移 OAuth Client 数据
+- [ ] 迁移 Token 管理
+- [ ] 更新 API 端点
+- [ ] 兼容性测试
+
+**预计减少代码**: 852 行（如果迁移）
+
+#### 任务 4: Session 管理优化（P2） - 2 周
+
+**目标**: 优化 Session 管理，使用 Better Auth API + 缓存
+
+**当前实现**:
+- ⚠️ `session.service.ts` (300 行) - 部分使用 Better Auth API
+
+**优化方案**:
+- ✅ 使用 Better Auth API（listUserSessions/revokeUserSession）
+- ✅ 添加缓存层（LRU Cache，已实现）
+- ✅ 保留业务特有功能（并发控制）
+
+**预计减少代码**: ~100 行
+
+**迁移时间表**:
+```
+Week 1-4: API Key 插件集成（P0）
+Week 5-8: Admin 插件集成（P0）
+Week 9-10: OAuth Provider 评估（P1）
+Week 11-12: Session 优化（P2）
+```
+
+**预期收益**:
+- 代码行数: 9,031 → ~7,400 (-18%)
+- 维护成本: 降低 60%（官方维护）
+- 类型覆盖: 85% → 95%+ (+10%)
+- 安全更新: 自动获得
+- 功能完整性: 70% → 95%+ (+25%)
 
 ## 参考资料
 

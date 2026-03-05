@@ -11,7 +11,14 @@ export default defineConfig({
       "libs/shared/**/*.spec.ts",
       "apps/gateway/**/*.spec.ts",
     ],
-    exclude: ["node_modules", "dist", "apps/web-admin/**"],
+    // 严格排除 node_modules，避免扫描模板文件和编译产物
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.output/**",
+      "apps/web-admin/**",
+      "**/*.d.ts",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],

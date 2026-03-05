@@ -12,6 +12,9 @@ catalogs:
     '@mikro-orm/core':
       specifier: ^6.6.8
       version: 6.6.8
+    '@mikro-orm/postgresql':
+      specifier: ^6.6.8
+      version: 6.6.8
     '@nestjs/cli':
       specifier: ^11.0.16
       version: 11.0.16
@@ -234,6 +237,9 @@ importers:
       nx:
         specifier: 22.5.1
         version: 22.5.1(@swc-node/register@1.11.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.8(@swc/helpers@0.5.18))
+      rimraf:
+        specifier: ^6.1.3
+        version: 6.1.3
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
@@ -467,6 +473,21 @@ importers:
 
   libs/database:
     dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.8
+      '@mikro-orm/nestjs':
+        specifier: ^6.1.1
+        version: 6.1.1(@mikro-orm/core@6.6.8)(@nestjs/common@11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)
+      '@mikro-orm/postgresql':
+        specifier: ^6.6.8
+        version: 6.6.8(@mikro-orm/core@6.6.8)(mysql2@3.15.3)
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@oksai/kernel':
+        specifier: workspace:*
+        version: link:../shared/kernel
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.1(@electric-sql/pglite@0.3.15)(@prisma/client@7.4.2(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3))(knex@3.1.0(mysql2@3.15.3)(pg@8.19.0))(kysely@0.28.11)(mysql2@3.15.3)(pg@8.19.0)(postgres@3.4.8)(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))
@@ -509,6 +530,40 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  libs/oauth:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.8
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@oksai/database':
+        specifier: workspace:*
+        version: link:../database
+      '@oksai/event-store':
+        specifier: workspace:*
+        version: link:../shared/event-store
+      '@oksai/kernel':
+        specifier: workspace:*
+        version: link:../shared/kernel
+      '@oksai/repository':
+        specifier: workspace:*
+        version: link:../shared/repository
+      reflect-metadata:
+        specifier: ^0.2.0
+        version: 0.2.2
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.0.18(vitest@4.0.18)
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
   libs/shared/better-auth-mikro-orm:
     dependencies:
       dset:
@@ -539,8 +594,16 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
-  libs/shared/constants: {}
+  libs/shared/constants:
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   libs/shared/context:
     dependencies:
@@ -550,6 +613,25 @@ importers:
       '@oksai/kernel':
         specifier: workspace:*
         version: link:../kernel
+
+  libs/shared/event-store:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.8
+      '@oksai/database':
+        specifier: workspace:*
+        version: link:../../database
+      '@oksai/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      reflect-metadata:
+        specifier: ^0.2.0
+        version: 0.2.2
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   libs/shared/kernel:
     dependencies:
@@ -584,6 +666,9 @@ importers:
       pino-pretty:
         specifier: 'catalog:'
         version: 13.1.3
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   libs/shared/nestjs-better-auth:
     dependencies:
@@ -631,6 +716,28 @@ importers:
         specifier: 'catalog:'
         version: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
+  libs/shared/repository:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.8
+      '@oksai/database':
+        specifier: workspace:*
+        version: link:../../database
+      '@oksai/event-store':
+        specifier: workspace:*
+        version: link:../event-store
+      '@oksai/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      reflect-metadata:
+        specifier: ^0.2.0
+        version: 0.2.2
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+
   libs/shared/types:
     devDependencies:
       tsup:
@@ -652,6 +759,40 @@ importers:
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
+
+  libs/testing:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.8
+      '@mikro-orm/postgresql':
+        specifier: 'catalog:'
+        version: 6.6.8(@mikro-orm/core@6.6.8)(mysql2@3.15.3)
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/testing':
+        specifier: 'catalog:'
+        version: 11.1.14(@nestjs/common@11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)(@nestjs/microservices@11.1.14)(@nestjs/platform-express@11.1.14)
+      '@oksai/database':
+        specifier: workspace:*
+        version: link:../database
+      '@oksai/event-store':
+        specifier: workspace:*
+        version: link:../shared/event-store
+      reflect-metadata:
+        specifier: ^0.2.0
+        version: 0.2.2
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.0.18(vitest@4.0.18)
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 

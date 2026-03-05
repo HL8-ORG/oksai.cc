@@ -1,4 +1,4 @@
-import type { ConfigService } from "@oksai/config";
+import { ConfigService } from "@oksai/config";
 import { createAuth } from "./auth.config";
 
 /**

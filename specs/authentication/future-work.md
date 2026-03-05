@@ -1,9 +1,159 @@
 # 认证系统后续工作
 
-从 Phase 1 实现中延期的想法与增强项。
+从 Phase 1-4 实现中延期的想法与增强项。
 
-**当前状态：** Phase 2 任务 3 完成（95%）  
-**下一阶段：** Phase 2 - 组织/团队管理 + 测试覆盖率提升
+**当前状态：** Phase 4 完成（2026-03-04）  
+**下一阶段：** Phase 5 - Better Auth 插件迁移（P0）
+
+---
+
+## 🎯 Phase 5: Better Auth 插件迁移（最高优先级）
+
+> **目标**: 将 Better Auth 插件利用率从 60% 提升到 90%+，减少 ~1,600 行自定义代码
+> 
+> **参考**: [docs/auth-optimization-plan.md](../../docs/auth-optimization-plan.md)
+
+### 5.1 API Key 插件集成（P0） - 4 周
+
+**目标**: 使用 Better Auth API Key 插件替代自定义实现
+
+**当前实现**:
+- ⚠️ `api-key.service.ts` (128 行) - 自行实现
+- ⚠️ `api-key.guard.ts` - 自行验证逻辑
+
+**Better Auth 插件特性**:
+- ✅ 完整的生命周期管理（create/verify/update/delete/list）
+- ✅ 内置速率限制（Rate Limiting）
+- ✅ 自定义过期时间和 Refill 机制
+- ✅ 元数据支持（Metadata）
+- ✅ 权限系统（Permissions）
+- ✅ 组织级 API Keys
+- ✅ 多配置支持
+
+**迁移影响**:
+- ⚠️ 现有 API Keys 需要重新生成（无法保留 Hash）
+- ⚠️ 需要用户通知和迁移脚本
+- ⚠️ 需要更新 Controller 和 Guard
+
+**预期收益**:
+- 减少 128 行自定义代码
+- 获得官方维护和安全更新
+- 内置企业级特性（速率限制、权限系统）
+- 完整的 TypeScript 类型支持
+
+**迁移时间表**:
+```
+Week 1: 安装配置插件、编写迁移脚本
+Week 2: 更新 Controller 和 Guard
+Week 3: 数据迁移、用户通知
+Week 4: 上线与监控
+```
+
+### 5.2 Admin 插件集成（P0） - 4 周
+
+**目标**: 使用 Better Auth Admin 插件替代自定义实现
+
+**当前实现**:
+- ⚠️ `impersonation.service.ts` (153 行) - 自行实现
+- ⚠️ 组织角色管理 - 自定义权限系统
+
+**Better Auth 插件特性**:
+- ✅ 用户管理（createUser/listUsers/getUser/updateUser/removeUser）
+- ✅ 角色与权限（setRole/hasPermission/checkRolePermission）
+- ✅ 用户状态管理（banUser/unbanUser）
+- ✅ 会话管理（listUserSessions/revokeUserSession）
+- ✅ 用户模拟（impersonateUser/stopImpersonating）
+  - 自动审计日志
+  - 会话持久化
+  - 可配置模拟时长
+- ✅ 完整的审计追踪
+
+**迁移影响**:
+- 需要迁移用户角色数据
+- 需要重新定义权限映射
+- 会话管理需要更新
+
+**预期收益**:
+- 减少 153 行自定义代码
+- 获得官方维护和审计日志
+- 完整的角色权限系统
+- 细粒度权限控制
+
+**迁移时间表**:
+```
+Week 5: 配置权限系统、定义角色
+Week 6: 重写 Admin Controller
+Week 7: 数据迁移、角色分配
+Week 8: 上线与权限验证
+```
+
+### 5.3 OAuth Provider 插件迁移（P1） - 2 周评估
+
+**目标**: 评估并迁移到 Better Auth OAuth Provider 插件
+
+**当前实现**:
+- ⚠️ `oauth.service.ts` (852 行) - 自行实现 OAuth 2.0 服务器
+- ⚠️ OAuth Client 管理 - 自行实现
+
+**Better Auth 插件特性**:
+- ✅ OAuth 2.1 标准（authorization_code + PKCE）
+- ✅ OIDC 兼容（UserInfo/id_token）
+- ✅ 安全特性（Issuer Validation/Rate Limiting/Token 加密）
+- ✅ 动态客户端注册（RFC 7591）
+- ✅ JWT 支持（签名/JWKS 验证）
+- ✅ Well-Known 端点
+- ✅ MCP 认证支持
+
+**评估决策**:
+```
+1. 是否需要第三方应用授权？
+   ✅ 是 - 需要 OAuth 2.0 服务器
+   
+2. 是否需要 OIDC 支持？
+   ✅ 是 - 使用 OAuth Provider 插件
+   
+3. 是否需要动态客户端注册？
+   ✅ 是 - 使用 OAuth Provider 插件
+   
+4. 是否需要标准 Well-Known 端点？
+   ✅ 是 - 使用 OAuth Provider 插件
+```
+
+**预期收益**:
+- 减少 852 行自定义代码
+- 获得官方维护和更新
+- 更好的安全性
+- 更完整的标准支持
+
+**迁移时间表**:
+```
+Week 9: 需求评估、技术调研
+Week 10: 方案决策、ROI 分析
+```
+
+### 5.4 Session 管理优化（P2） - 2 周
+
+**目标**: 优化 Session 管理，使用 Better Auth API + 缓存
+
+**当前实现**:
+- ⚠️ `session.service.ts` (300 行) - 部分使用 Better Auth API
+
+**优化方案**:
+- ✅ 使用 Better Auth API（listUserSessions/revokeUserSession）
+- ✅ 添加缓存层（LRU Cache，已实现）
+- ✅ 保留业务特有功能（并发控制）
+
+**预期收益**:
+- 减少 ~100 行代码
+- 使用官方 API，更稳定
+- 保留业务特有功能
+- 性能优化（缓存）
+
+**迁移时间表**:
+```
+Week 11: 优化 Session Service
+Week 12: 上线、性能验证
+```
 
 ---
 
@@ -228,15 +378,115 @@
 
 | 问题 | 影响 | 优先级 | 估算工作量 | 解决方案 |
 |:---|:---|:---:|:---:|:---|
-| OAuth 集成测试依赖注入问题 | 无法验证 OAuth 流程 | P1 | 1天 | 添加测试数据库或使用 mock |
-| 测试覆盖率不足（67.5%） | 回归风险高 | P1 | 2天 | 补充单元测试和集成测试 |
-| 错误处理不够统一 | 用户体验差 | P2 | 1天 | 定义统一错误码、使用异常过滤器 |
-| 日志记录不完整 | 问题排查困难 | P2 | 1天 | 记录所有认证事件、使用结构化日志 |
-| 文档不完整 | 维护成本高 | P2 | 2天 | 使用Swagger生成API文档、编写用户手册 |
+| **API Key 自定义实现** | 维护成本高，缺少官方特性 | **P0** | 4 周 | 迁移到 Better Auth API Key 插件 |
+| **Admin 功能自定义实现** | 维护成本高，缺少审计日志 | **P0** | 4 周 | 迁移到 Better Auth Admin 插件 |
+| **OAuth 2.0 自定义实现** | 852 行代码，维护成本极高 | **P1** | 2 周评估 | 评估迁移到 Better Auth OAuth Provider 插件 |
+| Session 管理未完全使用 Better Auth API | 部分冗余代码 | **P2** | 2 周 | 优化 Session Service，使用 Better Auth API |
+| OAuth 集成测试依赖注入问题 | 无法验证 OAuth 流程 | P3 | 1 天 | 添加测试数据库或使用 mock（已跳过） |
+| 测试覆盖率不足（67.5%） | 回归风险高 | P1 | 2 天 | 补充单元测试和集成测试 |
+| 错误处理不够统一 | 用户体验差 | P2 | 1 天 | 定义统一错误码、使用异常过滤器 |
+| 日志记录不完整 | 问题排查困难 | P2 | 1 天 | 记录所有认证事件、使用结构化日志 |
+| 文档不完整 | 维护成本高 | P2 | 2 天 | 使用 Swagger 生成 API 文档、编写用户手册 |
 
 ---
 
-### 0. OAuth 集成测试依赖注入问题（新增 2026-03-03）
+### 1. API Key 自定义实现（最高优先级） 🔥
+
+**当前状态**: 自行实现 API Key 管理（128 行）
+**优先级**: **P0**
+**估算工作量**: 4 周
+
+**问题**:
+- ❌ 缺少速率限制（Rate Limiting）
+- ❌ 缺少权限系统（Permissions）
+- ❌ 缺少元数据支持（Metadata）
+- ❌ 缺少过期时间和自动清理
+- ❌ 缺少 Refill 机制
+- ❌ 需要自行维护和安全更新
+
+**解决方案**: 迁移到 Better Auth API Key 插件
+
+**预期收益**:
+- ✅ 内置速率限制
+- ✅ 权限系统
+- ✅ 元数据和过期支持
+- ✅ Refill 机制
+- ✅ 官方维护和安全更新
+- ✅ 减少 128 行自定义代码
+
+---
+
+### 2. Admin 功能自定义实现（最高优先级） 🔥
+
+**当前状态**: 自行实现 Impersonation（153 行）
+**优先级**: **P0**
+**估算工作量**: 4 周
+
+**问题**:
+- ❌ 会话存储在内存，重启丢失
+- ❌ 缺少审计日志
+- ❌ 缺少权限细粒度控制
+- ❌ 缺少自动清理机制
+- ❌ 模拟时长硬编码
+
+**解决方案**: 迁移到 Better Auth Admin 插件
+
+**预期收益**:
+- ✅ 完整的用户管理功能
+- ✅ 角色与权限系统
+- ✅ 用户状态管理（封禁/解封）
+- ✅ 会话管理
+- ✅ 用户模拟（自动审计日志）
+- ✅ 减少 153 行自定义代码
+
+---
+
+### 3. OAuth 2.0 自定义实现（高优先级） ⚠️
+
+**当前状态**: 自行实现 OAuth 2.0 服务器（852 行）
+**优先级**: **P1**
+**估算工作量**: 2 周评估 + 4 周迁移（如果决定迁移）
+
+**问题**:
+- ❌ 代码量巨大（852 行），维护成本高
+- ❌ 缺少 OIDC 支持
+- ❌ 缺少 JWKS 支持
+- ❌ 缺少标准的 well-known 端点
+- ❌ 安全性需要自行保障
+
+**解决方案**: 评估迁移到 Better Auth OAuth Provider 插件
+
+**预期收益**（如果迁移）:
+- ✅ OAuth 2.1 标准支持
+- ✅ OIDC 兼容
+- ✅ 安全特性（Issuer Validation/PKCE/Rate Limiting）
+- ✅ 动态客户端注册
+- ✅ JWT 和 JWKS 支持
+- ✅ Well-Known 端点
+- ✅ 减少 852 行自定义代码
+
+---
+
+### 4. Session 管理优化（中等优先级）
+
+**当前状态**: 部分使用 Better Auth API
+**优先级**: **P2**
+**估算工作量**: 2 周
+
+**改进方案**:
+- ✅ 使用 Better Auth API（listUserSessions/revokeUserSession）
+- ✅ 添加缓存层（LRU Cache，已实现）
+- ✅ 保留业务特有功能（并发控制）
+
+**预期收益**:
+- ✅ 减少 ~100 行代码
+- ✅ 使用官方 API，更稳定
+- ✅ 保留业务特有功能
+- ✅ 性能优化（缓存）
+
+---
+
+### 5. OAuth 集成测试依赖注入问题
 
 - **当前状态**：集成测试已跳过，无法验证 OAuth 流程
 - **问题描述**：

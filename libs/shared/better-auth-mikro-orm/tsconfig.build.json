@@ -1,6 +1,7 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
+		"composite": false,
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
 		"removeComments": true,
