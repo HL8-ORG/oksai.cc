@@ -16,7 +16,7 @@ import type {
   VerifyEmailDto,
   VerifyTwoFactorDto,
 } from "./auth.dto";
-import { AuthResponse, AuthService } from "./auth.service";
+import type { AuthResponse, AuthService } from "./auth.service";
 
 /**
  * 认证控制器

@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import type { Reflector } from "@nestjs/core";
 import { ORG_PERMISSION_KEY } from "./org-permission.decorator";
-import { OrganizationService } from "./organization.service";
+import type { OrganizationService } from "./organization.service";
 import type { OrganizationPermission } from "./organization-role.enum";
 import { hasPermission, type OrganizationRole } from "./organization-role.enum";
 

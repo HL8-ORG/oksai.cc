@@ -5,7 +5,7 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { db, sessions, users } from "@oksai/database";
 import { and, eq, gt } from "drizzle-orm";
-import { CacheService } from "../common/cache.service";
+import type { CacheService } from "../common/cache.service";
 import type {
   SessionConfigResponse,
   SessionInfo,

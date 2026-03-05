@@ -19,7 +19,7 @@ import {
   users,
 } from "@oksai/database";
 import { eq } from "drizzle-orm";
-import { CacheService } from "../common/cache.service";
+import type { CacheService } from "../common/cache.service";
 import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util";
 import { verifyCodeVerifier } from "./oauth-crypto.util";
 import { validateRedirectUri, validateRedirectUriList } from "./redirect-uri.util";

@@ -1,6 +1,22 @@
 import type { ExecutionContext } from "@nestjs/common";
-import { describe, expect, it } from "vitest";
-import { getRequestFromContext } from "./utils";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
+let getRequestFromContext: typeof import("./utils").getRequestFromContext;
+
+beforeEach(async () => {
+  globalThis.__TEST_GQL_EXECUTION_CONTEXT__ = {
+    create: (context: any) => ({
+      getContext: () => ({
+        req: { headers: { cookie: "session=abc" } },
+      }),
+    }),
+  };
+  getRequestFromContext = (await import("./utils")).getRequestFromContext;
+});
+
+afterEach(() => {
+  globalThis.__TEST_GQL_EXECUTION_CONTEXT__ = undefined;
+});
 
 describe("getRequestFromContext", () => {
   describe("HTTP 上下文", () => {
@@ -38,18 +54,16 @@ describe("getRequestFromContext", () => {
   });
 
   describe("GraphQL 上下文", () => {
-    it.skip("应该从 GraphQL 上下文中获取请求（需要安装 @nestjs/graphql）", () => {
-      const mockRequest = { headers: { cookie: "session=abc" } };
-
+    it("应该从 GraphQL 上下文中获取请求", () => {
       const mockContext = {
         getType: () => "graphql",
         switchToHttp: () => ({
-          getRequest: () => mockRequest,
+          getRequest: () => ({ headers: { cookie: "session=abc" } }),
         }),
       } as ExecutionContext;
 
       const request = getRequestFromContext(mockContext);
-      expect(request).toBe(mockRequest);
+      expect(request).toEqual({ headers: { cookie: "session=abc" } });
     });
   });
 

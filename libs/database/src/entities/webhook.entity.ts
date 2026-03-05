@@ -1,5 +1,9 @@
 import { Entity, Index, Property } from "@mikro-orm/core";
-import { WebhookDeliveryStatus, type WebhookEventType, type WebhookStatus } from "../events/webhook.events.js";
+import {
+  WebhookDeliveryStatus,
+  type WebhookEventType,
+  type WebhookStatus,
+} from "../events/webhook.events.js";
 import { BaseEntity } from "./base.entity.js";
 
 @Entity()

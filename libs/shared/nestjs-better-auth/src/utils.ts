@@ -1,19 +1,37 @@
 import type { ExecutionContext } from "@nestjs/common";
 
-// biome-ignore lint/suspicious/noExplicitAny: GqlExecutionContext comes from optional @nestjs/graphql dependency
-let GqlExecutionContext: any;
+type GqlExecutionContextType = {
+  create: (context: ExecutionContext) => {
+    getContext: () => { req: any };
+  };
+};
 
-function getGqlExecutionContext(): any {
-  if (!GqlExecutionContext) {
-    try {
-      GqlExecutionContext = require("@nestjs/graphql").GqlExecutionContext;
-    } catch (error) {
-      throw new Error(
-        "@nestjs/graphql is not installed. Please install it to use GraphQL context: npm install @nestjs/graphql graphql"
-      );
-    }
+declare global {
+  // biome-ignore lint/suspicious/noRedeclare: 用于测试环境注入 mock
+  var __TEST_GQL_EXECUTION_CONTEXT__: GqlExecutionContextType | undefined;
+}
+
+let GqlExecutionContext: GqlExecutionContextType | undefined;
+
+function getGqlExecutionContext(): GqlExecutionContextType {
+  if (GqlExecutionContext) {
+    return GqlExecutionContext;
   }
-  return GqlExecutionContext;
+
+  if (globalThis.__TEST_GQL_EXECUTION_CONTEXT__) {
+    GqlExecutionContext = globalThis.__TEST_GQL_EXECUTION_CONTEXT__;
+    return GqlExecutionContext;
+  }
+
+  try {
+    const gqlModule = require("@nestjs/graphql");
+    GqlExecutionContext = gqlModule.GqlExecutionContext;
+    return GqlExecutionContext!;
+  } catch (error) {
+    throw new Error(
+      "@nestjs/graphql is not installed. Please install it to use GraphQL context: npm install @nestjs/graphql graphql"
+    );
+  }
 }
 
 /**
@@ -24,7 +42,8 @@ function getGqlExecutionContext(): any {
 export function getRequestFromContext(context: ExecutionContext) {
   const contextType = context.getType<"graphql" | "ws" | "http">();
   if (contextType === "graphql") {
-    return getGqlExecutionContext().create(context).getContext().req;
+    const gqlContext = getGqlExecutionContext().create(context);
+    return gqlContext.getContext().req;
   }
 
   if (contextType === "ws") {

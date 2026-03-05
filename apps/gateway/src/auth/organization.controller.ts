@@ -22,7 +22,7 @@ import type {
   UpdateMemberRoleDto,
   UpdateOrganizationDto,
 } from "./organization.dto";
-import { OrganizationService } from "./organization.service";
+import type { OrganizationService } from "./organization.service";
 
 /**
  * 组织管理控制器

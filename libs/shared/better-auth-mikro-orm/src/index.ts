@@ -6,5 +6,5 @@
  * @packageDocumentation
  */
 
-export { mikroOrmAdapter, type MikroOrmAdapterConfig } from './adapter.js';
-export type { AdapterUtils } from './utils/adapterUtils.js';
+export { mikroOrmAdapter, type MikroOrmAdapterConfig } from "./adapter.js";
+export type { AdapterUtils } from "./utils/adapterUtils.js";

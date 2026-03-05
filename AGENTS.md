@@ -73,6 +73,8 @@ pnpm nx build @oksai/web-admin
 pnpm nx build @oksai/gateway --with-deps
 ```
 
+**Nx Cloud 状态**: 已永久禁用（`neverConnectToCloud: true`），无需处理连接警告
+
 ### Lint Commands (Biome)
 
 ```bash
@@ -135,7 +137,7 @@ pnpm vitest run -t "Decorators"
 - ✅ 所有测试文件使用 `vi.fn()` 替代 `jest.fn()`
 - ✅ 兼容 Jest API，迁移成本低
 - ⚡ 更快的测试运行速度和 watch 模式
-- 📚 详见 `VITEST_MIGRATION.md`
+- 📚 详见 `docs/migration/vitest-migration.md`
 
 **测试最佳实践：**
 - 使用 `vi.fn()` 创建 mock 函数
@@ -169,7 +171,7 @@ pnpm db:studio    # Open Drizzle Studio
 - 项目正在从 Drizzle 迁移到 MikroORM
 - 新功能请使用 MikroORM Entity 和 Repository
 - 旧代码暂时保留 Drizzle Schema 作为参考
-- 详见：`docs/mikro-orm-migration-overall-progress.md`
+- 详见：`docs/migration/mikro-orm-migration-progress.md`
 
 
 ### Development Commands
@@ -290,6 +292,234 @@ try {
 - Prefer `import type` for component props
 - Use path alias `~/` for imports from `src/`
 
-## 五、Spec 优先开发
+## 五、TypeScript Configuration Rules
+
+> **重要**: 完整配置文档请参考 `docs/guides/typescript-configuration.md`
+
+### 5.1 Import Type 使用规则
+
+**⚠️ 关键规则**: 在 NestJS 中，构造函数注入的服务**禁止**使用 `import type`
+
+```typescript
+// ❌ 错误 - 会导致依赖注入元数据丢失
+import type { AppService } from "./app.service";
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}  // ❌ 运行时错误
+}
+
+// ✅ 正确
+import { AppService } from "./app.service";
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}  // ✅ 正常工作
+}
+```
+
+**规则总结：**
+
+| 场景 | 是否可以用 `import type` | 原因 |
+|------|------------------------|------|
+| 构造函数注入的 Service | ❌ **禁止** | 需要 `emitDecoratorMetadata` 生成运行时元数据 |
+| 方法参数类型 | ✅ 可以 | 纯类型，不需要运行时 |
+| 返回值类型 | ✅ 可以 | 纯类型，不需要运行时 |
+| 接口/DTO | ✅ 可以 | 纯类型，不需要运行时 |
+| 类装饰器 | ❌ **禁止** | 需要运行时引用 |
+
+**快速检查命令：**
+
+```bash
+# 检查所有可能有问题的 import type
+grep -rn "import type.*Service" apps/gateway/src --include="*.ts"
+```
+
+### 5.2 库构建配置
+
+#### 构建工具选择
+
+- **使用 `tsc` 构建**：简单库，不需要打包（如 `@oksai/kernel`, `@oksai/context`）
+- **使用 `tsup` 构建**：需要多格式输出或打包（如 `@oksai/logger`, `@oksai/database`）
+
+#### composite 配置规则
+
+**⚠️ 关键**: 为避免增量编译缓存导致构建产物不更新
+
+```json
+// tsconfig.json (开发配置)
+{
+  "compilerOptions": {
+    "composite": true  // ✅ 启用，用于项目引用和 IDE
+  }
+}
+
+// tsconfig.build.json (构建配置)
+{
+  "compilerOptions": {
+    "composite": false  // ⚠️ 必须禁用，确保生成构建产物
+  }
+}
+```
+
+**适用范围：**
+- ✅ 所有使用 `tsc` 构建的库
+- ❌ 使用 `tsup` 构建的库不需要此配置
+
+#### 构建命令标准
+
+```bash
+# 清理所有构建缓存和产物
+find libs apps -name "*.tsbuildinfo" -delete
+pnpm nx run-many -t clean --all
+pnpm nx reset
+
+# 重新构建所有项目
+pnpm build
+
+# 构建特定项目（自动处理依赖）
+pnpm nx build @oksai/gateway
+```
+
+### 5.3 依赖注入元数据问题排查
+
+**症状：**
+
+```
+Error: Nest can't resolve dependencies of the AppController (?).
+Please make sure that the argument Function at index [0] is available.
+```
+
+**诊断步骤：**
+
+1. **检查编译后的元数据**
+
+```bash
+cat apps/gateway/dist/src/app.controller.js | grep -A 3 "__metadata"
+
+# 正确: tslib_1.__metadata("design:paramtypes", [app_service_1.AppService])
+# 错误: tslib_1.__metadata("design:paramtypes", [Function])
+```
+
+2. **批量修复命令**
+
+```bash
+# 修复所有使用 import type 导入 Service 的文件
+find apps/gateway/src -name "*.ts" -exec \
+  sed -i 's/import type { \([^}]*Service[^}]*\) }/import { \1 }/g' {} \;
+```
+
+3. **验证修复**
+
+```bash
+# 确保没有遗漏
+grep -rn "import type.*Service" apps/gateway/src --include="*.ts"
+```
+
+### 5.4 项目配置模板
+
+#### tsc 构建的库
+
+```json
+// libs/shared/lib-name/tsconfig.build.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+}
+```
+
+#### tsup 构建的库
+
+```typescript
+// libs/shared/lib-name/tsup.config.ts
+import { type Options } from "tsup";
+
+const config: Options = {
+  entry: ["src/index.ts"],
+  format: ["cjs", "esm"],
+  dts: true,
+  sourcemap: true,
+  clean: true,
+  external: [
+    "@nestjs/common",
+    "@oksai/config"
+  ]
+};
+
+export default config;
+```
+
+### 5.5 常见问题快速修复
+
+#### 问题 1: 类型声明文件找不到
+
+```bash
+# 清理并重新构建
+find libs -name "*.tsbuildinfo" -delete
+pnpm nx reset
+pnpm build
+```
+
+#### 问题 2: rimraf: not found
+
+```bash
+# 已统一使用 pnpm exec rimraf
+# 所有 package.json 的 clean 脚本应使用：
+"clean": "pnpm exec rimraf dist coverage"
+```
+
+#### 问题 3: Nx Cloud 已禁用
+
+**说明**: 项目已在 `nx.json` 中配置 `neverConnectToCloud: true`，无需任何操作
+
+### 5.6 新库创建清单
+
+创建新的共享库时，确保：
+
+```markdown
+- [ ] 创建 `tsconfig.json` (extends tsconfig.base.json)
+- [ ] 创建 `tsconfig.build.json` (composite: false)
+- [ ] 在 `tsconfig.base.json` 添加路径映射
+- [ ] 选择构建工具 (tsc/tsup)
+- [ ] 配置 `package.json` 构建脚本
+- [ ] 添加到 `apps/gateway/project.json` 的 dependsOn（如果被使用）
+```
+
+### 5.7 完整清理和重建流程
+
+**⚠️ 当遇到任何构建或类型问题时，执行此流程：**
+
+```bash
+# 1. 清理所有构建产物和缓存
+find libs apps -name "*.tsbuildinfo" -delete
+pnpm nx run-many -t clean --all
+
+# 2. 重置 Nx 缓存
+pnpm nx reset
+
+# 3. 重新安装依赖（可选）
+pnpm install --force
+
+# 4. 重新构建所有项目
+pnpm build
+
+# 5. 验证构建结果
+pnpm test
+
+# 6. 启动开发服务器
+pnpm dev
+```
+
+## 六、Spec 优先开发
 
 详细流程参见 `specs/README.md`。每个功能包含：`design.md`、`implementation.md`、`decisions.md`、`prompts.md`、`future-work.md`、`docs/`。

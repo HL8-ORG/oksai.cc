@@ -1,4 +1,4 @@
-import { BetterAuthError } from 'better-auth';
+import { BetterAuthError } from "better-auth";
 
 /**
  * 创建并抛出带有适配器名称前缀的 BetterAuthError
@@ -6,5 +6,5 @@ import { BetterAuthError } from 'better-auth';
  * @param message - BetterAuthError 的错误消息
  */
 export function createAdapterError(message: string): never {
-	throw new BetterAuthError(`[Mikro ORM Adapter] ${message}`);
+  throw new BetterAuthError(`[Mikro ORM Adapter] ${message}`);
 }
