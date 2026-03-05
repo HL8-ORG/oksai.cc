@@ -3,6 +3,7 @@
  */
 
 import { randomBytes } from "node:crypto";
+import { EntityManager } from "@mikro-orm/core";
 import {
   BadRequestException,
   Injectable,
@@ -11,14 +12,12 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
-  db,
-  oauthAccessTokens,
-  oauthAuthorizationCodes,
-  oauthClients,
-  oauthRefreshTokens,
-  users,
+  OAuthAccessToken,
+  OAuthAuthorizationCode,
+  OAuthClient,
+  OAuthRefreshToken,
+  User,
 } from "@oksai/database";
-import { eq } from "drizzle-orm";
 import { CacheService } from "../common/cache.service";
 import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util";
 import { verifyCodeVerifier } from "./oauth-crypto.util";
@@ -51,7 +50,10 @@ export class OAuthService {
   private readonly TOKEN_CACHE_PREFIX = "oauth:token:";
   private readonly TOKEN_CACHE_TTL = 300000; // 5 分钟
 
-  constructor(private readonly cacheService: CacheService) {
+  constructor(
+    private readonly cacheService: CacheService,
+    private readonly em: EntityManager
+  ) {
     try {
       this.encryption = createEncryptionUtil();
       this.logger.log("加密功能已启用：Token 和 Client Secret 将加密存储");
@@ -88,32 +90,31 @@ export class OAuthService {
         clientSecretEncrypted = this.encryption ? this.encryption.encrypt(clientSecret) : clientSecret;
       }
 
-      const result = await db
-        .insert(oauthClients)
-        .values({
-          name: data.name,
-          clientId,
-          clientSecret: clientSecretEncrypted,
-          clientType: data.clientType || "confidential",
-          redirectUris: JSON.stringify(data.redirectUris),
-          allowedScopes: JSON.stringify(data.allowedScopes),
-          description: data.description,
-          homepageUrl: data.homepageUrl,
-          logoUrl: data.logoUrl,
-          createdBy: data.createdBy,
-        })
-        .returning();
+      const client = this.em.create(OAuthClient, {
+        name: data.name,
+        clientId,
+        clientSecret: clientSecretEncrypted,
+        clientType: data.clientType || "confidential",
+        redirectUris: data.redirectUris,
+        allowedScopes: data.allowedScopes,
+        description: data.description,
+        homepageUrl: data.homepageUrl,
+        logoUrl: data.logoUrl,
+        createdBy: data.createdBy,
+      } as any);
+
+      await this.em.flush();
 
       this.logger.log(`OAuth 客户端注册成功: ${clientId}`);
 
       return {
-        id: result[0].id,
-        name: result[0].name,
-        clientId: result[0].clientId,
+        id: client.id,
+        name: client.name,
+        clientId: client.clientId,
         clientSecret, // 只在创建时返回一次明文
-        clientType: result[0].clientType,
-        redirectUris: JSON.parse(result[0].redirectUris),
-        allowedScopes: JSON.parse(result[0].allowedScopes),
+        clientType: client.clientType,
+        redirectUris: client.redirectUris,
+        allowedScopes: client.allowedScopes,
       };
     } catch (error) {
       this.logger.error(`注册 OAuth 客户端失败`, error);
@@ -149,16 +150,14 @@ export class OAuthService {
       }
 
       // 验证 redirect_uri（严格验证）
-      const redirectUris = JSON.parse(client.redirectUris);
-      if (!validateRedirectUri(params.redirectUri, redirectUris)) {
+      if (!validateRedirectUri(params.redirectUri, client.redirectUris)) {
         this.logger.warn(`无效的 redirect_uri: ${params.redirectUri}`);
         throw new BadRequestException("无效的 redirect_uri");
       }
 
       // 验证 scope
-      const allowedScopes = JSON.parse(client.allowedScopes);
       const requestedScopes = params.scope.split(" ");
-      const invalidScopes = requestedScopes.filter((s) => !allowedScopes.includes(s));
+      const invalidScopes = requestedScopes.filter((s) => !client.allowedScopes.includes(s));
 
       if (invalidScopes.length > 0) {
         throw new BadRequestException(`不支持的 scope: ${invalidScopes.join(", ")}`);
@@ -168,7 +167,7 @@ export class OAuthService {
       const code = randomBytes(32).toString("hex");
       const expiresAt = new Date(Date.now() + 600000); // 10 分钟后过期
 
-      await db.insert(oauthAuthorizationCodes).values({
+      this.em.create(OAuthAuthorizationCode, {
         code,
         clientId: client.id,
         userId: params.userId,
@@ -177,7 +176,9 @@ export class OAuthService {
         codeChallenge: params.codeChallenge,
         codeChallengeMethod: params.codeChallengeMethod,
         expiresAt,
-      });
+      } as any);
+
+      await this.em.flush();
 
       this.logger.log(`授权码已生成: ${code.substring(0, 8)}...`);
 
@@ -239,47 +240,41 @@ export class OAuthService {
       }
 
       // 查找授权码
-      const authCode = await db
-        .select()
-        .from(oauthAuthorizationCodes)
-        .where(eq(oauthAuthorizationCodes.code, params.code))
-        .limit(1);
+      const authCode = await this.em.findOne(OAuthAuthorizationCode, { code: params.code });
 
-      if (!authCode[0]) {
+      if (!authCode) {
         throw new BadRequestException("无效的授权码");
       }
 
-      const code = authCode[0];
-
       // 检查授权码是否已使用
-      if (code.usedAt) {
+      if (authCode.isUsed()) {
         throw new BadRequestException("授权码已使用");
       }
 
       // 检查授权码是否过期
-      if (code.expiresAt < new Date()) {
+      if (authCode.isExpired()) {
         throw new BadRequestException("授权码已过期");
       }
 
       // 验证 client_id
-      if (code.clientId !== client.id) {
+      if (authCode.clientId !== client.id) {
         throw new BadRequestException("授权码与客户端不匹配");
       }
 
       // 验证 redirect_uri（严格匹配）
-      if (code.redirectUri !== params.redirectUri) {
-        this.logger.warn(`redirect_uri 不匹配: ${params.redirectUri} != ${code.redirectUri}`);
+      if (authCode.redirectUri !== params.redirectUri) {
+        this.logger.warn(`redirect_uri 不匹配: ${params.redirectUri} != ${authCode.redirectUri}`);
         throw new BadRequestException("redirect_uri 不匹配");
       }
 
       // PKCE 验证
-      if (code.codeChallenge) {
+      if (authCode.codeChallenge) {
         if (!params.codeVerifier) {
           throw new BadRequestException("缺少 code_verifier");
         }
 
-        const method = (code.codeChallengeMethod as "plain" | "S256") || "S256";
-        const isValid = verifyCodeVerifier(params.codeVerifier, code.codeChallenge, method);
+        const method = (authCode.codeChallengeMethod as "plain" | "S256") || "S256";
+        const isValid = verifyCodeVerifier(params.codeVerifier, authCode.codeChallenge, method);
 
         if (!isValid) {
           throw new BadRequestException("PKCE 验证失败");
@@ -287,10 +282,7 @@ export class OAuthService {
       }
 
       // 标记授权码为已使用
-      await db
-        .update(oauthAuthorizationCodes)
-        .set({ usedAt: new Date() })
-        .where(eq(oauthAuthorizationCodes.id, code.id));
+      authCode.markAsUsed();
 
       // 生成 Access Token
       const accessToken = randomBytes(32).toString("hex");
@@ -299,13 +291,13 @@ export class OAuthService {
       // 加密存储 Access Token
       const accessTokenEncrypted = this.encryption ? this.encryption.encrypt(accessToken) : accessToken;
 
-      await db.insert(oauthAccessTokens).values({
+      this.em.create(OAuthAccessToken, {
         accessToken: accessTokenEncrypted,
         clientId: client.id,
-        userId: code.userId,
-        scope: code.scope,
+        userId: authCode.userId,
+        scope: authCode.scope,
         expiresAt: accessTokenExpiresAt,
-      });
+      } as any);
 
       // 生成 Refresh Token
       const refreshToken = randomBytes(32).toString("hex");
@@ -314,13 +306,15 @@ export class OAuthService {
       // 加密存储 Refresh Token
       const refreshTokenEncrypted = this.encryption ? this.encryption.encrypt(refreshToken) : refreshToken;
 
-      await db.insert(oauthRefreshTokens).values({
+      this.em.create(OAuthRefreshToken, {
         refreshToken: refreshTokenEncrypted,
         clientId: client.id,
-        userId: code.userId,
-        scope: code.scope,
+        userId: authCode.userId,
+        scope: authCode.scope,
         expiresAt: refreshTokenExpiresAt,
-      });
+      } as any);
+
+      await this.em.flush();
 
       this.logger.log(`Access Token 已生成: ${accessToken.substring(0, 8)}...`);
 
@@ -329,7 +323,7 @@ export class OAuthService {
         token_type: "Bearer",
         expires_in: 3600,
         refresh_token: refreshToken, // 返回明文 Token
-        scope: code.scope,
+        scope: authCode.scope,
       };
     } catch (error) {
       this.logger.error(`交换 Access Token 失败`, error);
@@ -380,11 +374,11 @@ export class OAuthService {
       }
 
       // 查找 Refresh Token（需要解密后匹配）
+      const tokens = await this.em.find(OAuthRefreshToken, {});
       let refreshTokenRecord = null;
-      const tokens = await db.select().from(oauthRefreshTokens);
 
       for (const token of tokens) {
-        if (token.revokedAt) continue;
+        if (token.isRevoked()) continue;
 
         let decryptedToken = token.refreshToken;
         if (this.encryption) {
@@ -406,15 +400,12 @@ export class OAuthService {
       }
 
       // 检查是否过期
-      if (refreshTokenRecord.expiresAt < new Date()) {
+      if (refreshTokenRecord.isExpired()) {
         throw new BadRequestException("Refresh Token 已过期");
       }
 
       // 撤销旧的 Refresh Token（轮换机制）
-      await db
-        .update(oauthRefreshTokens)
-        .set({ revokedAt: new Date() })
-        .where(eq(oauthRefreshTokens.id, refreshTokenRecord.id));
+      refreshTokenRecord.revoke();
 
       // 生成新的 Access Token
       const accessToken = randomBytes(32).toString("hex");
@@ -423,13 +414,13 @@ export class OAuthService {
       // 加密存储 Access Token
       const accessTokenEncrypted = this.encryption ? this.encryption.encrypt(accessToken) : accessToken;
 
-      await db.insert(oauthAccessTokens).values({
+      this.em.create(OAuthAccessToken, {
         accessToken: accessTokenEncrypted,
         clientId: client.id,
         userId: refreshTokenRecord.userId,
         scope: refreshTokenRecord.scope,
         expiresAt: accessTokenExpiresAt,
-      });
+      } as any);
 
       // 生成新的 Refresh Token
       const newRefreshToken = randomBytes(32).toString("hex");
@@ -440,13 +431,15 @@ export class OAuthService {
         ? this.encryption.encrypt(newRefreshToken)
         : newRefreshToken;
 
-      await db.insert(oauthRefreshTokens).values({
+      this.em.create(OAuthRefreshToken, {
         refreshToken: newRefreshTokenEncrypted,
         clientId: client.id,
         userId: refreshTokenRecord.userId,
         scope: refreshTokenRecord.scope,
         expiresAt: newRefreshTokenExpiresAt,
-      });
+      } as any);
+
+      await this.em.flush();
 
       this.logger.log(`Access Token 已刷新: ${accessToken.substring(0, 8)}...`);
 
@@ -493,11 +486,11 @@ export class OAuthService {
       this.logger.debug(`Token 缓存未命中: ${accessToken.substring(0, 8)}...`);
 
       // 查找 Access Token（需要解密后匹配）
+      const tokens = await this.em.find(OAuthAccessToken, {});
       let accessTokenRecord = null;
-      const tokens = await db.select().from(oauthAccessTokens);
 
       for (const token of tokens) {
-        if (token.revokedAt) continue;
+        if (token.isRevoked()) continue;
 
         let decryptedToken = token.accessToken;
         if (this.encryption) {
@@ -519,18 +512,18 @@ export class OAuthService {
       }
 
       // 检查是否过期
-      if (accessTokenRecord.expiresAt < new Date()) {
+      if (accessTokenRecord.isExpired()) {
         return null;
       }
 
       // 获取用户信息
-      const user = await db.select().from(users).where(eq(users.id, accessTokenRecord.userId)).limit(1);
+      const user = await this.em.findOne(User, { id: accessTokenRecord.userId });
 
       const result = {
         userId: accessTokenRecord.userId,
         clientId: accessTokenRecord.clientId,
         scope: accessTokenRecord.scope,
-        user: user[0] || null,
+        user: user || null,
       };
 
       // 缓存结果
@@ -567,19 +560,21 @@ export class OAuthService {
 
       if (tokenTypeHint === "refresh_token" || !tokenTypeHint) {
         // 尝试撤销 Refresh Token
-        await db
-          .update(oauthRefreshTokens)
-          .set({ revokedAt: new Date() })
-          .where(eq(oauthRefreshTokens.refreshToken, token));
+        const refreshToken = await this.em.findOne(OAuthRefreshToken, { refreshToken: token });
+        if (refreshToken) {
+          refreshToken.revoke();
+        }
       }
 
       if (tokenTypeHint === "access_token" || !tokenTypeHint) {
         // 尝试撤销 Access Token
-        await db
-          .update(oauthAccessTokens)
-          .set({ revokedAt: new Date() })
-          .where(eq(oauthAccessTokens.accessToken, token));
+        const accessToken = await this.em.findOne(OAuthAccessToken, { accessToken: token });
+        if (accessToken) {
+          accessToken.revoke();
+        }
       }
+
+      await this.em.flush();
 
       this.logger.log(`Token 已撤销`);
     } catch (error) {
@@ -591,17 +586,15 @@ export class OAuthService {
   /**
    * 获取客户端信息
    */
-  private async getClient(clientId: string) {
-    const result = await db.select().from(oauthClients).where(eq(oauthClients.id, clientId)).limit(1);
-    return result[0] || null;
+  private async getClient(id: string) {
+    return this.em.findOne(OAuthClient, { id });
   }
 
   /**
    * 根据 client_id 获取客户端信息
    */
   private async getClientByClientId(clientId: string) {
-    const result = await db.select().from(oauthClients).where(eq(oauthClients.clientId, clientId)).limit(1);
-    return result[0] || null;
+    return this.em.findOne(OAuthClient, { clientId });
   }
 
   /**
@@ -655,44 +648,42 @@ export class OAuthService {
         clientSecretEncrypted = this.encryption ? this.encryption.encrypt(clientSecret) : clientSecret;
       }
 
-      const result = await db
-        .insert(oauthClients)
-        .values({
-          name: data.name,
-          clientId,
-          clientSecret: clientSecretEncrypted,
-          clientType: data.clientType || "confidential",
-          redirectUris: JSON.stringify(data.redirectUris),
-          allowedScopes: JSON.stringify(data.allowedScopes),
-          description: data.description,
-          homepageUrl: data.homepageUrl,
-          logoUrl: data.logoUrl,
-          privacyPolicyUrl: data.privacyPolicyUrl,
-          termsOfServiceUrl: data.termsOfServiceUrl,
-          createdBy: data.createdBy,
-        })
-        .returning();
+      const client = this.em.create(OAuthClient, {
+        name: data.name,
+        clientId,
+        clientSecret: clientSecretEncrypted,
+        clientType: data.clientType || "confidential",
+        redirectUris: data.redirectUris,
+        allowedScopes: data.allowedScopes,
+        description: data.description,
+        homepageUrl: data.homepageUrl,
+        logoUrl: data.logoUrl,
+        privacyPolicyUrl: data.privacyPolicyUrl,
+        termsOfServiceUrl: data.termsOfServiceUrl,
+        createdBy: data.createdBy,
+      } as any);
+
+      await this.em.flush();
 
       this.logger.log(`OAuth 客户端创建成功: ${clientId}`);
 
-      const created = result[0];
       return {
-        id: created.id,
-        name: created.name,
-        clientId: created.clientId,
+        id: client.id,
+        name: client.name,
+        clientId: client.clientId,
         clientSecret: clientSecret || undefined, // 只在创建时返回一次明文
-        clientType: created.clientType as "confidential" | "public",
-        redirectUris: JSON.parse(created.redirectUris),
-        allowedScopes: JSON.parse(created.allowedScopes),
-        description: created.description,
-        homepageUrl: created.homepageUrl,
-        logoUrl: created.logoUrl,
-        privacyPolicyUrl: created.privacyPolicyUrl,
-        termsOfServiceUrl: created.termsOfServiceUrl,
-        isActive: created.isActive,
-        createdAt: created.createdAt,
-        updatedAt: created.updatedAt,
-        createdBy: created.createdBy,
+        clientType: client.clientType,
+        redirectUris: client.redirectUris,
+        allowedScopes: client.allowedScopes,
+        description: client.description ?? null,
+        homepageUrl: client.homepageUrl ?? null,
+        logoUrl: client.logoUrl ?? null,
+        privacyPolicyUrl: client.privacyPolicyUrl ?? null,
+        termsOfServiceUrl: client.termsOfServiceUrl ?? null,
+        isActive: client.isActive,
+        createdAt: client.createdAt,
+        updatedAt: client.updatedAt,
+        createdBy: client.createdBy ?? null,
       };
     } catch (error) {
       this.logger.error(`创建 OAuth 客户端失败`, error);
@@ -707,7 +698,7 @@ export class OAuthService {
     clients: any[];
     total: number;
   }> {
-    const clients = await db.select().from(oauthClients);
+    const clients = await this.em.find(OAuthClient, {});
 
     const filteredClients = includeInactive ? clients : clients.filter((c) => c.isActive);
 
@@ -717,8 +708,8 @@ export class OAuthService {
         name: c.name,
         clientId: c.clientId,
         clientType: c.clientType,
-        redirectUris: JSON.parse(c.redirectUris),
-        allowedScopes: JSON.parse(c.allowedScopes),
+        redirectUris: c.redirectUris,
+        allowedScopes: c.allowedScopes,
         description: c.description,
         homepageUrl: c.homepageUrl,
         logoUrl: c.logoUrl,
@@ -737,20 +728,19 @@ export class OAuthService {
    * 根据 ID 获取客户端信息
    */
   async getClientById(id: string): Promise<any | null> {
-    const result = await db.select().from(oauthClients).where(eq(oauthClients.id, id)).limit(1);
+    const c = await this.em.findOne(OAuthClient, { id });
 
-    if (!result[0]) {
+    if (!c) {
       return null;
     }
 
-    const c = result[0];
     return {
       id: c.id,
       name: c.name,
       clientId: c.clientId,
       clientType: c.clientType,
-      redirectUris: JSON.parse(c.redirectUris),
-      allowedScopes: JSON.parse(c.allowedScopes),
+      redirectUris: c.redirectUris,
+      allowedScopes: c.allowedScopes,
       description: c.description,
       homepageUrl: c.homepageUrl,
       logoUrl: c.logoUrl,
@@ -786,21 +776,28 @@ export class OAuthService {
       return null;
     }
 
-    const updateData: any = {
-      updatedAt: new Date(),
-    };
+    const client = await this.em.findOne(OAuthClient, { id });
+    if (!client) {
+      return null;
+    }
 
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.redirectUris !== undefined) updateData.redirectUris = JSON.stringify(data.redirectUris);
-    if (data.allowedScopes !== undefined) updateData.allowedScopes = JSON.stringify(data.allowedScopes);
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.homepageUrl !== undefined) updateData.homepageUrl = data.homepageUrl;
-    if (data.logoUrl !== undefined) updateData.logoUrl = data.logoUrl;
-    if (data.privacyPolicyUrl !== undefined) updateData.privacyPolicyUrl = data.privacyPolicyUrl;
-    if (data.termsOfServiceUrl !== undefined) updateData.termsOfServiceUrl = data.termsOfServiceUrl;
-    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.name !== undefined) client.name = data.name;
+    if (data.redirectUris !== undefined) client.redirectUris = data.redirectUris;
+    if (data.allowedScopes !== undefined) client.allowedScopes = data.allowedScopes;
+    if (data.description !== undefined) client.description = data.description;
+    if (data.homepageUrl !== undefined) client.homepageUrl = data.homepageUrl;
+    if (data.logoUrl !== undefined) client.logoUrl = data.logoUrl;
+    if (data.privacyPolicyUrl !== undefined) client.privacyPolicyUrl = data.privacyPolicyUrl;
+    if (data.termsOfServiceUrl !== undefined) client.termsOfServiceUrl = data.termsOfServiceUrl;
+    if (data.isActive !== undefined) {
+      if (data.isActive) {
+        client.activate();
+      } else {
+        client.deactivate();
+      }
+    }
 
-    await db.update(oauthClients).set(updateData).where(eq(oauthClients.id, id));
+    await this.em.flush();
 
     return this.getClientById(id);
   }
@@ -809,17 +806,18 @@ export class OAuthService {
    * 删除客户端（设置 isActive = false）
    */
   async deleteClient(id: string): Promise<void> {
-    await db
-      .update(oauthClients)
-      .set({ isActive: false, updatedAt: new Date() })
-      .where(eq(oauthClients.id, id));
+    const client = await this.em.findOne(OAuthClient, { id });
+    if (client) {
+      client.deactivate();
+      await this.em.flush();
+    }
   }
 
   /**
    * 轮换客户端密钥
    */
   async rotateClientSecret(id: string): Promise<{ clientId: string; clientSecret: string; message: string }> {
-    const client = await this.getClientById(id);
+    const client = await this.em.findOne(OAuthClient, { id });
 
     if (!client) {
       throw new NotFoundException("客户端不存在");
@@ -835,11 +833,10 @@ export class OAuthService {
       ? this.encryption.encrypt(newClientSecret)
       : newClientSecret;
 
-    // 更新数据库
-    await db
-      .update(oauthClients)
-      .set({ clientSecret: clientSecretEncrypted, updatedAt: new Date() })
-      .where(eq(oauthClients.id, id));
+    // 更新实体
+    client.rotateSecret(clientSecretEncrypted);
+
+    await this.em.flush();
 
     this.logger.log(`客户端密钥已轮换: ${client.clientId}`);
 

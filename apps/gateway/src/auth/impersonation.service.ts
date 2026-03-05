@@ -2,9 +2,9 @@
  * 用户模拟服务
  */
 
+import { EntityManager } from "@mikro-orm/core";
 import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { db, users } from "@oksai/database";
-import { eq } from "drizzle-orm";
+import { User } from "@oksai/database";
 import type { ImpersonateUserDto, ImpersonateUserResponse, ImpersonationSession } from "./impersonation.dto";
 
 /**
@@ -25,6 +25,8 @@ export class ImpersonationService {
   /** 模拟会话存储（生产环境应使用 Redis） */
   private readonly impersonationSessions = new Map<string, ImpersonationSession>();
 
+  constructor(private readonly em: EntityManager) {}
+
   /**
    * 模拟用户登录
    *
@@ -41,7 +43,7 @@ export class ImpersonationService {
         throw new ForbiddenException("管理员用户不存在");
       }
 
-      if (admin.role !== "admin" && admin.role !== "owner") {
+      if (admin.role !== "ADMIN" && admin.role !== "OWNER") {
         throw new ForbiddenException("只有管理员可以模拟用户");
       }
 
@@ -147,7 +149,6 @@ export class ImpersonationService {
    * 获取用户信息
    */
   private async getUserById(userId: string) {
-    const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    return result[0] || null;
+    return this.em.findOne(User, { id: userId });
   }
 }

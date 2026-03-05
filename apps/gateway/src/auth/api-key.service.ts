@@ -1,5 +1,8 @@
 /**
  * API Key 管理服务
+ *
+ * TODO: 此服务暂时保留使用 Drizzle，待后续迁移到 MikroORM
+ * 当前 API Key 管理主要由 Better Auth 的 API Key 插件处理（见 api-key.controller.ts）
  */
 
 import { createHash, randomBytes } from "node:crypto";
@@ -13,6 +16,8 @@ import type { ApiKeyResponse, CreateApiKeyDto } from "./api-key.dto";
  *
  * @description
  * 提供API Key的创建、查询、撤销功能
+ *
+ * 注意：当前此服务未被使用，API Key 管理由 Better Auth 处理
  */
 @Injectable()
 export class ApiKeyService {
@@ -20,31 +25,17 @@ export class ApiKeyService {
 
   /**
    * 创建 API Key
-   *
-   * @description
-   * 1. 生成随机 Key (oks_<random>)
-   * 2. 计算 SHA256 hash
-   * 3. 存储到数据库
-   * 4. 返回完整 Key（仅此一次）
    */
   async createApiKey(userId: string, dto: CreateApiKeyDto): Promise<ApiKeyResponse> {
     try {
       this.logger.log(`创建 API Key: ${dto.name || "未命名"}`);
 
-      // 1. 生成随机 Key
       const randomString = randomBytes(32).toString("hex");
       const apiKey = `oks_${randomString}`;
-
-      // 2. 计算 hash
       const hashedKey = createHash("sha256").update(apiKey).digest("hex");
-
-      // 3. 提取前缀（用于快速识别）
-      const prefix = apiKey.substring(0, 11); // "oks_" + 前7位
-
-      // 4. 解析过期时间（expiresIn 是秒数）
+      const prefix = apiKey.substring(0, 11);
       const expiresAt = dto.expiresIn ? new Date(Date.now() + dto.expiresIn * 1000) : null;
 
-      // 5. 存储到数据库
       const result = await db
         .insert(apiKeys)
         .values({
@@ -70,7 +61,6 @@ export class ApiKeyService {
         createdAt: keyRecord.createdAt,
         expiresAt: keyRecord.expiresAt,
         lastUsedAt: keyRecord.lastUsedAt,
-        // 仅创建时返回完整 key
         key: apiKey,
       };
     } catch (error) {

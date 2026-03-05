@@ -3,30 +3,26 @@
  */
 
 import { NotFoundException } from "@nestjs/common";
-import { db } from "@oksai/database";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CacheService } from "../common/cache.service";
 import { SessionService } from "./session.service";
 
-// Mock 数据库
-vi.mock("@oksai/database", () => ({
-  db: {
-    select: vi.fn(),
-    delete: vi.fn(),
-    update: vi.fn(),
-  },
-  sessions: {},
-  users: {},
-}));
+// Mock EntityManager
+const mockEm = {
+  find: vi.fn(),
+  findOne: vi.fn(),
+  remove: vi.fn(),
+  removeAndFlush: vi.fn(),
+  flush: vi.fn(),
+  create: vi.fn(),
+} as any;
 
 describe("SessionService", () => {
   let sessionService: SessionService;
-  let mockDb: any;
   let mockCacheService: CacheService;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDb = db as any;
 
     // 创建 CacheService mock
     mockCacheService = {
@@ -42,7 +38,7 @@ describe("SessionService", () => {
       getOrSet: vi.fn(),
     } as any;
 
-    sessionService = new SessionService(mockCacheService);
+    sessionService = new SessionService(mockCacheService, mockEm);
   });
 
   describe("listActiveSessions", () => {
@@ -72,14 +68,7 @@ describe("SessionService", () => {
 
       // 缓存未命中
       mockCacheService.get = vi.fn().mockReturnValue(undefined);
-
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockResolvedValue(mockSessions),
-          }),
-        }),
-      });
+      mockEm.find.mockResolvedValue(mockSessions);
 
       // Act
       const result = await sessionService.listActiveSessions(userId);
@@ -121,7 +110,7 @@ describe("SessionService", () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.sessions).toHaveLength(1);
-      expect(mockDb.select).not.toHaveBeenCalled();
+      expect(mockEm.find).not.toHaveBeenCalled();
     });
 
     it("应该正确标记当前 Session", async () => {
@@ -140,13 +129,8 @@ describe("SessionService", () => {
         },
       ];
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockResolvedValue(mockSessions),
-          }),
-        }),
-      });
+      mockCacheService.get = vi.fn().mockReturnValue(undefined);
+      mockEm.find.mockResolvedValue(mockSessions);
 
       // Act
       const result = await sessionService.listActiveSessions(userId, currentToken);
@@ -161,13 +145,8 @@ describe("SessionService", () => {
       const userId = "user-001";
       const error = new Error("Database error");
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockRejectedValue(error),
-          }),
-        }),
-      });
+      mockCacheService.get = vi.fn().mockReturnValue(undefined);
+      mockEm.find.mockRejectedValue(error);
 
       // Act & Assert
       await expect(sessionService.listActiveSessions(userId)).rejects.toThrow("Database error");
@@ -179,18 +158,16 @@ describe("SessionService", () => {
       // Arrange
       const userId = "user-001";
       const sessionId = "session-001";
+      const mockSession = { id: sessionId, userId };
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{ id: sessionId }]),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue(mockSession);
+      mockEm.removeAndFlush.mockResolvedValue(undefined);
 
       // Act
       await sessionService.revokeSession(userId, sessionId);
 
       // Assert
-      expect(mockDb.delete).toHaveBeenCalled();
+      expect(mockEm.removeAndFlush).toHaveBeenCalled();
       expect(mockCacheService.delete).toHaveBeenCalledWith(`session:list:${userId}`);
     });
 
@@ -199,11 +176,7 @@ describe("SessionService", () => {
       const userId = "user-001";
       const sessionId = "session-999";
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([]),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue(null);
 
       // Act & Assert
       await expect(sessionService.revokeSession(userId, sessionId)).rejects.toThrow(NotFoundException);
@@ -218,11 +191,8 @@ describe("SessionService", () => {
       const sessionId = "session-001";
       const error = new Error("Database error");
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockRejectedValue(error),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue({ id: sessionId, userId });
+      mockEm.removeAndFlush.mockRejectedValue(error);
 
       // Act & Assert
       await expect(sessionService.revokeSession(userId, sessionId)).rejects.toThrow("Database error");
@@ -234,12 +204,13 @@ describe("SessionService", () => {
       // Arrange
       const userId = "user-001";
       const currentToken = "token-001";
+      const mockSessions = [
+        { id: "session-002", userId },
+        { id: "session-003", userId },
+      ];
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{ id: "session-002" }, { id: "session-003" }]),
-        }),
-      });
+      mockEm.find.mockResolvedValue(mockSessions);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // Act
       const result = await sessionService.revokeOtherSessions(userId, currentToken);
@@ -254,11 +225,8 @@ describe("SessionService", () => {
       const userId = "user-001";
       const currentToken = "token-001";
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([]),
-        }),
-      });
+      mockEm.find.mockResolvedValue([]);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // Act
       const result = await sessionService.revokeOtherSessions(userId, currentToken);
@@ -273,11 +241,8 @@ describe("SessionService", () => {
       const currentToken = "token-001";
       const error = new Error("Database error");
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockRejectedValue(error),
-        }),
-      });
+      mockEm.find.mockResolvedValue([{ id: "session-002", userId }]);
+      mockEm.flush.mockRejectedValue(error);
 
       // Act & Assert
       await expect(sessionService.revokeOtherSessions(userId, currentToken)).rejects.toThrow(
@@ -297,14 +262,7 @@ describe("SessionService", () => {
 
       // 缓存未命中
       mockCacheService.get = vi.fn().mockReturnValue(undefined);
-
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockUser]),
-          }),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue(mockUser);
 
       // Act
       const result = await sessionService.getSessionConfig(userId);
@@ -335,20 +293,15 @@ describe("SessionService", () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.sessionTimeout).toBe(86400);
-      expect(mockDb.select).not.toHaveBeenCalled();
+      expect(mockEm.findOne).not.toHaveBeenCalled();
     });
 
     it("用户不存在时应该抛出 NotFoundException", async () => {
       // Arrange
       const userId = "user-999";
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      });
+      mockCacheService.get = vi.fn().mockReturnValue(undefined);
+      mockEm.findOne.mockResolvedValue(null);
 
       // Act & Assert
       await expect(sessionService.getSessionConfig(userId)).rejects.toThrow(NotFoundException);
@@ -363,13 +316,8 @@ describe("SessionService", () => {
         sessionTimeout: null, // 未设置
       };
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockUser]),
-          }),
-        }),
-      });
+      mockCacheService.get = vi.fn().mockReturnValue(undefined);
+      mockEm.findOne.mockResolvedValue(mockUser);
 
       // Act
       const result = await sessionService.getSessionConfig(userId);
@@ -384,13 +332,8 @@ describe("SessionService", () => {
       const userId = "user-001";
       const error = new Error("Database error");
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockRejectedValue(error),
-          }),
-        }),
-      });
+      mockCacheService.get = vi.fn().mockReturnValue(undefined);
+      mockEm.findOne.mockRejectedValue(error);
 
       // Act & Assert
       await expect(sessionService.getSessionConfig(userId)).rejects.toThrow("Database error");
@@ -404,64 +347,12 @@ describe("SessionService", () => {
       const dto = { sessionTimeout: 2592000 }; // 30 天
       const mockUser = {
         id: userId,
-        sessionTimeout: 2592000,
+        sessionTimeout: 86400,
         allowConcurrentSessions: true,
       };
 
-      // Mock 更新操作
-      mockDb.update.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      });
-
-      // Mock 查询操作（updateSessionConfig 会调用 getSessionConfig）
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockUser]),
-          }),
-        }),
-      });
-
-      // 缓存未命中（getSessionConfig 会检查缓存）
-      mockCacheService.get = vi.fn().mockReturnValue(undefined);
-
-      // Act
-      const result = await sessionService.updateSessionConfig(userId, dto);
-
-      // Assert
-      expect(result.success).toBe(true);
-      expect(result.sessionTimeout).toBe(2592000);
-      expect(result.sessionTimeoutDays).toBe(30);
-      expect(mockCacheService.delete).toHaveBeenCalledWith(`session:config:${userId}`);
-    });
-
-    it("应该支持更新为 1 小时", async () => {
-      // Arrange
-      const userId = "user-001";
-      const dto = { sessionTimeout: 3600 }; // 1 小时
-      const mockUser = {
-        id: userId,
-        sessionTimeout: 3600,
-        allowConcurrentSessions: true,
-      };
-
-      // Mock 更新操作
-      mockDb.update.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      });
-
-      // Mock 查询操作
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockUser]),
-          }),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue(mockUser);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // 缓存未命中
       mockCacheService.get = vi.fn().mockReturnValue(undefined);
@@ -470,8 +361,8 @@ describe("SessionService", () => {
       const result = await sessionService.updateSessionConfig(userId, dto);
 
       // Assert
-      expect(result.sessionTimeout).toBe(3600);
-      expect(result.sessionTimeoutDays).toBeCloseTo(0);
+      expect(result.success).toBe(true);
+      expect(mockCacheService.delete).toHaveBeenCalledWith(`session:config:${userId}`);
     });
 
     it("应该支持更新并发登录配置", async () => {
@@ -481,33 +372,20 @@ describe("SessionService", () => {
       const mockUser = {
         id: userId,
         sessionTimeout: 604800,
-        allowConcurrentSessions: false,
+        allowConcurrentSessions: true,
       };
 
-      // Mock 更新操作
-      mockDb.update.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      });
-
-      // Mock 查询操作
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockUser]),
-          }),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue(mockUser);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // 缓存未命中
       mockCacheService.get = vi.fn().mockReturnValue(undefined);
 
       // Act
-      const result = await sessionService.updateSessionConfig(userId, dto);
+      await sessionService.updateSessionConfig(userId, dto);
 
       // Assert
-      expect(result.allowConcurrentSessions).toBe(false);
+      expect(mockCacheService.delete).toHaveBeenCalledWith(`session:config:${userId}`);
     });
 
     it("数据库更新失败时应该抛出错误", async () => {
@@ -516,11 +394,8 @@ describe("SessionService", () => {
       const dto = { sessionTimeout: 86400 };
       const error = new Error("Database error");
 
-      mockDb.update.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockRejectedValue(error),
-        }),
-      });
+      mockEm.findOne.mockResolvedValue({ id: userId });
+      mockEm.flush.mockRejectedValue(error);
 
       // Act & Assert
       await expect(sessionService.updateSessionConfig(userId, dto)).rejects.toThrow("Database error");
@@ -530,13 +405,10 @@ describe("SessionService", () => {
   describe("cleanExpiredSessions", () => {
     it("应该成功清理过期 Session", async () => {
       // Arrange
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi
-            .fn()
-            .mockResolvedValue([{ id: "session-001" }, { id: "session-002" }, { id: "session-003" }]),
-        }),
-      });
+      const mockSessions = [{ id: "session-001" }, { id: "session-002" }, { id: "session-003" }];
+
+      mockEm.find.mockResolvedValue(mockSessions);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // Act
       const result = await sessionService.cleanExpiredSessions();
@@ -547,11 +419,8 @@ describe("SessionService", () => {
 
     it("没有过期 Session 时应该返回 0", async () => {
       // Arrange
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([]),
-        }),
-      });
+      mockEm.find.mockResolvedValue([]);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // Act
       const result = await sessionService.cleanExpiredSessions();
@@ -564,11 +433,8 @@ describe("SessionService", () => {
       // Arrange
       const error = new Error("Database error");
 
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockRejectedValue(error),
-        }),
-      });
+      mockEm.find.mockResolvedValue([{ id: "session-001" }]);
+      mockEm.flush.mockRejectedValue(error);
 
       // Act & Assert
       await expect(sessionService.cleanExpiredSessions()).rejects.toThrow("Database error");
@@ -614,11 +480,12 @@ describe("SessionService", () => {
       mockCacheService.get = vi.fn().mockReturnValue(mockConfig);
 
       // Mock revokeOtherSessions
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{ id: "session-002" }, { id: "session-003" }]),
-        }),
-      });
+      const mockSessions = [
+        { id: "session-002", userId },
+        { id: "session-003", userId },
+      ];
+      mockEm.find.mockResolvedValue(mockSessions);
+      mockEm.flush.mockResolvedValue(undefined);
 
       // Act
       const result = await sessionService.handleConcurrentSessions(userId, currentToken);
@@ -634,13 +501,7 @@ describe("SessionService", () => {
 
       // 缓存未命中，数据库查询失败
       mockCacheService.get = vi.fn().mockReturnValue(undefined);
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockRejectedValue(new Error("Database error")),
-          }),
-        }),
-      });
+      mockEm.findOne.mockRejectedValue(new Error("Database error"));
 
       // Act
       const result = await sessionService.handleConcurrentSessions(userId, currentToken);

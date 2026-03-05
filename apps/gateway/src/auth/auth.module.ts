@@ -2,6 +2,7 @@
  * 认证模块
  */
 
+import { EntityManager } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
 import { MikroOrmDatabaseModule } from "@oksai/database";
 import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
@@ -17,6 +18,7 @@ import { OrganizationController } from "./organization.controller";
 import { OrganizationService } from "./organization.service";
 import { SessionController } from "./session.controller";
 import { SessionService } from "./session.service";
+import { TokenBlacklistService } from "./token-blacklist.service";
 import { WebhookController } from "./webhook.controller";
 import { WebhookService } from "./webhook.service";
 
@@ -62,18 +64,19 @@ import { WebhookService } from "./webhook.service";
     },
     {
       provide: OAuthService,
-      useFactory: (cacheService: CacheService) => {
-        return new OAuthService(cacheService);
+      useFactory: (cacheService: CacheService, em: EntityManager) => {
+        return new OAuthService(cacheService, em);
       },
-      inject: [CacheService],
+      inject: [CacheService, EntityManager],
     },
     {
       provide: SessionService,
-      useFactory: (cacheService: CacheService) => {
-        return new SessionService(cacheService);
+      useFactory: (cacheService: CacheService, em: EntityManager) => {
+        return new SessionService(cacheService, em);
       },
-      inject: [CacheService],
+      inject: [CacheService, EntityManager],
     },
+    TokenBlacklistService,
     WebhookService,
     {
       provide: OrganizationService,
@@ -83,6 +86,13 @@ import { WebhookService } from "./webhook.service";
       inject: [BetterAuthService],
     },
   ],
-  exports: [AuthService, OAuthService, SessionService, OrganizationService, WebhookService],
+  exports: [
+    AuthService,
+    OAuthService,
+    SessionService,
+    OrganizationService,
+    WebhookService,
+    TokenBlacklistService,
+  ],
 })
 export class AuthFeatureModule {}

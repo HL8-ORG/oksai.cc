@@ -7,5 +7,16 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node", "vitest/globals"]
-  }
+  },
+  "references": [
+    {
+      "path": "../constants"
+    },
+    {
+      "path": "../config"
+    },
+    {
+      "path": "../context"
+    }
+  ]
 }

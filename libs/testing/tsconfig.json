@@ -6,5 +6,13 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src"
-  }
+  },
+  "references": [
+    {
+      "path": "../shared/event-store"
+    },
+    {
+      "path": "../database"
+    }
+  ]
 }

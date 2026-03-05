@@ -2,13 +2,15 @@
  * Token 黑名单管理
  */
 
+import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger } from "@nestjs/common";
-import { db, oauthAccessTokens, oauthRefreshTokens } from "@oksai/database";
-import { and, eq, gt } from "drizzle-orm";
+import { OAuthAccessToken, OAuthRefreshToken } from "@oksai/database";
 
 @Injectable()
 export class TokenBlacklistService {
   private readonly logger = new Logger(TokenBlacklistService.name);
+
+  constructor(private readonly em: EntityManager) {}
 
   /**
    * 撤销所有用户 Token
@@ -20,20 +22,26 @@ export class TokenBlacklistService {
     this.logger.log(`撤销用户所有 Token: ${userId}, 原因: ${reason}`);
 
     // 撤销所有 Access Token
-    await db
-      .update(oauthAccessTokens)
-      .set({
-        revokedAt: new Date(),
-      })
-      .where(and(eq(oauthAccessTokens.userId, userId), eq(oauthAccessTokens.revokedAt, null as any)));
+    const accessTokens = await this.em.find(OAuthAccessToken, {
+      userId,
+      revokedAt: null,
+    });
+
+    for (const token of accessTokens) {
+      token.revoke();
+    }
 
     // 撤销所有 Refresh Token
-    await db
-      .update(oauthRefreshTokens)
-      .set({
-        revokedAt: new Date(),
-      })
-      .where(and(eq(oauthRefreshTokens.userId, userId), eq(oauthRefreshTokens.revokedAt, null as any)));
+    const refreshTokens = await this.em.find(OAuthRefreshToken, {
+      userId,
+      revokedAt: null,
+    });
+
+    for (const token of refreshTokens) {
+      token.revoke();
+    }
+
+    await this.em.flush();
   }
 
   /**
@@ -45,19 +53,27 @@ export class TokenBlacklistService {
   async revokeAllClientTokens(clientId: string, reason: string = "client_revoked"): Promise<void> {
     this.logger.log(`撤销客户端所有 Token: ${clientId}, 原因: ${reason}`);
 
-    await db
-      .update(oauthAccessTokens)
-      .set({
-        revokedAt: new Date(),
-      })
-      .where(and(eq(oauthAccessTokens.clientId, clientId), eq(oauthAccessTokens.revokedAt, null as any)));
+    // 撤销所有 Access Token
+    const accessTokens = await this.em.find(OAuthAccessToken, {
+      clientId,
+      revokedAt: null,
+    });
 
-    await db
-      .update(oauthRefreshTokens)
-      .set({
-        revokedAt: new Date(),
-      })
-      .where(and(eq(oauthRefreshTokens.clientId, clientId), eq(oauthRefreshTokens.revokedAt, null as any)));
+    for (const token of accessTokens) {
+      token.revoke();
+    }
+
+    // 撤销所有 Refresh Token
+    const refreshTokens = await this.em.find(OAuthRefreshToken, {
+      clientId,
+      revokedAt: null,
+    });
+
+    for (const token of refreshTokens) {
+      token.revoke();
+    }
+
+    await this.em.flush();
   }
 
   /**
@@ -67,17 +83,14 @@ export class TokenBlacklistService {
    * @param tokenType - Token 类型
    */
   async isTokenRevoked(tokenHash: string, tokenType: "access" | "refresh"): Promise<boolean> {
-    const table = tokenType === "access" ? oauthAccessTokens : oauthRefreshTokens;
-    const tokenField =
-      tokenType === "access" ? oauthAccessTokens.accessToken : oauthRefreshTokens.refreshToken;
+    const entityClass = tokenType === "access" ? OAuthAccessToken : OAuthRefreshToken;
+    const tokenField = tokenType === "access" ? "accessToken" : "refreshToken";
 
-    const result = await db
-      .select({ revokedAt: table.revokedAt })
-      .from(table)
-      .where(eq(tokenField as any, tokenHash))
-      .limit(1);
+    const token = await this.em.findOne(entityClass, {
+      [tokenField]: tokenHash,
+    });
 
-    return result[0]?.revokedAt != null;
+    return token?.revokedAt != null;
   }
 
   /**
@@ -88,17 +101,27 @@ export class TokenBlacklistService {
 
     const now = new Date();
 
-    // 删除过期的 Access Token（保留 7 天用于审计）
-    const expiredAccessTokens = await db
-      .delete(oauthAccessTokens)
-      .where(and(gt(oauthAccessTokens.expiresAt, now), eq(oauthAccessTokens.revokedAt, null as any)))
-      .returning();
+    // 删除过期的 Access Token
+    const expiredAccessTokens = await this.em.find(OAuthAccessToken, {
+      expiresAt: { $gt: now },
+      revokedAt: null,
+    });
 
-    // 删除过期的 Refresh Token（保留 7 天用于审计）
-    const expiredRefreshTokens = await db
-      .delete(oauthRefreshTokens)
-      .where(and(gt(oauthRefreshTokens.expiresAt, now), eq(oauthRefreshTokens.revokedAt, null as any)))
-      .returning();
+    for (const token of expiredAccessTokens) {
+      this.em.remove(token);
+    }
+
+    // 删除过期的 Refresh Token
+    const expiredRefreshTokens = await this.em.find(OAuthRefreshToken, {
+      expiresAt: { $gt: now },
+      revokedAt: null,
+    });
+
+    for (const token of expiredRefreshTokens) {
+      this.em.remove(token);
+    }
+
+    await this.em.flush();
 
     const result = {
       accessTokens: expiredAccessTokens.length,

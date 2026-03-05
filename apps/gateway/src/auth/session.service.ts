@@ -2,9 +2,9 @@
  * Session 管理服务
  */
 
+import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { db, sessions, users } from "@oksai/database";
-import { and, eq, gt } from "drizzle-orm";
+import { Session, User } from "@oksai/database";
 import { CacheService } from "../common/cache.service";
 import type {
   SessionConfigResponse,
@@ -35,7 +35,10 @@ export class SessionService {
   /** Session 列表缓存 TTL：1 分钟 */
   private static readonly CACHE_TTL_LIST = 60000;
 
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(
+    private readonly cacheService: CacheService,
+    private readonly em: EntityManager
+  ) {}
 
   /**
    * 获取用户的所有活跃 Session
@@ -72,19 +75,24 @@ export class SessionService {
 
       // 从数据库查询
       const now = new Date();
-      const result = await db
-        .select()
-        .from(sessions)
-        .where(and(eq((sessions as any).userId, userId), gt((sessions as any).expiresAt, now)))
-        .orderBy((sessions as any).createdAt);
+      const result = await this.em.find(
+        Session,
+        {
+          userId,
+          expiresAt: { $gt: now },
+        },
+        {
+          orderBy: { createdAt: "ASC" },
+        }
+      );
 
       const sessionList: SessionInfo[] = result.map((session) => ({
         id: session.id,
-        userId: (session as any).userId,
+        userId: session.userId,
         createdAt: session.createdAt,
-        expiresAt: (session as any).expiresAt,
-        ipAddress: (session as any).ipAddress,
-        userAgent: (session as any).userAgent,
+        expiresAt: session.expiresAt,
+        ipAddress: session.ipAddress,
+        userAgent: session.userAgent,
         isCurrent: currentSessionToken ? session.token === currentSessionToken : false,
       }));
 
@@ -116,14 +124,13 @@ export class SessionService {
    */
   async revokeSession(userId: string, sessionId: string): Promise<void> {
     try {
-      const result = await db
-        .delete(sessions)
-        .where(and(eq(sessions.id, sessionId), eq((sessions as any).userId, userId)))
-        .returning();
+      const session = await this.em.findOne(Session, { id: sessionId, userId });
 
-      if (!result[0]) {
+      if (!session) {
         throw new NotFoundException("Session 不存在或无权访问");
       }
+
+      await this.em.removeAndFlush(session);
 
       // 清除 Session 列表缓存
       this.cacheService.delete(`${SessionService.CACHE_PREFIX_LIST}${userId}`);
@@ -143,18 +150,19 @@ export class SessionService {
    */
   async revokeOtherSessions(userId: string, _currentSessionToken: string): Promise<number> {
     try {
-      const result = await db
-        .delete(sessions)
-        .where(
-          and(
-            eq((sessions as any).userId, userId)
-            // 保留当前 Session
-            // eq(sessions.token, currentSessionToken) 的反义
-          )
-        )
-        .returning();
+      const sessions = await this.em.find(Session, {
+        userId,
+        // 保留当前 Session
+        // token: { $ne: currentSessionToken }
+      });
 
-      const deletedCount = result.length;
+      for (const session of sessions) {
+        this.em.remove(session);
+      }
+
+      await this.em.flush();
+
+      const deletedCount = sessions.length;
 
       // 清除 Session 列表缓存
       this.cacheService.delete(`${SessionService.CACHE_PREFIX_LIST}${userId}`);
@@ -183,9 +191,8 @@ export class SessionService {
       }
 
       // 从数据库查询
-      const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      const user = await this.em.findOne(User, { id: userId });
 
-      const user = result[0];
       if (!user) {
         throw new NotFoundException("用户不存在");
       }
@@ -223,17 +230,20 @@ export class SessionService {
     try {
       this.logger.log(`更新 Session 配置: ${userId}`, dto);
 
-      // 构建更新对象
-      const updateData: any = {};
-      if (dto.sessionTimeout !== undefined) {
-        updateData.sessionTimeout = dto.sessionTimeout;
-      }
-      if (dto.allowConcurrentSessions !== undefined) {
-        updateData.allowConcurrentSessions = dto.allowConcurrentSessions;
+      const user = await this.em.findOne(User, { id: userId });
+      if (!user) {
+        throw new NotFoundException("用户不存在");
       }
 
-      // 更新用户配置
-      await db.update(users).set(updateData).where(eq(users.id, userId));
+      // 更新配置
+      if (dto.sessionTimeout !== undefined) {
+        (user as any).sessionTimeout = dto.sessionTimeout;
+      }
+      if (dto.allowConcurrentSessions !== undefined) {
+        (user as any).allowConcurrentSessions = dto.allowConcurrentSessions;
+      }
+
+      await this.em.flush();
 
       // 获取更新后的完整配置
       const config = await this.getSessionConfig(userId);
@@ -284,12 +294,17 @@ export class SessionService {
   async cleanExpiredSessions(): Promise<number> {
     try {
       const now = new Date();
-      const result = await db
-        .delete(sessions)
-        .where(gt((sessions as any).expiresAt, now))
-        .returning();
+      const sessions = await this.em.find(Session, {
+        expiresAt: { $lte: now },
+      });
 
-      const deletedCount = result.length;
+      for (const session of sessions) {
+        this.em.remove(session);
+      }
+
+      await this.em.flush();
+
+      const deletedCount = sessions.length;
       this.logger.log(`清理了 ${deletedCount} 个过期 Session`);
       return deletedCount;
     } catch (error) {

@@ -34,7 +34,8 @@ export interface MikroOrmAdapterConfig {
  * 当前限制：
  *   - 不支持 m:m 和 1:m 以及嵌入式引用
  *   - 不支持复杂主键
- *   - 不支持 schema 生成
+ *   - 当前适配器未实现 Better Auth `createSchema` 对接
+ *     （注意：MikroORM 本身已支持 SchemaGenerator）
  *
  * @param orm - 从 `MikroORM.init` 或 `MikroORM.initSync` 方法返回的 Mikro ORM 实例
  * @param config - Mikro ORM 适配器的额外配置
