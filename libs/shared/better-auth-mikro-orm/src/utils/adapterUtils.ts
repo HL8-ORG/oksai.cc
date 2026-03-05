@@ -1,6 +1,5 @@
 import type { EntityMetadata, EntityProperty, MikroORM } from "@mikro-orm/core";
 import { ReferenceKind, serialize } from "@mikro-orm/core";
-import type { Where } from "better-auth";
 import { dset } from "dset";
 import { createAdapterError } from "./createAdapterError.js";
 
@@ -61,6 +60,18 @@ export interface AdapterUtils {
    * @param metadata - 实体元数据
    * @param where - 要规范化的 where 子句列表
    */
+  normalizeWhereClauses(
+    metadata: EntityMetadata,
+    where:
+      | Array<{
+          field: string;
+          operator?: string;
+          value: any;
+          connector?: "AND" | "OR";
+        }>
+      | null
+      | undefined
+  ): Record<string, any>;
   /**
    * 将 Better Auth 的 join 参数转换为 MikroORM 的 populate 选项
    *
@@ -404,10 +415,7 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
     const populate: string[] = [];
     const joinEntries = Object.entries(join);
 
-    for (const [modelName, joinAttr] of joinEntries) {
-      // 获取关联的限制数
-      const limit = joinAttr.limit ?? options?.advanced?.database?.defaultFindManyLimit ?? 100;
-
+    for (const [modelName, _joinAttr] of joinEntries) {
       // 尝试匹配关联属性
       const relationField = Object.values(metadata.properties).find((prop) => {
         // 检查是否是关联类型
@@ -450,4 +458,3 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
     convertJoinToPopulate,
   };
 }
-// @ts-expect-error

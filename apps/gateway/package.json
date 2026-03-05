@@ -23,6 +23,7 @@
     "@nestjs/passport": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "@nestjs/throttler": "catalog:",
+    "@oksai/better-auth-mikro-orm": "workspace:*",
     "@oksai/config": "workspace:*",
     "@oksai/constants": "workspace:*",
     "@oksai/context": "workspace:*",

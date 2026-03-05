@@ -158,20 +158,21 @@ pnpm mikro-orm migration:down   # 回滚迁移
 pnpm mikro-orm migration:pending # 查看待执行迁移
 ```
 
-**Drizzle (兼容旧 Schema)**:
+**Drizzle (已废弃)**:
 ```bash
-# Drizzle 命令（保留用于旧代码参考）
-pnpm db:generate  # Generate Drizzle schema migrations
-pnpm db:migrate   # Run migrations
-pnpm db:push      # Push schema changes directly
-pnpm db:studio    # Open Drizzle Studio
+# Drizzle 命令（已移除，仅供参考）
+# pnpm db:generate  # Generate Drizzle schema migrations
+# pnpm db:migrate   # Run migrations
+# pnpm db:push      # Push schema changes directly
+# pnpm db:studio    # Open Drizzle Studio
 ```
 
 **说明**:
-- 项目正在从 Drizzle 迁移到 MikroORM
-- 新功能请使用 MikroORM Entity 和 Repository
-- 旧代码暂时保留 Drizzle Schema 作为参考
-- 详见：`docs/migration/mikro-orm-migration-progress.md`
+- ✅ 项目已完成从 Drizzle 到 MikroORM 的迁移（2026-03-06）
+- ✅ Better Auth 已使用 MikroORM 适配器
+- ✅ 所有数据库操作统一使用 MikroORM
+- 📚 迁移详情：`docs/migration/drizzle-to-mikro-orm.md`
+- 📊 进度报告：`docs/drizzle-removal-phase4-complete.md`
 
 
 ### Development Commands

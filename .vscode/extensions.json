@@ -1,3 +1,14 @@
 {
-  "recommendations": ["biomejs.biome", "nrwl.angular-console"]
+  "recommendations": [
+    "biomejs.biome", 
+    "nrwl.angular-console",
+    "DeepScan.vscode-deepscan",
+		"seatonjiang.gitmoji-vscode",
+		"dbaeumer.vscode-eslint",
+		"jondot.vscode-hygen",
+		"esbenp.prettier-vscode",
+		"firsttris.vscode-jest-runner",
+		"jebbs.plantuml",
+		"vscode-icons-team.vscode-icons",
+		"kuochunchang.goose-uml-vscode"]
 }

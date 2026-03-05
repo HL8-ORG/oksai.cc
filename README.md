@@ -17,7 +17,7 @@
 | -------- | ------------------------------------------- |
 | 前端     | React 18 + TanStack Router/Query + radix-ui |
 | 后端     | NestJS 10 + TypeScript                      |
-| 数据库   | PostgreSQL + Prisma ORM + pgvector          |
+| 数据库   | PostgreSQL + MikroORM + pgvector            |
 | 缓存     | Redis                                       |
 | 消息队列 | RabbitMQ                                    |
 | 对象存储 | MinIO                                       |
@@ -38,7 +38,7 @@ oksai.cc/
 │   └── web-marketing/       # 营销官网
 ├── libs/                    # 共享库
 │   ├── shared/              # 共享类型、工具
-│   ├── database/            # Prisma Schema
+│   ├── database/            # MikroORM Entity + 数据库配置
 │   ├── infra/               # 基础设施客户端
 │   ├── auth/                # 认证逻辑
 │   ├── ai/                  # AI 集成
@@ -58,8 +58,8 @@ pnpm install
 # 启动基础设施 (PostgreSQL, Redis)
 docker-compose -f docker/docker-compose.dev.yml up -d
 
-# 运行数据库迁移
-pnpm nx run @oksai/database:migrate
+# 运行数据库迁移（MikroORM）
+pnpm mikro-orm migration:up
 
 # 启动开发服务器
 pnpm nx serve gateway
@@ -83,11 +83,12 @@ pnpm test
 # 代码检查
 pnpm lint
 
-# 数据库操作
-pnpm db:generate    # 生成迁移
-pnpm db:migrate     # 运行迁移
-pnpm db:push        # 推送 schema
-pnpm db:studio      # 打开 Prisma Studio
+# 数据库操作（MikroORM）
+pnpm mikro-orm schema:update   # 更新 Schema（开发环境）
+pnpm mikro-orm migration:create # 创建迁移文件
+pnpm mikro-orm migration:up     # 运行迁移
+pnpm mikro-orm migration:down   # 回滚迁移
+pnpm mikro-orm migration:pending # 查看待执行迁移
 
 # Docker 操作
 pnpm docker:up      # 启动所有服务

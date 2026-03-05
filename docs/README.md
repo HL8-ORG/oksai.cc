@@ -21,7 +21,8 @@
 ### 🔄 迁移文档
 
 - [Vitest 迁移指南](./migration/vitest-migration.md) - Jest → Vitest 迁移完整记录
-- [MikroORM 迁移进度](./migration/mikro-orm-migration-progress.md) - Drizzle → MikroORM 迁移状态
+- [Drizzle → MikroORM 迁移](./migration/drizzle-to-mikro-orm.md) - Better Auth 迁移完整指南
+- [MikroORM 迁移进度](./migration/mikro-orm-migration-progress.md) - MikroORM 迁移总体进度（已完成）
 
 ### 🏗️ 架构文档
 
@@ -92,6 +93,7 @@ docs/
 │   └── typescript-configuration.md        # TypeScript 配置详解
 ├── migration/                             # 迁移文档
 │   ├── vitest-migration.md               # Vitest 迁移指南
+│   ├── drizzle-to-mikro-orm.md           # Drizzle → MikroORM 迁移指南
 │   └── mikro-orm-migration-progress.md   # MikroORM 迁移进度
 ├── ARCHITECTURE.md                        # 系统架构
 ├── BETTER_AUTH_*.md                       # Better Auth 相关文档
@@ -111,7 +113,8 @@ docs/
 | TypeScript 配置 | [typescript-configuration.md](./guides/typescript-configuration.md) |
 | 构建问题 | [typescript-configuration.md](./guides/typescript-configuration.md#故障排除指南) |
 | 测试框架 | [vitest-migration.md](./migration/vitest-migration.md) |
-| 数据库迁移 | [mikro-orm-migration-progress.md](./migration/mikro-orm-migration-progress.md) |
+| Drizzle 迁移 | [drizzle-to-mikro-orm.md](./migration/drizzle-to-mikro-orm.md) |
+| MikroORM | [mikro-orm-migration-progress.md](./migration/mikro-orm-migration-progress.md) |
 | 认证授权 | [BETTER_AUTH_INTEGRATION.md](./BETTER_AUTH_INTEGRATION.md) |
 | 前端开发 | [FRONTEND_ALIGNMENT.md](./FRONTEND_ALIGNMENT.md) |
 | 代码规范 | [AGENTS.md](../AGENTS.md) |
@@ -199,4 +202,4 @@ docs/
 ---
 
 **维护者**: Oksai Team  
-**最后更新**: 2026-03-05
+**最后更新**: 2026-03-06

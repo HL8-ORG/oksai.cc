@@ -23,12 +23,10 @@
 
 import { apiKey } from "@better-auth/api-key";
 import { MikroORM } from "@mikro-orm/core";
+import { mikroOrmAdapter } from "@oksai/better-auth-mikro-orm";
 import type { ConfigService } from "@oksai/config";
 import { betterAuth } from "better-auth";
 import { admin, organization, twoFactor } from "better-auth/plugins";
-// TODO: 修复包导入后改回 @oksai/better-auth-mikro-orm
-// 使用相对路径导入（apps/gateway/src/auth -> libs/shared/...）
-import { mikroOrmAdapter } from "../../../../libs/shared/better-auth-mikro-orm/src/adapter";
 
 // biome-ignore lint/suspicious/noExplicitAny: Better Auth 返回类型过于复杂
 export function createAuth(orm: MikroORM, configService: ConfigService): any {
