@@ -1,10 +1,9 @@
 /**
- * 数据库 Schema 导出
+ * 数据库 Schema 导出（仅保留非 Better Auth Schema）
  *
- * 使用 Better Auth 兼容的 Schema
+ * Better Auth 现在使用 MikroORM Entity，不再需要 Drizzle Schema
  */
 
 export * from "./api-key.schema.js";
-export * from "./better-auth.schema.js";
 export * from "./oauth.schema.js";
 export * from "./webhook.schema.js";

@@ -1,4 +1,5 @@
 import process from "node:process";
+import { MikroORM } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule } from "@nestjs/throttler";
@@ -51,15 +52,15 @@ import { HealthController } from "./health/health.controller";
 
     AuthModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const auth = createAuthInstance(configService);
+      useFactory: (configService: ConfigService, orm: MikroORM) => {
+        const auth = createAuthInstance(orm, configService);
         return {
           auth,
           // 禁用内置 CORS，因为我们在 main.ts 中已经配置了
           disableTrustedOriginsCors: true,
         };
       },
-      inject: [ConfigService],
+      inject: [ConfigService, MikroORM],
     }),
 
     AuthFeatureModule,

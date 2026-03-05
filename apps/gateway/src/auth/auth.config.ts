@@ -1,25 +1,15 @@
-import { apiKey } from "@better-auth/api-key";
-import type { ConfigService } from "@oksai/config";
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin, organization, twoFactor } from "better-auth/plugins";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-
 /**
- * 创建 Better Auth 实例
+ * Better Auth 配置工厂
  *
  * @description
- * 初始化 Better Auth 认证服务，配置：
- * - Drizzle ORM 数据库适配器
+ * 初始化 Better Auth 认证服务，使用 MikroORM 适配器
  * - 邮箱/密码登录
  * - OAuth 社交登录（GitHub、Google）
  * - 双因素认证 (2FA/TOTP)
- * - 会话管理（支持 Redis 缓存）
+ * - 会话管理
  * - 安全策略（CORS、CSRF、Rate Limiting）
  *
  * 环境变量（通过 ConfigService 读取）：
- * - DATABASE_URL: 数据库连接字符串（必需）
  * - BETTER_AUTH_SECRET: 认证密钥（可选，Better Auth 自动读取）
  * - BETTER_AUTH_URL: 应用基础 URL（可选，Better Auth 自动读取）
  * - GITHUB_CLIENT_ID/SECRET: GitHub OAuth（可选）
@@ -30,9 +20,16 @@ import postgres from "postgres";
  * @see https://better-auth.com/docs/reference/options
  * @see https://better-auth.com/docs/plugins/2fa
  */
-// biome-ignore lint/suspicious/noExplicitAny: Better Auth 返回类型过于复杂，无法显式声明
-export function createAuth(configService: ConfigService): any {
-  const databaseUrl = configService.getRequired("DATABASE_URL");
+
+import { apiKey } from "@better-auth/api-key";
+import { MikroORM } from "@mikro-orm/core";
+import { mikroOrmAdapter } from "@oksai/better-auth-mikro-orm";
+import type { ConfigService } from "@oksai/config";
+import { betterAuth } from "better-auth";
+import { admin, organization, twoFactor } from "better-auth/plugins";
+
+// biome-ignore lint/suspicious/noExplicitAny: Better Auth 返回类型过于复杂
+export function createAuth(orm: MikroORM, configService: ConfigService): any {
   const nodeEnv = configService.get("NODE_ENV") || "development";
 
   const githubClientId = configService.get("GITHUB_CLIENT_ID");
@@ -40,17 +37,15 @@ export function createAuth(configService: ConfigService): any {
   const googleClientId = configService.get("GOOGLE_CLIENT_ID");
   const googleClientSecret = configService.get("GOOGLE_CLIENT_SECRET");
 
-  const client = postgres(databaseUrl);
-  const db = drizzle(client);
-
   return betterAuth({
     // Better Auth 基础路径
     // 注意：NestJS 全局前缀 /api 会自动添加到中间件路径
     // 所以这里设置为 /auth，最终路径为 /api/auth/*
     basePath: "/auth",
 
-    database: drizzleAdapter(db, {
-      provider: "pg",
+    // 使用 MikroORM 适配器
+    database: mikroOrmAdapter(orm, {
+      debugLogs: nodeEnv === "development",
     }),
 
     emailAndPassword: {
@@ -148,23 +143,9 @@ export function createAuth(configService: ConfigService): any {
       ipAddress: {
         ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
       },
+      crossSubDomainCookies: {
+        enabled: false,
+      },
     },
-
-    // Rate Limiting 配置
-    // 注意：使用内存存储（默认），避免需要额外的数据库表
-    // 生产环境建议使用 Redis 存储以支持分布式部署
-    rateLimit: {
-      enabled: true,
-      window: 60, // 60秒时间窗口
-      max: 100, // 每个 IP 最多 100 次请求
-      // storage: "database", // 使用数据库存储需要创建 rateLimit 表
-    },
-
-    // CORS 配置：允许的前端来源
-    trustedOrigins: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:5173",
-    ],
   });
 }
