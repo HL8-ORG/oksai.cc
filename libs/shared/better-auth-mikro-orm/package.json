@@ -17,7 +17,14 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
-			"require": "./dist/index.js"
+			"require": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./adapter": {
+			"types": "./dist/adapter.d.ts",
+			"import": "./dist/adapter.js",
+			"require": "./dist/adapter.js",
+			"default": "./dist/adapter.js"
 		}
 	},
 	"files": [
@@ -27,25 +34,25 @@
 		"build": "tsc -p tsconfig.build.json",
 		"build:watch": "tsc -p tsconfig.build.json --watch",
 		"typecheck": "tsc --noEmit",
-		"clean": "pnpm exec rimraf dist",
+		"clean": "pnpm exec rimraf dist coverage",
 		"test": "vitest run",
 		"test:watch": "vitest watch",
 		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {
+		"@mikro-orm/core": "^6.6.8",
+		"better-auth": "catalog:",
 		"dset": "^3.1.4"
 	},
-	"peerDependencies": {
-		"@mikro-orm/core": ">=6.0.0",
-		"better-auth": ">=1.0.0"
-	},
 	"devDependencies": {
-		"@mikro-orm/core": "catalog:",
-		"@mikro-orm/postgresql": "catalog:",
-		"better-auth": "catalog:",
-		"vitest": "catalog:"
-	},
-	"engines": {
-		"node": ">=20"
+		"@mikro-orm/postgresql": "^6.6.8",
+		"@mikro-orm/reflection": "^6.6.8",
+		"@mikro-orm/sqlite": "^6.6.8",
+		"@oksai/config": "workspace:*",
+		"@oksai/tsconfig": "workspace:*",
+		"@types/node": "^20.17.16",
+		"rimraf": "^6.0.1",
+		"typescript": "^5.7.3",
+		"vitest": "^3.0.5"
 	}
 }
