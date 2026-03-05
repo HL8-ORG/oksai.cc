@@ -27,6 +27,7 @@
 ### 🏗️ 架构文档
 
 - [系统架构](./ARCHITECTURE.md) - 整体系统架构设计
+- [认证系统架构](./AUTHENTICATION_ARCHITECTURE.md) - 认证系统详细架构 ⭐ 新增
 - [Better Auth 集成](./BETTER_AUTH_INTEGRATION.md) - Better Auth 认证集成方案
 - [Better Auth 最佳实践](./BETTER_AUTH_BEST_PRACTICES.md) - Better Auth 使用建议
 - [Better Auth 优化](./BETTER_AUTH_OPTIMIZATION.md) - 性能优化指南
@@ -77,10 +78,11 @@
 
 ### 配置认证和授权
 
-1. [Better Auth 集成](./BETTER_AUTH_INTEGRATION.md)
-2. [Better Auth 最佳实践](./BETTER_AUTH_BEST_PRACTICES.md)
-3. [GitHub OAuth 设置](./GITHUB_OAUTH_SETUP.md)
-4. [Google OAuth 设置](./GOOGLE_OAUTH_SETUP.md)
+1. [认证系统架构](./AUTHENTICATION_ARCHITECTURE.md) - 认证系统整体架构 ⭐ 推荐阅读
+2. [Better Auth 集成](./BETTER_AUTH_INTEGRATION.md)
+3. [Better Auth 最佳实践](./BETTER_AUTH_BEST_PRACTICES.md)
+4. [GitHub OAuth 设置](./GITHUB_OAUTH_SETUP.md)
+5. [Google OAuth 设置](./GOOGLE_OAUTH_SETUP.md)
 
 ---
 
@@ -115,7 +117,10 @@ docs/
 | 测试框架 | [vitest-migration.md](./migration/vitest-migration.md) |
 | Drizzle 迁移 | [drizzle-to-mikro-orm.md](./migration/drizzle-to-mikro-orm.md) |
 | MikroORM | [mikro-orm-migration-progress.md](./migration/mikro-orm-migration-progress.md) |
+| 认证架构 | [AUTHENTICATION_ARCHITECTURE.md](./AUTHENTICATION_ARCHITECTURE.md) |
 | 认证授权 | [BETTER_AUTH_INTEGRATION.md](./BETTER_AUTH_INTEGRATION.md) |
+| OAuth 2.0 | [AUTHENTICATION_ARCHITECTURE.md](./AUTHENTICATION_ARCHITECTURE.md#oauth-20-授权流程) |
+| 双因素认证 | [AUTHENTICATION_ARCHITECTURE.md](./AUTHENTICATION_ARCHITECTURE.md#4-双因素认证-2fa-流程) |
 | 前端开发 | [FRONTEND_ALIGNMENT.md](./FRONTEND_ALIGNMENT.md) |
 | 代码规范 | [AGENTS.md](../AGENTS.md) |
 
