@@ -30,14 +30,7 @@
       "@oksai/database": ["libs/database/src/index.ts"],
       "@oksai/email": ["libs/notification/email/src/index.ts"],
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
-      "@oksai/kernel": ["libs/shared/kernel/src/index.ts"],
-      "@oksai/logger": ["libs/shared/logger/src/index.ts"],
-      "@oksai/nestjs-better-auth": ["libs/shared/nestjs-better-auth/src/index.ts"],
-      "@oksai/oauth": ["libs/oauth/src/index.ts"],
-      "@oksai/repository": ["libs/shared/repository/src/index.ts"],
-      "@oksai/testing": ["libs/testing/src/index.ts"],
-      "@oksai/types": ["libs/shared/types/src/index.ts"],
-      "@oksai/utils": ["libs/shared/utils/src/index.ts"]
+      "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"]
     }
   }
 }

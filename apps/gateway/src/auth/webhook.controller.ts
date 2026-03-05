@@ -15,7 +15,7 @@ import {
   Put,
 } from "@nestjs/common";
 import type { CreateWebhookDto, UpdateWebhookDto } from "./webhook.dto";
-import type { WebhookService } from "./webhook.service";
+import { WebhookService } from "./webhook.service";
 
 @Controller("webhooks")
 export class WebhookController {

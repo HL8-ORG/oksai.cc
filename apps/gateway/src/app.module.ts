@@ -53,7 +53,11 @@ import { HealthController } from "./health/health.controller";
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         const auth = createAuthInstance(configService);
-        return { auth };
+        return {
+          auth,
+          // 禁用内置 CORS，因为我们在 main.ts 中已经配置了
+          disableTrustedOriginsCors: true,
+        };
       },
       inject: [ConfigService],
     }),

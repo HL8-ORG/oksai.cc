@@ -16,7 +16,7 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
-import type { OAuthService } from "./oauth.service";
+import { OAuthService } from "./oauth.service";
 import type {
   CreateOAuthClientDto,
   OAuthClientCreatedResponse,

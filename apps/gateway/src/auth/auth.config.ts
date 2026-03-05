@@ -44,6 +44,11 @@ export function createAuth(configService: ConfigService): any {
   const db = drizzle(client);
 
   return betterAuth({
+    // Better Auth 基础路径
+    // 注意：NestJS 全局前缀 /api 会自动添加到中间件路径
+    // 所以这里设置为 /auth，最终路径为 /api/auth/*
+    basePath: "/auth",
+
     database: drizzleAdapter(db, {
       provider: "pg",
     }),
@@ -51,6 +56,36 @@ export function createAuth(configService: ConfigService): any {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+    },
+
+    // 邮箱验证配置
+    emailVerification: {
+      // 开发环境：将验证链接打印到控制台
+      sendVerificationEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
+        if (nodeEnv === "development") {
+          console.log("\n");
+          console.log("=".repeat(60));
+          console.log("📧 邮箱验证链接（开发环境）");
+          console.log("=".repeat(60));
+          console.log(`用户: ${user.email}`);
+          console.log(`验证链接: ${url}`);
+          console.log("=".repeat(60));
+          console.log("\n");
+        }
+      },
+      // 密码重置邮件
+      sendResetPassword: async ({ user, url }: { user: { email: string }; url: string }) => {
+        if (nodeEnv === "development") {
+          console.log("\n");
+          console.log("=".repeat(60));
+          console.log("🔐 密码重置链接（开发环境）");
+          console.log("=".repeat(60));
+          console.log(`用户: ${user.email}`);
+          console.log(`重置链接: ${url}`);
+          console.log("=".repeat(60));
+          console.log("\n");
+        }
+      },
     },
 
     socialProviders: {
@@ -115,11 +150,21 @@ export function createAuth(configService: ConfigService): any {
       },
     },
 
+    // Rate Limiting 配置
+    // 注意：使用内存存储（默认），避免需要额外的数据库表
+    // 生产环境建议使用 Redis 存储以支持分布式部署
     rateLimit: {
       enabled: true,
-      window: 60,
-      max: 100,
-      storage: "database",
+      window: 60, // 60秒时间窗口
+      max: 100, // 每个 IP 最多 100 次请求
+      // storage: "database", // 使用数据库存储需要创建 rateLimit 表
     },
+
+    // CORS 配置：允许的前端来源
+    trustedOrigins: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:5173",
+    ],
   });
 }

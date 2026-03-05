@@ -4433,7 +4433,7 @@ var entriesPromise;
 var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
-	const routerEntry = await import("./router-wWjkAnx7.mjs");
+	const routerEntry = await import("./router-BLHncsfh.mjs");
 	return {
 		startEntry: await import("./start-iEQPJIA8.mjs"),
 		routerEntry

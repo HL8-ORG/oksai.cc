@@ -3,12 +3,12 @@
  */
 
 import { Module } from "@nestjs/common";
+import { MikroOrmDatabaseModule } from "@oksai/database";
 import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
 import { CacheModule } from "../common/cache.module";
 import { CacheService } from "../common/cache.service";
 import { AdminController } from "./admin.controller";
 import { ApiKeyController } from "./api-key.controller";
-import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { OAuthController } from "./oauth.controller";
 import { OAuthService } from "./oauth.service";
@@ -25,7 +25,7 @@ import { WebhookService } from "./webhook.service";
  *
  * @description
  * 提供用户认证功能：
- * - 用户注册/登录
+ * - 用户注册/登录（由 Better Auth 原生 API 处理）
  * - 邮箱验证
  * - 密码重置
  * - Magic Link 登录
@@ -36,11 +36,14 @@ import { WebhookService } from "./webhook.service";
  * - 组织/团队管理
  * - Webhook 事件通知
  * - Admin 管理（使用 Better Auth Admin 插件）
+ *
+ * 注意：AuthController 已禁用，因为前端使用 Better Auth 客户端直接调用原生 API。
+ * 如需自定义认证端点，请使用不同的路由前缀（如 /auth-v2）避免冲突。
  */
 @Module({
-  imports: [CacheModule.forRoot()],
+  imports: [MikroOrmDatabaseModule, CacheModule.forRoot()],
   controllers: [
-    AuthController,
+    // AuthController, // 已禁用：与 Better Auth 原生 API 冲突
     OAuthController,
     OAuthV2Controller,
     ApiKeyController,

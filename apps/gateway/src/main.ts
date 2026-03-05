@@ -12,23 +12,32 @@ import { AppModule } from "./app.module";
  *
  * @description
  * 配置 NestJS 应用：
- * 1. 禁用内置 body parser（Better Auth 需要处理原始请求体）
- * 2. 设置全局前缀 /api
- * 3. CORS 由 Better Auth 模块自动处理
- * 4. 配置全局验证管道
- * 5. 提供静态文件服务（登录页面）
- * 6. 使用 OksaiLoggerService 作为全局日志器
+ * 1. 设置全局前缀 /api
+ * 2. 启用 CORS（允许前端跨域访问）
+ * 3. 配置全局验证管道
+ * 4. 提供静态文件服务（登录页面）
+ * 5. 使用 OksaiLoggerService 作为全局日志器
+ *
+ * 注意：body parser 由 nestjs-better-auth 模块自动处理，
+ * 它会选择性跳过 Better Auth 路由的 body 解析。
  */
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bodyParser: false, // 必须禁用，由 Better Auth 处理
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const configService = app.get(ConfigService);
   const logger = await app.resolve(OksaiLoggerService);
   app.useLogger(logger);
 
   app.setGlobalPrefix("api");
+
+  // 启用 CORS，允许前端跨域访问
+  app.enableCors({
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  });
+
   app.useStaticAssets(join(__dirname, "..", "public"));
 
   app.useGlobalPipes(

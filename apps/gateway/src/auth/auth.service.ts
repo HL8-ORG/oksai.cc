@@ -14,7 +14,7 @@ import type {
   VerifyEmailDto,
   VerifyTwoFactorDto,
 } from "./auth.dto";
-import type { SessionService } from "./session.service";
+import { SessionService } from "./session.service";
 
 /* biome-ignore lint/suspicious/noExplicitAny: Better Auth API 类型复杂,使用 any 简化集成 */
 type BetterAuthParams = { body?: any; headers?: any };

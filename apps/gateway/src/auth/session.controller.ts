@@ -15,7 +15,7 @@ import {
   Put,
 } from "@nestjs/common";
 import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./session.dto";
-import type { SessionService } from "./session.service";
+import { SessionService } from "./session.service";
 
 /**
  * Session 管理控制器

@@ -1,292 +1,503 @@
-# @oksai/nestjs-better-auth
+# NestJS Better Auth Integration
 
-[![npm version](https://badge.fury.io/js/@oksai%2Fnestjs-better-auth.svg)](https://badge.fury.io/js/@oksai%2Fnestjs-better-auth)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A comprehensive NestJS integration library for [Better Auth](https://www.better-auth.com/), providing seamless authentication and authorization for your NestJS applications.
 
-Better Auth 的 NestJS 集成模块，提供开箱即用的认证守卫、装饰器和中间件。
+## Installation
 
-## 特性
-
-- ✅ **动态模块** - 支持 `forRoot` 和 `forRootAsync` 配置
-- ✅ **全局认证守卫** - 自动保护所有路由
-- ✅ **装饰器支持** - `@AllowAnonymous()`, `@Roles()`, `@Session` 等
-- ✅ **多上下文支持** - HTTP, GraphQL, WebSocket, RPC
-- ✅ **插件兼容** - 支持 Better Auth admin 和 organization 插件
-- ✅ **钩子系统** - 前置/后置钩子用于自定义逻辑
-
-## 安装
+Install the library in your NestJS project:
 
 ```bash
-pnpm add @oksai/nestjs-better-auth better-auth
+# Using npm
+npm install @oksai/nestjs-better-auth
 
-# 或
-npm install @oksai/nestjs-better-auth better-auth
-# 或
-yarn add @oksai/nestjs-better-auth better-auth
+# Using yarn
+yarn add @oksai/nestjs-better-auth
+
+# Using pnpm
+pnpm add @oksai/nestjs-better-auth
+
+# Using bun
+bun add @oksai/nestjs-better-auth
 ```
 
-### 可选依赖
+## Prerequisites
 
-如果使用 GraphQL 或 WebSocket 支持：
+> [!IMPORTANT]  
+> Requires `better-auth` >= 1.3.8. Older versions are deprecated and unsupported.
 
-```bash
-pnpm add @nestjs/graphql graphql
-# 或
-pnpm add @nestjs/websockets @nestjs/platform-socket.io
+Before you start, make sure you have:
+
+- A working NestJS application
+- Better Auth (>= 1.3.8) installed and configured ([installation guide](https://www.better-auth.com/docs/installation))
+
+## Basic Setup
+
+**1. Disable Body Parser**
+
+Disable NestJS's built-in body parser to allow Better Auth to handle the raw request body:
+
+```ts title="main.ts"
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, {
+    // Don't worry, the library will automatically re-add the default body parsers.
+    bodyParser: false,
+  });
+  await app.listen(process.env.PORT ?? 3333);
+}
+bootstrap();
 ```
 
-## 快速开始
+> [!IMPORTANT]
+> **Side Effect:** Since we disable NestJS's built-in body parser, the `rawBody: true` option in `NestFactory.create()` has no effect.
+> If you need access to `req.rawBody` (e.g., for webhook signature verification), use the `enableRawBodyParser` option in `AuthModule.forRoot()` instead.
+> See [Module Options](#module-options) for details.
 
-### 1. 创建 Better Auth 实例
+> [!NOTE]
+> Fastify 平台已完全支持。如需使用 Fastify，请安装所需依赖：
+> ```bash
+> npm install @nestjs/platform-fastify fastify
+> ```
 
-```typescript
-// auth.config.ts
-import { betterAuth } from 'better-auth';
+**2. Import AuthModule**
+
+Import the `AuthModule` in your root module:
+
+```ts title="app.module.ts"
+import { Module } from "@nestjs/common";
+import { AuthModule } from "@oksai/nestjs-better-auth";
+import { auth } from "./auth";
+
+@Module({
+  imports: [AuthModule.forRoot({ auth })],
+})
+export class AppModule {}
+```
+
+## Route Protection
+
+**Global by default**: An `AuthGuard` is registered globally by this module. All routes are protected unless you explicitly allow access with `@AllowAnonymous()` or mark them as optional with `@OptionalAuth()`.
+
+GraphQL is supported and works the same way as REST: the global guard applies to resolvers too, and you can use `@AllowAnonymous()`/`@OptionalAuth()` on queries and mutations.
+
+WebSocket is also supported and works in the same way as REST and GraphQL: you can use `@AllowAnonymous()`/`@OptionalAuth()` on any connections, but you must set the AuthGuard for all of them, either at the Gateway or Message level, like so:
+
+```ts
+import { SubscribeMessage, WebSocketGateway } from "@nestjs/websockets";
+import { UseGuards } from "@nestjs/common";
+import { AuthGuard } from '@oksai/nestjs-better-auth';
+
+@WebSocketGateway({
+	path: "/ws",
+	namespace: "test",
+	cors: {
+		origin: "*",
+	},
+})
+@UseGuards(AuthGuard)
+export class TestGateway { /* ... */ }
+```
+
+Check the [test gateway](./tests/shared/test-gateway.ts) for a full example.
+
+## Decorators
+
+Better Auth provides several decorators to enhance your authentication setup:
+
+### Session Decorator
+
+Access the user session in your controllers:
+
+```ts title="user.controller.ts"
+import { Controller, Get } from "@nestjs/common";
+import { Session, UserSession } from "@oksai/nestjs-better-auth";
+
+@Controller("users")
+export class UserController {
+  @Get("me")
+  async getProfile(@Session() session: UserSession) {
+    return session;
+  }
+}
+```
+
+### AllowAnonymous and OptionalAuth Decorators
+
+Control authentication requirements for specific routes:
+
+```ts title="app.controller.ts"
+import { Controller, Get } from "@nestjs/common";
+import { AllowAnonymous, OptionalAuth } from "@oksai/nestjs-better-auth";
+
+@Controller("users")
+export class UserController {
+  @Get("public")
+  @AllowAnonymous() // Allow anonymous access (no authentication required)
+  async publicRoute() {
+    return { message: "This route is public" };
+  }
+
+  @Get("optional")
+  @OptionalAuth() // Authentication is optional for this route
+  async optionalRoute(@Session() session: UserSession) {
+    return { authenticated: !!session, session };
+  }
+}
+```
+
+Alternatively, use as a class decorator for an entire controller:
+
+```ts title="app.controller.ts"
+@AllowAnonymous() // All routes inside this controller are public
+@Controller("public")
+export class PublicController {
+  /* */
+}
+
+@OptionalAuth() // Authentication is optional for all routes
+@Controller("optional")
+export class OptionalController {
+  /* */
+}
+```
+
+### Role-Based Access Control
+
+This library provides two role decorators for different use cases:
+
+| Decorator | Checks | Use Case |
+|-----------|--------|----------|
+| `@Roles()` | `user.role` only | System-level roles ([admin plugin](https://www.better-auth.com/docs/plugins/admin)) |
+| `@OrgRoles()` | Organization member role only | Organization-level roles ([organization plugin](https://www.better-auth.com/docs/plugins/organization)) |
+
+> [!IMPORTANT]
+> These decorators are intentionally **separate** to prevent privilege escalation. The `@Roles()` decorator only checks `user.role` and does **not** check organization member roles. This ensures an organization admin cannot bypass system-level admin protection.
+
+#### @Roles() - System-Level Roles
+
+Use `@Roles()` for system-wide admin protection. This checks only the `user.role` field from Better Auth's [admin plugin](https://www.better-auth.com/docs/plugins/admin).
+
+```ts title="admin.controller.ts"
+import { Controller, Get } from "@nestjs/common";
+import { Roles } from "@oksai/nestjs-better-auth";
+
+@Controller("admin")
+export class AdminController {
+  @Roles(["admin"])
+  @Get("dashboard")
+  async adminDashboard() {
+    // Only users with user.role = 'admin' can access
+    // Organization admins CANNOT access this route
+    return { message: "System admin dashboard" };
+  }
+}
+
+// Or as a class decorator
+@Roles(["admin"])
+@Controller("admin")
+export class AdminController {
+  /* All routes require user.role = 'admin' */
+}
+```
+
+#### @OrgRoles() - Organization-Level Roles
+
+Use `@OrgRoles()` for organization-scoped protection. This checks only the organization member role and requires an active organization (`activeOrganizationId` in session).
+
+```ts title="org.controller.ts"
+import { Controller, Get } from "@nestjs/common";
+import { OrgRoles, Session, UserSession } from "@oksai/nestjs-better-auth";
+
+@Controller("org")
+export class OrgController {
+  @OrgRoles(["owner", "admin"])
+  @Get("settings")
+  async getOrgSettings(@Session() session: UserSession) {
+    // Only org owners/admins can access (requires activeOrganizationId)
+    // System admins (user.role = 'admin') CANNOT access without org context
+    return { orgId: session.session.activeOrganizationId };
+  }
+
+  @OrgRoles(["owner"])
+  @Get("billing")
+  async getOrgBilling() {
+    // Only org owners can access
+    return { message: "Billing settings" };
+  }
+}
+```
+
+> [!NOTE]
+> Both role decorators accept any role strings you define. Better Auth's organization plugin provides default roles (`owner`, `admin`, `member`), but you can configure custom roles. The organization creator automatically gets the `owner` role.
+
+### Composed Decorators (Convenience Methods)
+
+The library provides convenient composed decorators that wrap `@Roles()` and `@OrgRoles()` for common use cases:
+
+#### System Admin Decorators
+
+```ts title="admin.controller.ts"
+import { Controller, Get, Delete } from "@nestjs/common";
+import { AdminOnly, SuperAdminOnly } from "@oksai/nestjs-better-auth";
+
+@Controller("admin")
+export class AdminController {
+  @AdminOnly() // Equivalent to @Roles(["admin"])
+  @Get("users")
+  async listUsers() {
+    // Only users with user.role = 'admin' can access
+    return { users: [] };
+  }
+
+  @SuperAdminOnly() // Equivalent to @Roles(["superadmin"])
+  @Delete("users/:id")
+  async deleteUser() {
+    // Only users with user.role = 'superadmin' can access
+    return { success: true };
+  }
+}
+```
+
+#### Organization Role Decorators
+
+```ts title="org.controller.ts"
+import { Controller, Get, Post } from "@nestjs/common";
+import { OwnerOnly, OrgAdminOnly, MemberOnly } from "@oksai/nestjs-better-auth";
+
+@Controller("org")
+export class OrgController {
+  @OwnerOnly() // Equivalent to @OrgRoles(["owner"])
+  @Delete("organization")
+  async deleteOrganization() {
+    // Only organization owners can access
+    return { success: true };
+  }
+
+  @OrgAdminOnly() // Equivalent to @OrgRoles(["owner", "admin"])
+  @Post("members")
+  async addMember() {
+    // Only org owners and admins can access
+    return { success: true };
+  }
+
+  @MemberOnly() // Equivalent to @OrgRoles(["owner", "admin", "member"])
+  @Get("resources")
+  async getResources() {
+    // All organization members can access
+    return { resources: [] };
+  }
+}
+```
+
+Available composed decorators:
+
+| Decorator         | Equivalent To                       | Use Case                                              |
+| ----------------- | ----------------------------------- | ----------------------------------------------------- |
+| `@AdminOnly()`    | `@Roles(["admin"])`                 | System-level admin routes (user management, etc.)    |
+| `@SuperAdminOnly()` | `@Roles(["superadmin"])`          | Highest privilege routes (system settings, etc.)     |
+| `@OwnerOnly()`    | `@OrgRoles(["owner"])`              | Organization deletion, ownership transfer            |
+| `@OrgAdminOnly()` | `@OrgRoles(["owner", "admin"])`     | Member management, organization settings             |
+| `@MemberOnly()`   | `@OrgRoles(["owner", "admin", "member"])` | Organization resources access                       |
+
+### Hook Decorators
+
+> [!IMPORTANT]
+> To use `@Hook`, `@BeforeHook`, `@AfterHook`, set `hooks: {}` (empty object) in your `betterAuth(...)` config. You can still add your own Better Auth hooks; `hooks: {}` (empty object) is just the minimum required.
+
+Minimal Better Auth setup with hooks enabled:
+
+```ts title="auth.ts"
+import { betterAuth } from "better-auth";
 
 export const auth = betterAuth({
-  database: {
-    // 数据库配置
-  },
-  // 其他配置
+  basePath: "/api/auth",
+  // other better-auth options...
+  hooks: {}, // minimum required to use hooks. read above for more details.
 });
 ```
 
-### 2. 导入 AuthModule
+Create custom hooks that integrate with NestJS's dependency injection:
 
-```typescript
-// app.module.ts
-import { Module } from '@nestjs/common';
-import { AuthModule } from '@oksai/nestjs-better-auth';
-import { auth } from './auth.config';
+```ts title="hooks/sign-up.hook.ts"
+import { Injectable } from "@nestjs/common";
+import {
+  BeforeHook,
+  Hook,
+  AuthHookContext,
+} from "@oksai/nestjs-better-auth";
+import { SignUpService } from "./sign-up.service";
+
+@Hook()
+@Injectable()
+export class SignUpHook {
+  constructor(private readonly signUpService: SignUpService) {}
+
+  @BeforeHook("/sign-up/email")
+  async handle(ctx: AuthHookContext) {
+    // Custom logic like enforcing email domain registration
+    // Can throw APIError if validation fails
+    await this.signUpService.execute(ctx);
+  }
+}
+```
+
+Register your hooks in a module:
+
+```ts title="app.module.ts"
+import { Module } from "@nestjs/common";
+import { AuthModule } from "@oksai/nestjs-better-auth";
+import { SignUpHook } from "./hooks/sign-up.hook";
+import { SignUpService } from "./sign-up.service";
+import { auth } from "./auth";
+
+@Module({
+  imports: [AuthModule.forRoot({ auth })],
+  providers: [SignUpHook, SignUpService],
+})
+export class AppModule {}
+```
+
+## AuthService
+
+The `AuthService` is automatically provided by the `AuthModule` and can be injected into your controllers to access the Better Auth instance and its API endpoints.
+
+```ts title="users.controller.ts"
+import { Controller, Get, Post, Request, Body } from "@nestjs/common";
+import { AuthService } from "@oksai/nestjs-better-auth";
+import { fromNodeHeaders } from "better-auth/node";
+import type { Request as ExpressRequest } from "express";
+import { auth } from "../auth";
+
+@Controller("users")
+export class UsersController {
+  constructor(private authService: AuthService<typeof auth>) {}
+
+  @Get("accounts")
+  async getAccounts(@Request() req: ExpressRequest) {
+    // Pass the request headers to the auth API
+    const accounts = await this.authService.api.listUserAccounts({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    return { accounts };
+  }
+
+  @Post("api-keys")
+  async createApiKey(@Request() req: ExpressRequest, @Body() body) {
+    // Access plugin-specific functionality with request headers
+    // createApiKey is a method added by a plugin, not part of the core API
+    return this.authService.api.createApiKey({
+      ...body,
+      headers: fromNodeHeaders(req.headers),
+    });
+  }
+}
+```
+
+When using plugins that extend the Auth type with additional functionality, use generics to access the extended features as shown above with `AuthService<typeof auth>`. This ensures type safety when using plugin-specific API methods like `createApiKey`.
+
+## Request Object Access
+
+You can access the session and user through the request object:
+
+```ts
+import { Controller, Get, Request } from "@nestjs/common";
+import type { Request as ExpressRequest } from "express";
+
+@Controller("users")
+export class UserController {
+  @Get("me")
+  async getProfile(@Request() req: ExpressRequest) {
+    return {
+      session: req.session, // Session is attached to the request
+      user: req.user, // User object is attached to the request
+    };
+  }
+}
+```
+
+The request object provides:
+
+- `req.session`: The full session object containing user data and authentication state
+- `req.user`: A direct reference to the user object from the session (useful for observability tools like Sentry)
+
+### Advanced: Disable the global AuthGuard
+
+If you prefer to manage guards yourself, you can disable the global guard and then apply `@UseGuards(AuthGuard)` per controller/route or register it via `APP_GUARD`.
+
+```ts title="app.module.ts"
+import { Module } from "@nestjs/common";
+import { AuthModule } from "@oksai/nestjs-better-auth";
+import { auth } from "./auth";
 
 @Module({
   imports: [
     AuthModule.forRoot({
       auth,
-      isGlobal: true, // 可选，默认为 true
+      disableGlobalAuthGuard: true,
     }),
   ],
 })
 export class AppModule {}
 ```
 
-### 3. 使用装饰器保护路由
+```ts title="app.controller.ts"
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "@oksai/nestjs-better-auth";
 
-```typescript
-// users.controller.ts
-import { Controller, Get } from '@nestjs/common';
-import { AllowAnonymous, Roles, Session } from '@oksai/nestjs-better-auth';
-
-@Controller('users')
-export class UsersController {
-  @Get('profile')
-  getProfile(@Session() session: any) {
-    return session.user;
-  }
-
-  @Get('public')
-  @AllowAnonymous()
-  getPublicData() {
-    return { message: 'This is public' };
-  }
-
-  @Get('admin-only')
-  @Roles(['admin'])
-  getAdminData() {
-    return { message: 'Admin only' };
+@Controller("users")
+@UseGuards(AuthGuard)
+export class UserController {
+  @Get("me")
+  async getProfile() {
+    return { message: "Protected route" };
   }
 }
 ```
 
-## 配置选项
+## Module Options
 
-### AuthModuleOptions
-
-| 选项                        | 类型                | 默认值  | 说明                          |
-| --------------------------- | ------------------- | ------- | ----------------------------- |
-| `auth`                      | `Auth`              | 必填    | Better Auth 实例              |
-| `isGlobal`                  | `boolean`           | `true`  | 是否为全局模块                |
-| `disableGlobalAuthGuard`    | `boolean`           | `false` | 禁用全局认证守卫              |
-| `disableControllers`        | `boolean`           | `false` | 禁用控制器（仅提供守卫/服务） |
-| `disableTrustedOriginsCors` | `boolean`           | `false` | 禁用自动 CORS 配置            |
-| `disableBodyParser`         | `boolean`           | `false` | 禁用自定义 Body 解析          |
-| `enableRawBodyParser`       | `boolean`           | `false` | 启用原始 Body（用于 webhook） |
-| `middleware`                | `ExpressMiddleware` | -       | 自定义中间件                  |
-
-### forRootAsync
+When configuring `AuthModule.forRoot()`, you can provide options to customize the behavior:
 
 ```typescript
-AuthModule.forRootAsync({
-  useFactory: async () => {
-    const auth = betterAuth({
-      // 配置
-    });
-    return { auth };
+AuthModule.forRoot({
+  auth,
+  platform: "express", // or "fastify"
+  disableTrustedOriginsCors: false,
+  disableBodyParser: false,
+  enableRawBodyParser: false,
+  disableGlobalAuthGuard: false,
+  disableControllers: false,
+});
+```
+
+The available options are:
+
+| Option                      | Default     | Description                                                                                                                                                              |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `platform`                  | `"express"` | Platform to use: `"express"` or `"fastify"`. Auto-detected if not specified. When using Fastify, install `@nestjs/platform-fastify` and `fastify`. |
+| `disableTrustedOriginsCors` | `false`     | When set to `true`, disables the automatic CORS configuration for the origins specified in `trustedOrigins`. Use this if you want to handle CORS configuration manually. |
+| `disableBodyParser`         | `false`     | When set to `true`, disables the automatic body parser middleware. Use this if you want to handle request body parsing manually.                                         |
+| `enableRawBodyParser`       | `false`     | When set to `true`, enables raw body parsing and attaches the raw buffer to `req.rawBody`. Use this for webhook signature verification. **Note:** Since this library disables NestJS's built-in body parser, NestJS's `rawBody: true` option has no effect - use this option instead. |
+| `disableGlobalAuthGuard`    | `false`     | When set to `true`, does not register `AuthGuard` as a global guard. Use this if you prefer to apply `AuthGuard` manually or register it yourself via `APP_GUARD`.       |
+| `disableControllers`        | `false`     | When set to `true`, does not register any controllers. Use this if you want to handle routes manually.                                                                   |
+| `middleware`                | `undefined` | Optional middleware function that wraps the Better Auth handler. Receives `(req, res, next)` parameters. Useful for integrating with request-scoped libraries like MikroORM's RequestContext. |
+
+### Using Custom Middleware
+
+You can provide a custom middleware function that wraps the Better Auth handler. This is particularly useful when integrating with libraries like MikroORM that require request context:
+
+```typescript
+import { RequestContext } from '@mikro-orm/core';
+
+AuthModule.forRoot({
+  auth,
+  middleware: (req, res, next) => {
+    RequestContext.create(orm.em, next);
   },
 });
 ```
 
-## 装饰器
-
-### @AllowAnonymous()
-
-允许未认证用户访问路由。
-
-```typescript
-@Get('public')
-@AllowAnonymous()
-getPublicData() {}
-```
-
-### @OptionalAuth()
-
-允许未认证用户访问，但如果已认证则提供会话信息。
-
-```typescript
-@Get('optional')
-@OptionalAuth()
-getOptionalData(@Session() session: any) {
-  if (session) {
-    return { user: session.user };
-  }
-  return { user: null };
-}
-```
-
-### @Roles(roles)
-
-限制只有特定角色的用户才能访问（需要 Better Auth admin 插件）。
-
-```typescript
-@Get('admin')
-@Roles(['admin'])
-getAdminData() {}
-```
-
-### @OrgRoles(roles)
-
-限制只有特定组织角色的用户才能访问（需要 Better Auth organization 插件）。
-
-```typescript
-@Get('org-admin')
-@OrgRoles(['owner', 'admin'])
-getOrgAdminData() {}
-```
-
-### @Session()
-
-注入当前用户会话到控制器方法。
-
-```typescript
-@Get('profile')
-getProfile(@Session() session: any) {
-  return session.user;
-}
-```
-
-### 钩子装饰器
-
-```typescript
-@Hook()
-export class AuthHooks {
-  @BeforeHook('/sign-in')
-  async beforeSignIn(ctx: AuthHookContext) {
-    console.log('User signing in:', ctx.body);
-  }
-
-  @AfterHook('/sign-up')
-  async afterSignUp(ctx: AuthHookContext) {
-    console.log('New user registered:', ctx.body);
-  }
-}
-```
-
-## 使用 AuthService
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import { AuthService } from '@oksai/nestjs-better-auth';
-
-@Injectable()
-export class UsersService {
-  constructor(private readonly authService: AuthService) {}
-
-  async getCurrentUser(headers: Headers) {
-    const session = await this.authService.api.getSession({ headers });
-    return session?.user;
-  }
-}
-```
-
-## GraphQL 支持
-
-模块自动支持 GraphQL 上下文，无需额外配置：
-
-```typescript
-@Resolver()
-export class UsersResolver {
-  @Query(() => User)
-  @Roles(['admin'])
-  async currentUser(@Session() session: any) {
-    return session.user;
-  }
-}
-```
-
-## WebSocket 支持
-
-模块自动支持 WebSocket 上下文：
-
-```typescript
-@WebSocketGateway()
-export class EventsGateway {
-  @SubscribeMessage('events')
-  async handleEvent(@Session() session: any) {
-    // session 从 handshake.headers 中获取
-    return { userId: session?.user?.id };
-  }
-}
-```
-
-## 示例项目
-
-查看 [示例目录](./examples) 获取完整示例。
-
-## API 文档
-
-详细的 API 文档请查看 [docs](./docs) 目录。
-
-## 开发
-
-### 构建
-
-```bash
-pnpm build
-```
-
-### 测试
-
-```bash
-pnpm test
-pnpm test:watch
-pnpm test:coverage
-```
-
-### 代码检查
-
-```bash
-pnpm check
-pnpm check:fix
-```
-
-## 许可证
-
-MIT © Oksai Team
-
-## 贡献
-
-欢迎贡献！请查看 [贡献指南](./CONTRIBUTING.md)。
-
-## 支持
-
-如有问题，请提交 [Issue](https://github.com/your-org/oksai/issues)。
+The middleware receives standard Express middleware parameters `(req, res, next)` where `next` is a function that invokes the Better Auth handler.

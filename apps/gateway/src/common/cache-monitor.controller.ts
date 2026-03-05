@@ -5,7 +5,7 @@
  */
 
 import { Controller, Get } from "@nestjs/common";
-import type { CacheService } from "./cache.service";
+import { CacheService } from "./cache.service";
 
 /**
  * 缓存监控控制器

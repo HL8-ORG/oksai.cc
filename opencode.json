@@ -3,7 +3,16 @@
   "mcp": {
     "nx-mcp": {
       "type": "local",
-      "command": ["npx", "nx", "mcp"],
+      "command": [
+        "npx",
+        "nx",
+        "mcp"
+      ],
+      "enabled": true
+    },
+    "better-auth": {
+      "type": "remote",
+      "url": "https://mcp.inkeep.com/better-auth/mcp",
       "enabled": true
     }
   }

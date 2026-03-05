@@ -6,7 +6,7 @@
  */
 
 import { type ExecutionContext, HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import type { Reflector } from "@nestjs/core";
+import { Reflector } from "@nestjs/core";
 import { RATE_LIMIT_KEY, type RateLimitConfig } from "./rate-limit.decorator";
 
 interface Request {

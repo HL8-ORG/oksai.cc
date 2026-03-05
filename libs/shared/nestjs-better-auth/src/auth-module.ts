@@ -195,11 +195,10 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
 
   static forRootAsync(options: typeof ASYNC_OPTIONS_TYPE): DynamicModule {
     const forRootAsyncResult = ConfigurableModuleClass.forRootAsync(options);
-    const { module } = forRootAsyncResult;
 
     return {
       ...forRootAsyncResult,
-      module: options.disableControllers ? AuthModuleWithoutControllers : module,
+      module: options.disableControllers ? AuthModuleWithoutControllers : AuthModule,
       controllers: options.disableControllers ? [] : forRootAsyncResult.controllers,
       providers: [
         AuthService,
@@ -230,11 +229,10 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
         : ({ ...(arg2 ?? {}), auth: arg1 as Auth } as typeof OPTIONS_TYPE);
 
     const forRootResult = ConfigurableModuleClass.forRoot(normalizedOptions);
-    const { module } = forRootResult;
 
     return {
       ...forRootResult,
-      module: normalizedOptions.disableControllers ? AuthModuleWithoutControllers : module,
+      module: normalizedOptions.disableControllers ? AuthModuleWithoutControllers : AuthModule,
       controllers: normalizedOptions.disableControllers ? [] : forRootResult.controllers,
       providers: [
         AuthService,
