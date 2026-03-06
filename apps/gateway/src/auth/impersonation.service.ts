@@ -5,7 +5,11 @@
 import { EntityManager } from "@mikro-orm/core";
 import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { User } from "@oksai/database";
-import type { ImpersonateUserDto, ImpersonateUserResponse, ImpersonationSession } from "./impersonation.dto";
+import type {
+  ImpersonateUserDto,
+  ImpersonationSession,
+  ImpersonationUserResponse,
+} from "./dto/impersonation.dto";
 
 /**
  * 用户模拟服务
@@ -33,9 +37,9 @@ export class ImpersonationService {
    * @param adminUserId - 管理员用户 ID
    * @param dto - 模拟请求
    */
-  async impersonateUser(adminUserId: string, dto: ImpersonateUserDto): Promise<ImpersonateUserResponse> {
+  async impersonateUser(adminUserId: string, dto: ImpersonateUserDto): Promise<ImpersonationUserResponse> {
     try {
-      this.logger.log(`管理员 ${adminUserId} 请求模拟用户 ${dto.userId}`);
+      this.logger.log(`管理员 ${adminUserId} 请求模拟用户 ${dto.email}`);
 
       // 1. 验证管理员权限
       const admin = await this.getUserById(adminUserId);
@@ -48,7 +52,7 @@ export class ImpersonationService {
       }
 
       // 2. 获取目标用户
-      const targetUser = await this.getUserById(dto.userId);
+      const targetUser = await this.getUserByEmail(dto.email);
       if (!targetUser) {
         throw new NotFoundException("目标用户不存在");
       }
@@ -56,15 +60,14 @@ export class ImpersonationService {
       // 3. 创建模拟会话
       const sessionId = `imp_${crypto.randomUUID()}`;
       const session: ImpersonationSession = {
+        id: sessionId,
+        userId: targetUser.id,
         impersonatorId: adminUserId,
         impersonatorEmail: admin.email,
-        impersonatorName: admin.name ?? undefined,
-        targetUserId: targetUser.id,
         targetUserEmail: targetUser.email,
-        targetUserName: targetUser.name ?? undefined,
         reason: dto.reason,
         startedAt: new Date(),
-        sessionId,
+        expiresAt: new Date(Date.now() + 3600000), // 1小时后过期
       };
 
       // 4. 存储模拟会话（生产环境应使用 Redis）
@@ -74,21 +77,16 @@ export class ImpersonationService {
 
       return {
         success: true,
-        message: "模拟登录成功",
+        message: "模拟成功",
         impersonatedUser: {
           id: targetUser.id,
           email: targetUser.email,
-          name: targetUser.name ?? undefined,
+          name: targetUser.name ?? null,
         },
         session: {
           id: sessionId,
           token: sessionId, // 简化实现，生产环境应生成真实 token
           expiresAt: new Date(Date.now() + 3600000), // 1 小时后过期
-        },
-        impersonator: {
-          id: admin.id,
-          email: admin.email,
-          name: admin.name ?? undefined,
         },
       };
     } catch (error) {
@@ -150,5 +148,12 @@ export class ImpersonationService {
    */
   private async getUserById(userId: string) {
     return this.em.findOne(User, { id: userId });
+  }
+
+  /**
+   * 通过邮箱获取用户信息
+   */
+  private async getUserByEmail(email: string) {
+    return this.em.findOne(User, { email });
   }
 }

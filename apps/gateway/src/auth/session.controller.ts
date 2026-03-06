@@ -11,7 +11,7 @@ import {
   Put,
 } from "@nestjs/common";
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./session.dto";
+import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./dto";
 import { SessionService } from "./session.service";
 
 /**

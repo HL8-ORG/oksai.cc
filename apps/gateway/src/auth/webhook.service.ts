@@ -13,13 +13,13 @@ import type {
   WebhookEventType,
   WebhookPayload,
   WebhookResponse,
-} from "./webhook.dto";
+} from "./dto";
 import {
   WEBHOOK_EVENT_TYPE_HEADER,
   WEBHOOK_ID_HEADER,
   WEBHOOK_SIGNATURE_HEADER,
   WEBHOOK_TIMESTAMP_HEADER,
-} from "./webhook.dto";
+} from "./dto";
 
 @Injectable()
 export class WebhookService {
@@ -29,7 +29,7 @@ export class WebhookService {
 
   async createWebhook(userId: string, dto: CreateWebhookDto): Promise<WebhookResponse> {
     const secret = randomBytes(32).toString("hex");
-    const headers = dto.headers ? this.parseHeaders(dto.headers) : undefined;
+    const headers = dto.headers;
     const webhook = this.em.create(Webhook, {
       name: dto.name,
       url: dto.url,
@@ -68,7 +68,7 @@ export class WebhookService {
     if (dto.url) webhook.url = dto.url;
     if (dto.events) webhook.events = dto.events;
     if (dto.description !== undefined) webhook.description = dto.description;
-    if (dto.headers !== undefined) webhook.headers = this.parseHeaders(dto.headers);
+    if (dto.headers !== undefined) webhook.headers = dto.headers;
     if (dto.status) {
       if (dto.status === "active") {
         webhook.activate();
@@ -111,12 +111,11 @@ export class WebhookService {
     return deliveries.map((d) => ({
       id: d.id,
       webhookId: d.webhook.id,
-      eventType: d.eventType as WebhookEventType,
-      status: d.status as string,
-      responseStatusCode: d.responseStatusCode ?? undefined,
-      errorMessage: d.errorMessage ?? undefined,
-      attemptCount: d.attemptCount,
-      deliveredAt: d.deliveredAt ?? undefined,
+      eventType: d.eventType,
+      success: d.status === "success",
+      statusCode: d.responseStatusCode ?? 0,
+      response: d.responseBody ?? "",
+      attempts: d.attemptCount,
       createdAt: d.createdAt,
     })) as WebhookDeliveryResponse[];
   }
@@ -124,7 +123,7 @@ export class WebhookService {
   private async sendWebhook(webhook: Webhook, eventType: WebhookEventType, data: any): Promise<void> {
     const payload: WebhookPayload = {
       id: crypto.randomUUID(),
-      eventType,
+      event: eventType,
       timestamp: new Date(),
       data,
     };
@@ -178,27 +177,14 @@ export class WebhookService {
     }
   }
 
-  private parseHeaders(headersStr: string): Record<string, string> | undefined {
-    try {
-      return JSON.parse(headersStr);
-    } catch {
-      return undefined;
-    }
-  }
-
   private toResponse = (w: Webhook): WebhookResponse => ({
     id: w.id,
     name: w.name,
     url: w.url,
     events: w.events as WebhookEventType[],
-    status: w.status,
-    description: w.description,
-    organizationId: w.organizationId,
+    description: w.description || null,
     isActive: w.isActive,
     createdAt: w.createdAt,
     updatedAt: w.updatedAt,
-    lastTriggeredAt: w.lastTriggeredAt,
-    failureCount: w.failureCount,
-    successCount: w.successCount,
   });
 }

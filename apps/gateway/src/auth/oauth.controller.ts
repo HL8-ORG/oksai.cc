@@ -8,7 +8,7 @@ import process from "node:process";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
-import type { OAuthProviderStatus } from "./auth.dto";
+import type { OAuthProviderStatus } from "./dto";
 
 /**
  * OAuth 认证控制器

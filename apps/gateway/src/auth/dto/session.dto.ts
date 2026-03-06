@@ -45,6 +45,9 @@ export class SessionConfigResponse {
   @ApiProperty({ description: "会话超时时间（秒）" })
   sessionTimeout!: number;
 
+  @ApiProperty({ description: "会话超时时间（天）" })
+  sessionTimeoutDays!: number;
+
   @ApiProperty({ description: "是否允许并发登录" })
   allowConcurrentSessions!: boolean;
 
@@ -60,7 +63,7 @@ export class SessionInfo {
   id!: string;
 
   @ApiPropertyOptional({ description: "用户代理", nullable: true })
-  userAgent!: string | null;
+  userAgent?: string | null;
 
   @ApiPropertyOptional({ description: "IP 地址", nullable: true })
   ipAddress!: string | null;
@@ -71,8 +74,11 @@ export class SessionInfo {
   @ApiProperty({ description: "过期时间" })
   expiresAt!: Date;
 
-  @ApiProperty({ description: "是否为当前会话" })
-  isCurrent!: boolean;
+  @ApiPropertyOptional({ description: "是否为当前会话" })
+  isCurrent?: boolean;
+
+  @ApiPropertyOptional({ description: "用户 ID" })
+  userId?: string;
 }
 
 /**
@@ -81,6 +87,9 @@ export class SessionInfo {
 export class SessionListResponse {
   @ApiProperty({ description: "操作是否成功" })
   success!: boolean;
+
+  @ApiProperty({ description: "消息" })
+  message!: string;
 
   @ApiPropertyOptional({ description: "当前会话 ID", nullable: true })
   currentSessionId?: string | null;

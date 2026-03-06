@@ -15,8 +15,8 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
-import type { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto } from "./api-key.dto";
 import { auth } from "./auth";
+import type { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto } from "./dto";
 
 /**
  * API Key 管理控制器
@@ -119,7 +119,7 @@ export class ApiKeyController {
       // 仅创建时返回完整 key
       key: result.key,
       // Better Auth 特有字段
-      enabled: result.enabled,
+      isActive: result.isActive,
       remaining: result.remaining,
       rateLimitEnabled: result.rateLimitEnabled,
       permissions: result.permissions,
@@ -175,7 +175,33 @@ export class ApiKeyController {
       success: true,
       message: "获取 API Key 列表成功",
       total: result.total || result.apiKeys.length,
-      apiKeys: result.apiKeys.map(
+      apiKeys: result.keys.map(
+        (key: {
+          id: string;
+          name?: string;
+          prefix?: string;
+          start?: string;
+          createdAt?: string;
+          expiresAt?: string;
+          lastRequest?: string;
+          enabled: boolean;
+          remaining: number;
+          rateLimitEnabled: boolean;
+        }) => ({
+          id: key.id,
+          name: key.name || null,
+          prefix: key.prefix || key.start || "",
+          createdAt: key.createdAt ? new Date(key.createdAt) : new Date(),
+          expiresAt: key.expiresAt ? new Date(key.expiresAt) : null,
+          lastUsedAt: key.lastRequest ? new Date(key.lastRequest) : null,
+          // Better Auth 特有字段
+          isActive: key.enabled,
+          enabled: key.enabled,
+          remaining: key.remaining,
+          rateLimitEnabled: key.rateLimitEnabled,
+        })
+      ),
+      keys: result.keys.map(
         (key: {
           id: string;
           name?: string;
@@ -241,6 +267,7 @@ export class ApiKeyController {
       expiresAt: result.expiresAt ? new Date(result.expiresAt) : null,
       lastUsedAt: result.lastRequest ? new Date(result.lastRequest) : null,
       // Better Auth 特有字段
+      isActive: result.enabled,
       enabled: result.enabled,
       remaining: result.remaining,
       rateLimitEnabled: result.rateLimitEnabled,

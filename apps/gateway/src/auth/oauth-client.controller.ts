@@ -16,7 +16,6 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
-import { OAuthService } from "./oauth.service";
 import type {
   CreateOAuthClientDto,
   OAuthClientCreatedResponse,
@@ -24,7 +23,8 @@ import type {
   OAuthClientResponse,
   RotateClientSecretResponse,
   UpdateOAuthClientDto,
-} from "./oauth-client.dto";
+} from "./dto";
+import { OAuthService } from "./oauth.service";
 
 /**
  * OAuth Client 管理 Controller
@@ -58,7 +58,17 @@ export class OAuthClientController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createClient(@Body() dto: CreateOAuthClientDto): Promise<OAuthClientCreatedResponse> {
-    return this.oauthService.createClient(dto);
+    const result = await this.oauthService.createClient({
+      ...dto,
+      allowedScopes: dto.allowedScopes || [],
+      clientType: (dto.clientType as "confidential" | "public" | undefined) || "confidential",
+    });
+
+    // 确保返回有 clientSecret
+    return {
+      ...result,
+      clientSecret: result.clientSecret || "",
+    };
   }
 
   /**
@@ -158,6 +168,11 @@ export class OAuthClientController {
   @Post(":id/rotate-secret")
   @HttpCode(HttpStatus.OK)
   async rotateSecret(@Param("id") id: string): Promise<RotateClientSecretResponse> {
-    return this.oauthService.rotateClientSecret(id);
+    const result = await this.oauthService.rotateClientSecret(id);
+    return {
+      success: true,
+      message: result.message,
+      clientSecret: result.clientSecret,
+    };
   }
 }

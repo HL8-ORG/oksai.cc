@@ -5,7 +5,7 @@
 import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
 import { ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
-import type { RegisterOAuthClientDto } from "./oauth.dto";
+import type { RegisterOAuthClientDto } from "./dto";
 import { OAuthService } from "./oauth.service";
 
 /**
@@ -65,8 +65,8 @@ export class OAuthV2Controller {
     return this.oauthService.registerClient({
       name: dto.name,
       redirectUris: dto.redirectUris,
-      allowedScopes: dto.allowedScopes,
-      clientType: dto.clientType,
+      allowedScopes: dto.allowedScopes || [],
+      clientType: (dto.clientType as "confidential" | "public" | undefined) || "confidential",
       description: dto.description,
       homepageUrl: dto.homepageUrl,
       logoUrl: dto.logoUrl,

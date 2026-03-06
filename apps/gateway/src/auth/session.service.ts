@@ -7,12 +7,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Session } from "@oksai/database";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import { CacheService } from "../common/cache.service";
-import type {
-  SessionConfigResponse,
-  SessionInfo,
-  SessionListResponse,
-  UpdateSessionConfigDto,
-} from "./session.dto";
+import type { SessionConfigResponse, SessionInfo, SessionListResponse, UpdateSessionConfigDto } from "./dto";
 
 /**
  * Session 管理服务
@@ -170,6 +165,7 @@ export class SessionService {
       const sessionTimeout = result.sessionTimeout || 604800; // 默认 7 天
       const sessionTimeoutDays = Math.round((sessionTimeout / 86400) * 10) / 10;
       const allowConcurrentSessions = result.allowConcurrentSessions ?? true;
+      const maxConcurrentSessions = result.maxConcurrentSessions ?? 5; // 默认 5 个会话
 
       const response: SessionConfigResponse = {
         success: true,
@@ -177,6 +173,7 @@ export class SessionService {
         sessionTimeout,
         sessionTimeoutDays,
         allowConcurrentSessions,
+        maxConcurrentSessions,
       };
 
       // 写入缓存

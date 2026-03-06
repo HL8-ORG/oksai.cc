@@ -14,7 +14,7 @@ import type {
   SignUpDto,
   VerifyEmailDto,
   VerifyTwoFactorDto,
-} from "./auth.dto";
+} from "./dto";
 import { SessionService } from "./session.service";
 
 /**
@@ -393,10 +393,10 @@ export class AuthService {
    */
   async impersonateUser(
     adminUserId: string,
-    dto: import("./impersonation.dto").ImpersonateUserDto
-  ): Promise<import("./impersonation.dto").ImpersonateUserResponse> {
+    dto: import("./dto/impersonation.dto").ImpersonateUserDto
+  ): Promise<import("./dto/impersonation.dto").ImpersonationUserResponse> {
     try {
-      this.logger.log(`管理员 ${adminUserId} 开始模拟用户 ${dto.userId}`);
+      this.logger.log(`管理员 ${adminUserId} 开始模拟用户 ${dto.email}`);
 
       // TODO: 验证管理员权限
       // TODO: 获取目标用户信息
@@ -407,9 +407,19 @@ export class AuthService {
       return {
         success: false,
         message: "用户模拟功能正在开发中",
+        session: {
+          id: "",
+          token: "",
+          expiresAt: new Date(),
+        },
+        impersonatedUser: {
+          id: "",
+          email: "",
+          name: null,
+        },
       };
     } catch (error) {
-      this.logger.error(`模拟用户失败: ${dto.userId}`, error);
+      this.logger.error(`模拟用户失败: ${dto.email}`, error);
       throw error;
     }
   }

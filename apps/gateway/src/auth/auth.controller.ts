@@ -13,6 +13,7 @@ import {
 } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
 import { RateLimit, RateLimitPresets } from "../common/rate-limit.decorator";
+import { type AuthResponse, AuthService } from "./auth.service";
 import type {
   DisableTwoFactorDto,
   EnableTwoFactorDto,
@@ -23,8 +24,7 @@ import type {
   SignUpDto,
   VerifyEmailDto,
   VerifyTwoFactorDto,
-} from "./auth.dto";
-import { type AuthResponse, AuthService } from "./auth.service";
+} from "./dto";
 
 /**
  * 认证控制器

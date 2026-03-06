@@ -29,6 +29,7 @@ import {
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { UserSession } from "@oksai/nestjs-better-auth";
 import { BetterAuthApiClient, Session } from "@oksai/nestjs-better-auth";
+import { auth } from "./auth";
 import type {
   AdminImpersonateResponse,
   AdminSessionListResponse,
@@ -44,8 +45,7 @@ import type {
   StopImpersonatingResponse,
   UnbanUserResponse,
   UpdateAdminUserDto,
-} from "./admin.dto";
-import { auth } from "./auth";
+} from "./dto";
 import { hasPermission } from "./user-role.enum";
 
 /**

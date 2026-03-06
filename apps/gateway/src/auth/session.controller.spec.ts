@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./dto";
 import { SessionController } from "./session.controller";
-import type { SessionConfigResponse, SessionListResponse, UpdateSessionTimeoutDto } from "./session.dto";
 
 describe("SessionController", () => {
   let controller: SessionController;
@@ -94,6 +94,7 @@ describe("SessionController", () => {
         sessionTimeout: 604800,
         sessionTimeoutDays: 7,
         allowConcurrentSessions: true,
+        maxConcurrentSessions: 5,
       };
 
       mockSessionService.getSessionConfig.mockResolvedValue(mockResponse);
@@ -116,6 +117,7 @@ describe("SessionController", () => {
         sessionTimeout: 604800,
         sessionTimeoutDays: 7,
         allowConcurrentSessions: true,
+        maxConcurrentSessions: 5,
       };
 
       mockSessionService.getSessionConfig.mockResolvedValue(mockResponse);
@@ -131,16 +133,17 @@ describe("SessionController", () => {
   describe("updateConfig", () => {
     it("应该成功更新 Session 配置为 30 天", async () => {
       // Arrange
-      const dto: UpdateSessionTimeoutDto = {
+      const dto: UpdateSessionConfigDto = {
         sessionTimeout: 2592000, // 30 天
       };
 
       const mockResponse: SessionConfigResponse = {
         success: true,
-        message: "Session 配置已更新",
+        message: "Session 配置更新成功",
         sessionTimeout: 2592000,
         sessionTimeoutDays: 30,
         allowConcurrentSessions: true,
+        maxConcurrentSessions: 5,
       };
 
       mockSessionService.updateSessionConfig.mockResolvedValue(mockResponse);
@@ -156,7 +159,7 @@ describe("SessionController", () => {
 
     it("应该成功更新 Session 配置为 1 小时", async () => {
       // Arrange
-      const dto: UpdateSessionTimeoutDto = {
+      const dto: UpdateSessionConfigDto = {
         sessionTimeout: 3600, // 1 小时
       };
 
@@ -164,8 +167,9 @@ describe("SessionController", () => {
         success: true,
         message: "Session 配置已更新",
         sessionTimeout: 3600,
-        sessionTimeoutDays: 0.04,
+        sessionTimeoutDays: 0.04, // 1 小时
         allowConcurrentSessions: true,
+        maxConcurrentSessions: 5,
       };
 
       mockSessionService.updateSessionConfig.mockResolvedValue(mockResponse);

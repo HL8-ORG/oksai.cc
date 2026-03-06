@@ -9,14 +9,43 @@ import { IsArray, IsBoolean, IsObject, IsOptional, IsString, IsUrl } from "class
  * Webhook 事件类型
  */
 export enum WebhookEventType {
+  // 用户事件
   USER_CREATED = "user.created",
   USER_UPDATED = "user.updated",
   USER_DELETED = "user.deleted",
+  USER_EMAIL_VERIFIED = "user.email_verified",
+  USER_PASSWORD_CHANGED = "user.password_changed",
   USER_LOGIN = "user.login",
   USER_LOGOUT = "user.logout",
+
+  // 会话事件
+  SESSION_CREATED = "session.created",
+  SESSION_DESTROYED = "session.destroyed",
+  SESSION_EXTENDED = "session.extended",
+
+  // 组织事件
+  ORGANIZATION_CREATED = "organization.created",
+  ORGANIZATION_UPDATED = "organization.updated",
+  ORGANIZATION_DELETED = "organization.deleted",
+  ORGANIZATION_MEMBER_INVITED = "organization.member_invited",
+  ORGANIZATION_MEMBER_JOINED = "organization.member_joined",
+  ORGANIZATION_MEMBER_REMOVED = "organization.member_removed",
+  ORGANIZATION_MEMBER_ROLE_CHANGED = "organization.member_role_changed",
+
+  // OAuth 事件
+  OAUTH_CLIENT_CREATED = "oauth.client_created",
+  OAUTH_CLIENT_UPDATED = "oauth.client_updated",
+  OAUTH_CLIENT_DELETED = "oauth.client_deleted",
+  OAUTH_TOKEN_ISSUED = "oauth.token_issued",
+  OAUTH_TOKEN_REVOKED = "oauth.token_revoked",
+  OAUTH_AUTHORIZATION_GRANTED = "oauth.authorization_granted",
+
+  // API Key 事件
   API_KEY_CREATED = "api_key.created",
   API_KEY_UPDATED = "api_key.updated",
   API_KEY_DELETED = "api_key.deleted",
+  API_KEY_REVOKED = "api_key.revoked",
+  API_KEY_USED = "api_key.used",
 }
 
 /**
@@ -59,10 +88,14 @@ export class CreateWebhookDto {
   @IsUrl()
   url!: string;
 
-  @ApiProperty({ description: "事件类型列表", type: [String], example: ["user.created", "user.updated"] })
+  @ApiProperty({
+    description: "事件类型列表",
+    enum: WebhookEventType,
+    isArray: true,
+    example: [WebhookEventType.USER_CREATED, WebhookEventType.USER_UPDATED],
+  })
   @IsArray()
-  @IsString({ each: true })
-  events!: string[];
+  events!: WebhookEventType[];
 
   @ApiPropertyOptional({ description: "是否激活", default: true })
   @IsBoolean()
@@ -99,11 +132,10 @@ export class UpdateWebhookDto {
   @IsOptional()
   url?: string;
 
-  @ApiPropertyOptional({ description: "事件类型列表", type: [String] })
+  @ApiPropertyOptional({ description: "事件类型列表", enum: WebhookEventType, isArray: true })
   @IsArray()
-  @IsString({ each: true })
   @IsOptional()
-  events?: string[];
+  events?: WebhookEventType[];
 
   @ApiPropertyOptional({ description: "是否激活" })
   @IsBoolean()

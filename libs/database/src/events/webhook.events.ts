@@ -4,6 +4,8 @@ export type WebhookEventType =
   | "user.deleted"
   | "user.email_verified"
   | "user.password_changed"
+  | "user.login"
+  | "user.logout"
   | "session.created"
   | "session.destroyed"
   | "session.extended"
@@ -21,6 +23,8 @@ export type WebhookEventType =
   | "oauth.token_revoked"
   | "oauth.authorization_granted"
   | "api_key.created"
+  | "api_key.updated"
+  | "api_key.deleted"
   | "api_key.revoked"
   | "api_key.used";
 

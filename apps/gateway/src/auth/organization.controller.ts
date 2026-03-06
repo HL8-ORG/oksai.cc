@@ -22,7 +22,7 @@ import type {
   OrganizationResponse,
   UpdateMemberRoleDto,
   UpdateOrganizationDto,
-} from "./organization.dto";
+} from "./dto";
 import { OrganizationService } from "./organization.service";
 
 /**

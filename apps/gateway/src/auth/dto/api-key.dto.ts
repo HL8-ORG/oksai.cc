@@ -179,6 +179,18 @@ export class ApiKeyResponse {
   @ApiProperty({ description: "是否激活" })
   isActive!: boolean;
 
+  @ApiPropertyOptional({ description: "是否启用（向后兼容）" })
+  enabled?: boolean;
+
+  @ApiPropertyOptional({ description: "剩余请求次数", nullable: true })
+  remaining?: number;
+
+  @ApiPropertyOptional({ description: "是否启用速率限制" })
+  rateLimitEnabled?: boolean;
+
+  @ApiPropertyOptional({ description: "元数据", nullable: true })
+  metadata?: Record<string, any>;
+
   @ApiPropertyOptional({ description: "过期时间", nullable: true })
   expiresAt!: Date | null;
 
@@ -200,6 +212,9 @@ export class ApiKeyListResponse {
   message!: string;
 
   @ApiProperty({ description: "API Key 列表", type: [ApiKeyResponse] })
+  apiKeys!: ApiKeyResponse[];
+
+  @ApiProperty({ description: "API Key 列表（别名）", type: [ApiKeyResponse] })
   keys!: ApiKeyResponse[];
 
   @ApiProperty({ description: "总数" })

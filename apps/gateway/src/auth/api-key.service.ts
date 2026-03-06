@@ -19,8 +19,6 @@ export class ApiKeyService {
   private readonly logger = new Logger(ApiKeyService.name);
 
   constructor() {
-    this.logger.warn(
-      "ApiKeyService 已废弃，请使用 Better Auth API Key 插件。见 api-key.controller.ts"
-    );
+    this.logger.warn("ApiKeyService 已废弃，请使用 Better Auth API Key 插件。见 api-key.controller.ts");
   }
 }

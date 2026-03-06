@@ -15,7 +15,7 @@ import {
   Put,
 } from "@nestjs/common";
 import { ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { CreateWebhookDto, UpdateWebhookDto } from "./webhook.dto";
+import type { CreateWebhookDto, UpdateWebhookDto } from "./dto";
 import { WebhookService } from "./webhook.service";
 
 @ApiTags("Webhook 管理")
