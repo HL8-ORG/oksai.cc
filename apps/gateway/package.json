@@ -17,7 +17,7 @@
   "dependencies": {
     "@better-auth/api-key": "catalog:",
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/nestjs": "^6.1.1",
+    "@mikro-orm/nestjs": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@nestjs/common": "catalog:",

@@ -29,6 +29,7 @@
 	},
 	"dependencies": {
 		"@mikro-orm/core": "catalog:",
+		"@mikro-orm/nestjs": "catalog:",
 		"@mikro-orm/postgresql": "catalog:",
 		"@nestjs/common": "catalog:",
 		"@nestjs/testing": "catalog:",
