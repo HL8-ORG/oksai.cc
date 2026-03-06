@@ -75,7 +75,7 @@ services:
     image: dpage/pgadmin4:latest
     container_name: oksai-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@oksai.local
+      PGADMIN_DEFAULT_EMAIL: admin@oksai.dev
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'

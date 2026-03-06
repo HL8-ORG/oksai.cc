@@ -450,7 +450,9 @@ export * from "./order-response.dto";
 
 ## 在控制器中使用
 
-### 1. 基本用法
+### 1. 基本用法（必须添加 @ApiBody）
+
+⚠️ **重要**：在 NestJS 中，`@Body()` 装饰器的类型信息在编译后会丢失，必须使用 `@ApiBody({ type: XxxDto })` 显式声明请求体类型，否则 Swagger 无法识别。
 
 ```typescript
 @Controller("users")
@@ -458,10 +460,11 @@ export * from "./order-response.dto";
 export class UserController {
   @Post()
   @ApiOperation({ summary: "创建用户" })
+  @ApiBody({ type: CreateUserDto })  // ⚠️ 必须添加，否则 Swagger 无法识别
   @ApiResponse({ status: 201, description: "创建成功", type: UserResponse })
   @ApiResponse({ status: 400, description: "参数错误" })
   async create(
-    @Body() dto: CreateUserDto  // 自动验证
+    @Body() dto: CreateUserDto
   ): Promise<UserResponse> {
     return this.userService.create(dto);
   }
@@ -470,19 +473,69 @@ export class UserController {
   @ApiOperation({ summary: "获取用户列表" })
   @ApiResponse({ status: 200, description: "成功", type: UserListResponse })
   async list(
-    @Query() query: ListUsersDto  // 自动验证查询参数
+    @Query() query: ListUsersDto
   ): Promise<UserListResponse> {
     return this.userService.findAll(query);
   }
 }
 ```
 
-### 2. 配合 @ApiBody
+### 2. @ApiResponse 必须使用 type 而非 schema
 
-如果需要更详细描述请求体：
+⚠️ **重要**：`@ApiResponse` 应该使用 `type: XxxResponse` 而不是 `schema: { example: {...} }`，否则响应类型无法在 Swagger 中正确显示。
+
+```typescript
+// ❌ 错误：使用 schema（无法正确显示响应结构）
+@ApiResponse({
+  status: 200,
+  description: "成功",
+  schema: { example: { id: "xxx", name: "User" } }
+})
+
+// ✅ 正确：使用 type
+@ApiResponse({ status: 200, description: "成功", type: UserResponse })
+```
+
+### 3. 完整的装饰器组合
+
+每个 controller 方法都应该包含以下装饰器：
 
 ```typescript
 @Post()
+@ApiOperation({ summary: "操作描述" })           // 操作说明
+@ApiBody({ type: CreateXxxDto })                 // 请求体类型（@Body 参数必加）
+@ApiResponse({ status: 201, type: XxxResponse }) // 成功响应
+@ApiResponse({ status: 400, description: "参数错误" })  // 错误响应
+async create(@Body() dto: CreateXxxDto): Promise<XxxResponse> {
+  // ...
+}
+
+@Put(":id")
+@ApiOperation({ summary: "更新操作" })
+@ApiParam({ name: "id", description: "资源 ID" })  // 路径参数
+@ApiBody({ type: UpdateXxxDto })                    // 请求体类型
+@ApiResponse({ status: 200, type: XxxResponse })
+async update(
+  @Param("id") id: string,
+  @Body() dto: UpdateXxxDto
+): Promise<XxxResponse> {
+  // ...
+}
+
+@Get()
+@ApiOperation({ summary: "列表查询" })
+@ApiQuery({ name: "page", required: false })  // 查询参数
+@ApiQuery({ name: "limit", required: false })
+@ApiResponse({ status: 200, type: XxxListResponse })
+async list(@Query() query: ListXxxDto): Promise<XxxListResponse> {
+  // ...
+}
+```
+
+### 4. 批量操作示例
+
+```typescript
+@Post("batch")
 @ApiOperation({ summary: "批量导入用户" })
 @ApiBody({
   type: BatchCreateUsersDto,
@@ -499,6 +552,7 @@ export class UserController {
     }
   }
 })
+@ApiResponse({ status: 201, type: BatchCreateResponse })
 async batchCreate(
   @Body() dto: BatchCreateUsersDto
 ): Promise<BatchCreateResponse> {
@@ -649,6 +703,10 @@ export class CreateUserDto {
 ### DO ✅
 
 - 使用 `class` 而非 `interface`
+- **使用普通 `import` 导入 DTO（绝不使用 `import type`）**
+- **Controller 中必须添加 `@ApiBody({ type: XxxDto })`**
+- **`@ApiResponse` 使用 `type: XxxResponse` 而非 `schema`**
+- **所有 DTO 在 `@ApiExtraModels()` 中注册**
 - 添加 `@ApiProperty` 或 `@ApiPropertyOptional` 装饰器
 - 请求 DTO 添加验证装饰器
 - 为所有属性添加描述和示例
@@ -659,6 +717,10 @@ export class CreateUserDto {
 
 ### DON'T ❌
 
+- **不要在 Controller 中使用 `import type` 导入 DTO**
+- **不要省略 `@ApiBody({ type: XxxDto })`**
+- **不要在 `@ApiResponse` 中使用 `schema: { example: {...} }`**
+- **不要忘记在 `@ApiExtraModels()` 中注册 DTO**
 - 不要使用 `interface` 定义 DTO
 - 不要省略 Swagger 装饰器
 - 不要使用 `any` 类型
@@ -666,9 +728,170 @@ export class CreateUserDto {
 - 不要在响应 DTO 中添加验证装饰器
 - 不要在 DTO 中编写业务逻辑
 
+## 常见问题和解决方案
+
+### 1. 禁止使用 `import type` 导入 DTO
+
+⚠️ **严重警告**：在 NestJS Controller 中，用于 `@Body()`, `@Query()`, `@Param()` 的 DTO **绝对不能**使用 `import type`，否则会导致：
+
+1. **Swagger 无法识别** - 编译后类型信息丢失，Swagger 无法生成文档
+2. **依赖注入失败** - NestJS 无法获取运行时类型元数据
+3. **验证失效** - class-validator 无法正常工作
+
+```typescript
+// ❌ 严重错误：使用 import type（编译后类型丢失）
+import type { CreateUserDto } from "./dto";
+
+@Controller("users")
+export class UserController {
+  @Post()
+  async create(@Body() dto: CreateUserDto) {  // 运行时错误！
+    // ...
+  }
+}
+
+// ✅ 正确：使用普通 import
+import { CreateUserDto } from "./dto";
+
+@Controller("users")
+export class UserController {
+  @Post()
+  @ApiBody({ type: CreateUserDto })  // 必须添加
+  async create(@Body() dto: CreateUserDto) {  // 正常工作
+    // ...
+  }
+}
+```
+
+**诊断方法：**
+
+```bash
+# 检查编译后的元数据
+cat dist/src/user.controller.js | grep -A 3 "__metadata"
+
+# 正确: tslib_1.__metadata("design:paramtypes", [create_user_dto_1.CreateUserDto])
+# 错误: tslib_1.__metadata("design:paramtypes", [Function])
+```
+
+**修复命令：**
+
+```bash
+# 批量修复所有使用 import type 导入 DTO 的文件
+find src -name "*.controller.ts" -exec \
+  sed -i 's/import type { \([^}]*Dto[^}]*\) }/import { \1 }/g' {} \;
+```
+
+### 2. 注册 DTO 到 Swagger（@ApiExtraModels）
+
+⚠️ **重要**：所有 DTO 必须通过 `@ApiExtraModels()` 注册到 Swagger 文档中，否则可能无法在 Swagger UI 中正确显示。
+
+```typescript
+// app.module.ts
+import { ApiExtraModels } from "@nestjs/swagger";
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UserResponse,
+  UserListResponse
+} from "./user/dto";
+
+@ApiExtraModels(
+  CreateUserDto,
+  UpdateUserDto,
+  UserResponse,
+  UserListResponse
+)
+@Module({
+  // ...
+})
+export class AppModule {}
+```
+
+**推荐做法：**
+
+1. 在模块的 `dto/index.ts` 中导出所有 DTO
+2. 在 `app.module.ts` 中统一注册所有 DTO
+
+```typescript
+// user/dto/index.ts
+export * from "./create-user.dto";
+export * from "./update-user.dto";
+export * from "./user-response.dto";
+
+// app.module.ts
+import * as UserDtos from "./user/dto";
+
+@ApiExtraModels(
+  ...Object.values(UserDtos)
+)
+@Module({ /* ... */ })
+export class AppModule {}
+```
+
+### 3. Swagger 显示不完整的常见原因
+
+**症状：** DTO 在 Swagger 中不显示或显示为空对象 `{}`
+
+**原因排查：**
+
+1. ❌ **Controller 使用了 `import type`**
+   ```bash
+   # 检查命令
+   grep -rn "import type.*Dto" apps/*/src --include="*.controller.ts"
+   ```
+
+2. ❌ **缺少 `@ApiBody({ type: XxxDto })`**
+   ```typescript
+   // 必须添加
+   @ApiBody({ type: CreateUserDto })
+   ```
+
+3. ❌ **响应使用 `schema` 而非 `type`**
+   ```typescript
+   // 错误
+   @ApiResponse({ schema: { example: {...} } })
+   
+   // 正确
+   @ApiResponse({ type: UserResponse })
+   ```
+
+4. ❌ **DTO 未注册到 `@ApiExtraModels()`**
+   ```bash
+   # 检查 app.module.ts 是否包含所有 DTO
+   grep -A 50 "@ApiExtraModels" apps/*/src/app.module.ts
+   ```
+
+### 4. 快速检查清单
+
+在编写或修改 Controller 时，确保：
+
+- [ ] DTO 使用**普通 import**（不是 `import type`）
+- [ ] `@Body()` 参数添加了 `@ApiBody({ type: XxxDto })`
+- [ ] `@ApiResponse` 使用 `type: XxxResponse` 而非 `schema`
+- [ ] 所有 DTO 已在 `app.module.ts` 的 `@ApiExtraModels()` 中注册
+- [ ] DTO 类使用 `class` 而非 `interface`
+- [ ] DTO 属性添加了 `@ApiProperty()` 或 `@ApiPropertyOptional()`
+
+### 5. 验证 Swagger 文档
+
+```bash
+# 1. 启动服务
+pnpm dev
+
+# 2. 访问 Swagger UI
+open http://localhost:3000/api/docs
+
+# 3. 检查要点：
+#    - 所有 API 都有完整的请求体字段
+#    - 所有响应都有类型定义
+#    - Schema 中列出了所有 DTO
+#    - 可以展开查看 DTO 的详细结构
+```
+
 ## 参考资料
 
 - [NestJS DTO Best Practices](https://docs.nestjs.com/controllers#request-payloads)
 - [class-validator Documentation](https://github.com/typestack/class-validator)
 - [class-transformer Documentation](https://github.com/typestack/class-transformer)
 - [NestJS Swagger Plugin](https://docs.nestjs.com/openapi/introduction)
+- [TypeScript emitDecoratorMetadata](https://www.typescriptlang.org/tsconfig#emitDecoratorMetadata)
