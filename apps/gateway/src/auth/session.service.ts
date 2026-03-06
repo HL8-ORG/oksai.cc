@@ -3,8 +3,9 @@
  */
 
 import { EntityManager } from "@mikro-orm/core";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { Session, User } from "@oksai/database";
+import { Injectable, Logger } from "@nestjs/common";
+import { Session } from "@oksai/database";
+import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import { CacheService } from "../common/cache.service";
 import type {
   SessionConfigResponse,
@@ -37,7 +38,8 @@ export class SessionService {
 
   constructor(
     private readonly cacheService: CacheService,
-    private readonly em: EntityManager
+    private readonly em: EntityManager,
+    private readonly apiClient: BetterAuthApiClient
   ) {}
 
   /**
@@ -53,57 +55,42 @@ export class SessionService {
       // 尝试从缓存获取
       const cachedResponse = this.cacheService.get<SessionListResponse>(cacheKey);
       if (cachedResponse) {
-        // 更新当前 Session 标记
-        if (currentSessionToken) {
-          const sessions = cachedResponse.sessions.map((session) => ({
-            ...session,
-            isCurrent: false,
-          }));
-          const currentSession = sessions.find((s) => {
-            // 由于缓存中没有 token 信息，这里需要重新查询当前 session
-            return false;
-          });
-
-          return {
-            ...cachedResponse,
-            sessions,
-            currentSessionId: currentSession?.id,
-          };
-        }
         return cachedResponse;
       }
 
-      // 从数据库查询
-      const now = new Date();
-      const result = await this.em.find(
-        Session,
-        {
-          userId,
-          expiresAt: { $gt: now },
-        },
-        {
-          orderBy: { createdAt: "ASC" },
-        }
-      );
+      // 使用 Better Auth API 获取活跃会话
+      const result = await this.apiClient.listActiveSessions(userId, currentSessionToken);
 
-      const sessionList: SessionInfo[] = result.map((session) => ({
-        id: session.id,
-        userId: session.userId,
-        createdAt: session.createdAt,
-        expiresAt: session.expiresAt,
-        ipAddress: session.ipAddress,
-        userAgent: session.userAgent,
-        isCurrent: currentSessionToken ? session.token === currentSessionToken : false,
-      }));
-
-      // 查找当前 Session ID
-      const currentSession = sessionList.find((s) => s.isCurrent);
+      // 转换为我们的格式
+      const sessionList: SessionInfo[] =
+        result.sessions?.map(
+          (session: {
+            id: string;
+            userId: string;
+            createdAt: Date;
+            expiresAt: Date;
+            ipAddress?: string;
+            userAgent?: string;
+            isCurrent?: boolean;
+          }) => ({
+            id: session.id,
+            userId: session.userId,
+            createdAt: session.createdAt,
+            expiresAt: session.expiresAt,
+            ipAddress: session.ipAddress,
+            userAgent: session.userAgent,
+            isCurrent: session.isCurrent || false,
+          })
+        ) || [];
 
       const response: SessionListResponse = {
         success: true,
         message: "获取活跃 Session 列表成功",
         sessions: sessionList,
-        currentSessionId: currentSession?.id,
+        currentSessionId:
+          result.currentSessionId || currentSessionToken
+            ? sessionList.find((s) => s.isCurrent)?.id
+            : undefined,
       };
 
       // 写入缓存
@@ -124,13 +111,8 @@ export class SessionService {
    */
   async revokeSession(userId: string, sessionId: string): Promise<void> {
     try {
-      const session = await this.em.findOne(Session, { id: sessionId, userId });
-
-      if (!session) {
-        throw new NotFoundException("Session 不存在或无权访问");
-      }
-
-      await this.em.removeAndFlush(session);
+      // 使用 Better Auth API 撤销会话
+      await this.apiClient.revokeSession(sessionId, sessionId); // 这里 sessionId 作为 token 使用
 
       // 清除 Session 列表缓存
       this.cacheService.delete(`${SessionService.CACHE_PREFIX_LIST}${userId}`);
@@ -148,21 +130,12 @@ export class SessionService {
    * @param userId - 用户 ID
    * @param currentSessionToken - 当前 Session Token
    */
-  async revokeOtherSessions(userId: string, _currentSessionToken: string): Promise<number> {
+  async revokeOtherSessions(userId: string, currentSessionToken: string): Promise<number> {
     try {
-      const sessions = await this.em.find(Session, {
-        userId,
-        // 保留当前 Session
-        // token: { $ne: currentSessionToken }
-      });
+      // 使用 Better Auth API 撤销所有其他会话
+      const result = await this.apiClient.revokeAllSessions(userId, currentSessionToken);
 
-      for (const session of sessions) {
-        this.em.remove(session);
-      }
-
-      await this.em.flush();
-
-      const deletedCount = sessions.length;
+      const deletedCount = result.deletedCount || 0;
 
       // 清除 Session 列表缓存
       this.cacheService.delete(`${SessionService.CACHE_PREFIX_LIST}${userId}`);
@@ -190,17 +163,13 @@ export class SessionService {
         return cachedConfig;
       }
 
-      // 从数据库查询
-      const user = await this.em.findOne(User, { id: userId });
+      // 使用 Better Auth API 获取会话配置
+      const result = await this.apiClient.getSessionConfig(userId);
 
-      if (!user) {
-        throw new NotFoundException("用户不存在");
-      }
-
-      // 默认 7 天（604800 秒）
-      const sessionTimeout = (user as any).sessionTimeout || 604800;
+      // 转换为我们的格式
+      const sessionTimeout = result.sessionTimeout || 604800; // 默认 7 天
       const sessionTimeoutDays = Math.round((sessionTimeout / 86400) * 10) / 10;
-      const allowConcurrentSessions = (user as any).allowConcurrentSessions ?? true;
+      const allowConcurrentSessions = result.allowConcurrentSessions ?? true;
 
       const response: SessionConfigResponse = {
         success: true,
@@ -230,20 +199,8 @@ export class SessionService {
     try {
       this.logger.log(`更新 Session 配置: ${userId}`, dto);
 
-      const user = await this.em.findOne(User, { id: userId });
-      if (!user) {
-        throw new NotFoundException("用户不存在");
-      }
-
-      // 更新配置
-      if (dto.sessionTimeout !== undefined) {
-        (user as any).sessionTimeout = dto.sessionTimeout;
-      }
-      if (dto.allowConcurrentSessions !== undefined) {
-        (user as any).allowConcurrentSessions = dto.allowConcurrentSessions;
-      }
-
-      await this.em.flush();
+      // 使用 Better Auth API 更新会话配置
+      await this.apiClient.updateSessionConfig(dto);
 
       // 获取更新后的完整配置
       const config = await this.getSessionConfig(userId);

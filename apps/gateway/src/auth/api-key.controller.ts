@@ -12,9 +12,10 @@
  * - 过期时间管理
  */
 
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto, UpdateApiKeyDto } from "./api-key.dto";
+import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
+import type { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto } from "./api-key.dto";
 import { auth } from "./auth";
 
 /**
@@ -30,6 +31,11 @@ import { auth } from "./auth";
 @ApiTags("API Key 管理")
 @Controller("api-keys")
 export class ApiKeyController {
+  private readonly apiClient: BetterAuthApiClient;
+
+  constructor() {
+    this.apiClient = new BetterAuthApiClient(auth.api);
+  }
   /**
    * 创建 API Key
    *
@@ -83,10 +89,10 @@ export class ApiKeyController {
     // 临时方案：使用硬编码的 userId
     const userId = "temp-user-id";
 
-    // 使用 Better Auth API 创建 API Key（临时使用 as any 绕过类型检查）
-    const result = await (auth.api as any).createApiKey({
-      body: {
-        userId,
+    // 使用 Better Auth API 创建 API Key
+    const result = await this.apiClient.createApiKey(
+      userId,
+      {
         name: dto.name,
         expiresIn: dto.expiresIn,
         permissions: dto.permissions,
@@ -100,7 +106,8 @@ export class ApiKeyController {
         refillAmount: dto.refillAmount,
         refillInterval: dto.refillInterval,
       },
-    });
+      "temp-session-token"
+    );
 
     return {
       id: result.id,
@@ -117,7 +124,7 @@ export class ApiKeyController {
       rateLimitEnabled: result.rateLimitEnabled,
       permissions: result.permissions,
       metadata: result.metadata,
-    } as any;
+    };
   }
 
   /**
@@ -153,32 +160,46 @@ export class ApiKeyController {
     @Query("sortBy") sortBy?: string,
     @Query("sortDirection") sortDirection?: "asc" | "desc"
   ): Promise<ApiKeyListResponse> {
-    // 使用 Better Auth API 列出 API Keys（临时使用 as any 绕过类型检查）
-    const result = await (auth.api as any).listApiKeys({
-      query: {
+    // 使用 Better Auth API 列出 API Keys
+    const result = await this.apiClient.listApiKeys(
+      {
         limit: limit || 100,
         offset: offset || 0,
         sortBy: sortBy || "createdAt",
         sortDirection: sortDirection || "desc",
       },
-    });
+      "temp-session-token"
+    );
 
     return {
       success: true,
       message: "获取 API Key 列表成功",
       total: result.total || result.apiKeys.length,
-      apiKeys: result.apiKeys.map((key: any) => ({
-        id: key.id,
-        name: key.name || null,
-        prefix: key.prefix || key.start || "",
-        createdAt: key.createdAt ? new Date(key.createdAt) : new Date(),
-        expiresAt: key.expiresAt ? new Date(key.expiresAt) : null,
-        lastUsedAt: key.lastRequest ? new Date(key.lastRequest) : null,
-        // Better Auth 特有字段
-        enabled: key.enabled,
-        remaining: key.remaining,
-        rateLimitEnabled: key.rateLimitEnabled,
-      })),
+      apiKeys: result.apiKeys.map(
+        (key: {
+          id: string;
+          name?: string;
+          prefix?: string;
+          start?: string;
+          createdAt?: string;
+          expiresAt?: string;
+          lastRequest?: string;
+          enabled: boolean;
+          remaining: number;
+          rateLimitEnabled: boolean;
+        }) => ({
+          id: key.id,
+          name: key.name || null,
+          prefix: key.prefix || key.start || "",
+          createdAt: key.createdAt ? new Date(key.createdAt) : new Date(),
+          expiresAt: key.expiresAt ? new Date(key.expiresAt) : null,
+          lastUsedAt: key.lastRequest ? new Date(key.lastRequest) : null,
+          // Better Auth 特有字段
+          enabled: key.enabled,
+          remaining: key.remaining,
+          rateLimitEnabled: key.rateLimitEnabled,
+        })
+      ),
     };
   }
 
@@ -205,12 +226,8 @@ export class ApiKeyController {
   @ApiResponse({ status: 200, description: "成功", schema: { example: { id: "xxx", name: "My API Key" } } })
   @ApiResponse({ status: 404, description: "API Key 不存在" })
   async getApiKey(@Param("id") apiKeyId: string): Promise<ApiKeyResponse> {
-    // 使用 Better Auth API 获取 API Key（临时使用 as any 绕过类型检查）
-    const result = await (auth.api as any).getApiKey({
-      query: {
-        id: apiKeyId,
-      },
-    });
+    // 使用 Better Auth API 获取 API Key
+    const result = await this.apiClient.getApiKey(apiKeyId, "temp-session-token");
 
     if (!result) {
       throw new Error("API Key 不存在");
@@ -229,67 +246,7 @@ export class ApiKeyController {
       rateLimitEnabled: result.rateLimitEnabled,
       permissions: result.permissions,
       metadata: result.metadata,
-    } as any;
-  }
-
-  /**
-   * 更新 API Key
-   *
-   * @description
-   * 更新 API Key 的属性（名称、权限、元数据等）
-   *
-   * @example
-   * PUT /api/api-keys/:id
-   * Header: Authorization: Bearer <token>
-   * Body: {
-   *   "name": "New Name",
-   *   "permissions": { "user": ["read"] }
-   * }
-   * Response: {
-   *   "id": "xxx",
-   *   "name": "New Name",
-   *   ...
-   * }
-   */
-  @Put(":id")
-  @ApiOperation({ summary: "更新 API Key", description: "更新 API Key 的属性（名称、权限、元数据等）" })
-  @ApiParam({ name: "id", description: "API Key ID" })
-  @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
-  @ApiBody({ schema: { example: { name: "New Name", permissions: { user: ["read"] } } } })
-  @ApiResponse({ status: 200, description: "成功", schema: { example: { id: "xxx", name: "New Name" } } })
-  async updateApiKey(@Param("id") apiKeyId: string, @Body() dto: UpdateApiKeyDto): Promise<ApiKeyResponse> {
-    // 使用 Better Auth API 更新 API Key（临时使用 as any 绕过类型检查）
-    const result = await (auth.api as any).updateApiKey({
-      body: {
-        keyId: apiKeyId,
-        name: dto.name,
-        permissions: dto.permissions,
-        metadata: dto.metadata,
-        enabled: dto.enabled,
-        remaining: dto.remaining,
-        refillAmount: dto.refillAmount,
-        refillInterval: dto.refillInterval,
-        expiresIn: dto.expiresIn,
-        rateLimitEnabled: dto.rateLimitEnabled,
-        rateLimitTimeWindow: dto.rateLimitTimeWindow,
-        rateLimitMax: dto.rateLimitMax,
-      },
-    });
-
-    return {
-      id: result.id,
-      name: result.name || null,
-      prefix: result.prefix || result.start || "",
-      createdAt: result.createdAt ? new Date(result.createdAt) : new Date(),
-      expiresAt: result.expiresAt ? new Date(result.expiresAt) : null,
-      lastUsedAt: result.lastRequest ? new Date(result.lastRequest) : null,
-      // Better Auth 特有字段
-      enabled: result.enabled,
-      remaining: result.remaining,
-      rateLimitEnabled: result.rateLimitEnabled,
-      permissions: result.permissions,
-      metadata: result.metadata,
-    } as any;
+    };
   }
 
   /**
@@ -317,12 +274,8 @@ export class ApiKeyController {
     schema: { example: { success: true, message: "API Key 已删除" } },
   })
   async deleteApiKey(@Param("id") apiKeyId: string): Promise<{ success: boolean; message: string }> {
-    // 使用 Better Auth API 删除 API Key（临时使用 as any 绕过类型检查）
-    await (auth.api as any).deleteApiKey({
-      body: {
-        keyId: apiKeyId,
-      },
-    });
+    // 使用 Better Auth API 删除 API Key
+    await this.apiClient.deleteApiKey(apiKeyId, "temp-session-token");
 
     return {
       success: true,

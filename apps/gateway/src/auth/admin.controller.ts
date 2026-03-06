@@ -12,7 +12,6 @@
  * - 用户模拟（模拟登录/停止模拟）
  */
 
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -27,8 +26,9 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { UserSession } from "@oksai/nestjs-better-auth";
-import { Session } from "@oksai/nestjs-better-auth";
+import { BetterAuthApiClient, Session } from "@oksai/nestjs-better-auth";
 import type {
   AdminImpersonateResponse,
   AdminSessionListResponse,
@@ -61,6 +61,12 @@ import { hasPermission } from "./user-role.enum";
 @ApiTags("Admin 管理")
 @Controller("admin")
 export class AdminController {
+  private readonly apiClient: BetterAuthApiClient;
+
+  constructor() {
+    this.apiClient = new BetterAuthApiClient(auth.api);
+  }
+
   // ============================================
   // 用户管理
   // ============================================
@@ -95,8 +101,8 @@ export class AdminController {
     this.requireAdminRole(session);
 
     // 使用 Better Auth API 列出用户
-    const result = await (auth.api as any).listUsers({
-      query: {
+    const result = await this.apiClient.listUsersWithAuth(
+      {
         searchValue: query.searchValue,
         searchField: query.searchField || "email",
         searchOperator: query.searchOperator || "contains",
@@ -105,8 +111,8 @@ export class AdminController {
         sortBy: query.sortBy || "createdAt",
         sortDirection: query.sortDirection || "desc",
       },
-      headers: this.getHeaders(session),
-    });
+      session.session.token
+    );
 
     return {
       users: result.users || [],
@@ -137,10 +143,7 @@ export class AdminController {
   async getUser(@Session() session: UserSession, @Param("id") userId: string): Promise<AdminUserResponse> {
     this.requireAdminRole(session);
 
-    const result = await (auth.api as any).getUser({
-      query: { userId },
-      headers: this.getHeaders(session),
-    });
+    const result = await this.apiClient.getUser(userId, session.session.token);
 
     if (!result) {
       throw new NotFoundException("用户不存在");
@@ -173,16 +176,16 @@ export class AdminController {
   ): Promise<AdminUserResponse> {
     this.requireAdminRole(session);
 
-    const result = await (auth.api as any).createUser({
-      body: {
+    const result = await this.apiClient.createUser(
+      {
         email: dto.email,
         password: dto.password,
         name: dto.name,
         role: dto.role || "user",
         emailVerified: dto.emailVerified || false,
       },
-      headers: this.getHeaders(session),
-    });
+      session.session.token
+    );
 
     return result;
   }
@@ -210,13 +213,13 @@ export class AdminController {
   ): Promise<AdminUserResponse> {
     this.requireAdminRole(session);
 
-    const result = await (auth.api as any).updateUser({
-      body: {
+    const result = await this.apiClient.updateUser(
+      {
         userId,
         ...dto,
       },
-      headers: this.getHeaders(session),
-    });
+      session.session.token
+    );
 
     return result;
   }
@@ -243,10 +246,7 @@ export class AdminController {
   ): Promise<{ success: boolean }> {
     this.requireSuperAdminRole(session);
 
-    await (auth.api as any).removeUser({
-      body: { userId },
-      headers: this.getHeaders(session),
-    });
+    await this.apiClient.removeUser(userId, session.session.token);
 
     return { success: true };
   }
@@ -280,13 +280,7 @@ export class AdminController {
       throw new ForbiddenException("只有超级管理员可以设置超级管理员角色");
     }
 
-    await (auth.api as any).setRole({
-      body: {
-        userId,
-        role: dto.role,
-      },
-      headers: this.getHeaders(session),
-    });
+    await this.apiClient.setRole(userId, dto.role, session.session.token);
 
     return { success: true };
   }
@@ -316,13 +310,7 @@ export class AdminController {
   ): Promise<CheckPermissionResponse> {
     this.requireAdminRole(session);
 
-    const result = await (auth.api as any).userHasPermission({
-      body: {
-        userId: dto.userId,
-        permissions: dto.permissions,
-      },
-      headers: this.getHeaders(session),
-    });
+    const result = await this.apiClient.userHasPermission(dto.userId, dto.permissions, session.session.token);
 
     return {
       hasPermission: result,
@@ -358,14 +346,7 @@ export class AdminController {
   ): Promise<{ success: boolean }> {
     this.requireAdminRole(session);
 
-    await (auth.api as any).banUser({
-      body: {
-        userId,
-        banReason: dto.banReason || "违反服务条款",
-        banExpiresIn: dto.banExpiresIn,
-      },
-      headers: this.getHeaders(session),
-    });
+    await this.apiClient.banUser(userId, session.session.token, dto.banReason || "违反服务条款");
 
     return { success: true };
   }
@@ -389,10 +370,7 @@ export class AdminController {
   async unbanUser(@Session() session: UserSession, @Param("id") userId: string): Promise<UnbanUserResponse> {
     this.requireAdminRole(session);
 
-    await (auth.api as any).unbanUser({
-      body: { userId },
-      headers: this.getHeaders(session),
-    });
+    await this.apiClient.unbanUser(userId, session.session.token);
 
     return {
       success: true,
@@ -426,10 +404,7 @@ export class AdminController {
   ): Promise<AdminSessionListResponse> {
     this.requireAdminRole(session);
 
-    const result = await (auth.api as any).listUserSessions({
-      body: { userId },
-      headers: this.getHeaders(session),
-    });
+    const result = await this.apiClient.listUserSessions(userId, session.session.token);
 
     return {
       sessions: result || [],
@@ -459,10 +434,7 @@ export class AdminController {
   ): Promise<RevokeSessionResponse> {
     this.requireAdminRole(session);
 
-    await (auth.api as any).revokeUserSession({
-      body: { sessionToken },
-      headers: this.getHeaders(session),
-    });
+    await this.apiClient.revokeUserSession(sessionToken, session.session.token);
 
     return {
       success: true,
@@ -506,10 +478,7 @@ export class AdminController {
   ): Promise<AdminImpersonateResponse> {
     this.requireAdminRole(session);
 
-    const result = await (auth.api as any).impersonateUser({
-      body: { userId },
-      headers: this.getHeaders(session),
-    });
+    const result = await this.apiClient.impersonateUser(userId, session.session.token);
 
     return {
       success: true,
@@ -534,9 +503,7 @@ export class AdminController {
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("stop-impersonating")
   async stopImpersonating(@Session() session: UserSession): Promise<StopImpersonatingResponse> {
-    await (auth.api as any).stopImpersonating({
-      headers: this.getHeaders(session),
-    });
+    await this.apiClient.stopImpersonating(session.session.token);
 
     return {
       success: true,
@@ -552,7 +519,7 @@ export class AdminController {
    * 检查是否是管理员
    */
   private requireAdminRole(session: UserSession): void {
-    if (!hasPermission(session.user.role as any, "user:list")) {
+    if (!hasPermission(session.user.role as "user" | "admin" | "superadmin", "user:list")) {
       throw new ForbiddenException("需要管理员权限");
     }
   }
@@ -564,14 +531,5 @@ export class AdminController {
     if (session.user.role !== "superadmin") {
       throw new ForbiddenException("需要超级管理员权限");
     }
-  }
-
-  /**
-   * 获取请求头（用于 Better Auth API）
-   */
-  private getHeaders(session: UserSession) {
-    return {
-      authorization: `Bearer ${session.session.token}`,
-    };
   }
 }

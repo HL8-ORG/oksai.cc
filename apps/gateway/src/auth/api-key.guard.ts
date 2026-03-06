@@ -3,6 +3,7 @@
  */
 
 import { type CanActivate, type ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import type { Request } from "express";
 import { auth } from "./auth";
 
@@ -18,7 +19,7 @@ export interface ApiKeyPayload {
   enabled: boolean;
   expiresAt?: Date | null;
   permissions?: Record<string, string[]> | null;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   remaining?: number | null;
   rateLimitEnabled?: boolean;
 }
@@ -35,6 +36,11 @@ export interface ApiKeyPayload {
  */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
+  private readonly apiClient: BetterAuthApiClient;
+
+  constructor() {
+    this.apiClient = new BetterAuthApiClient(auth.api);
+  }
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const apiKey = this.extractApiKey(request);
@@ -72,11 +78,7 @@ export class ApiKeyGuard implements CanActivate {
   private async validateApiKey(apiKey: string): Promise<ApiKeyPayload | null> {
     try {
       // 使用 Better Auth API 验证
-      const result = await (auth.api as any).verifyApiKey({
-        body: {
-          key: apiKey,
-        },
-      });
+      const result = await this.apiClient.verifyApiKey(apiKey);
 
       if (!result.valid || !result.key) {
         return null;

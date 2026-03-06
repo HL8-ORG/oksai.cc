@@ -70,17 +70,25 @@ import { WebhookService } from "./webhook.service";
     },
     {
       provide: SessionService,
-      useFactory: (cacheService: CacheService, em: EntityManager) => {
-        return new SessionService(cacheService, em);
+      useFactory: (cacheService: CacheService, em: EntityManager, betterAuthService: BetterAuthService) => {
+        // 创建 BetterAuthApiClient 实例
+        const { BetterAuthApiClient } = require("@oksai/nestjs-better-auth");
+        const apiClient = new BetterAuthApiClient(betterAuthService.api);
+
+        return new SessionService(cacheService, em, apiClient);
       },
-      inject: [CacheService, EntityManager],
+      inject: [CacheService, EntityManager, BetterAuthService],
     },
     TokenBlacklistService,
     WebhookService,
     {
       provide: OrganizationService,
       useFactory: (betterAuthService: BetterAuthService) => {
-        return new OrganizationService(betterAuthService.api as any);
+        // 创建 BetterAuthApiClient 实例
+        const { BetterAuthApiClient } = require("@oksai/nestjs-better-auth");
+        const apiClient = new BetterAuthApiClient(betterAuthService.api);
+
+        return new OrganizationService(apiClient);
       },
       inject: [BetterAuthService],
     },

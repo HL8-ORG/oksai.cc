@@ -21,6 +21,12 @@ const config: Options = {
     "nats",
     "amqplib",
     "amqp-connection-manager",
+    // MikroORM
+    "@mikro-orm/nestjs",
+    "@mikro-orm/core",
+    "@mikro-orm/reflection",
+    // Better Auth
+    "@oksai/nestjs-better-auth",
   ],
   tsconfig: "./tsconfig.build.json",
 };

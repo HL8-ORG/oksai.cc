@@ -3,6 +3,7 @@
  */
 
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import type {
   DisableTwoFactorDto,
   EnableTwoFactorDto,
@@ -15,32 +16,6 @@ import type {
   VerifyTwoFactorDto,
 } from "./auth.dto";
 import { SessionService } from "./session.service";
-
-/* biome-ignore lint/suspicious/noExplicitAny: Better Auth API 类型复杂,使用 any 简化集成 */
-type BetterAuthParams = { body?: any; headers?: any };
-/* biome-ignore lint/suspicious/noExplicitAny: Better Auth API 类型复杂,使用 any 简化集成 */
-type BetterAuthResult = any;
-
-/**
- * Better Auth API 类型
- *
- * 基于 Better Auth 实际 API 方法
- * @see https://github.com/better-auth/better-auth
- */
-interface BetterAuthAPI {
-  signUpEmail: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  signInEmail: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  verifyEmail: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  requestPasswordReset: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  resetPassword: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  getSession: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  signOut: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  signInSocial: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  sendVerificationEmail: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  enableTwoFactor: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  verifyTwoFactor: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-  disableTwoFactor: (params: BetterAuthParams) => Promise<BetterAuthResult>;
-}
 
 /**
  * 认证服务响应
@@ -69,11 +44,11 @@ export interface AuthResponse {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly authAPI: BetterAuthAPI;
+  private readonly apiClient: BetterAuthApiClient;
   private readonly sessionService?: SessionService;
 
-  constructor(authAPI: BetterAuthAPI, sessionService?: SessionService) {
-    this.authAPI = authAPI;
+  constructor(apiClient: BetterAuthApiClient, sessionService?: SessionService) {
+    this.apiClient = apiClient;
     this.sessionService = sessionService;
   }
 
@@ -84,12 +59,10 @@ export class AuthService {
     try {
       this.logger.log(`用户注册: ${dto.email}`);
 
-      const result = await this.authAPI.signUpEmail({
-        body: {
-          email: dto.email,
-          password: dto.password,
-          name: dto.name,
-        },
+      const result = await this.apiClient.signUpEmail({
+        email: dto.email,
+        password: dto.password,
+        name: dto.name,
       });
 
       if (!result) {
@@ -116,11 +89,9 @@ export class AuthService {
     try {
       this.logger.log(`用户登录: ${dto.email}`);
 
-      const result = await this.authAPI.signInEmail({
-        body: {
-          email: dto.email,
-          password: dto.password,
-        },
+      const result = await this.apiClient.signInEmail({
+        email: dto.email,
+        password: dto.password,
       });
 
       if (!result) {
@@ -159,10 +130,8 @@ export class AuthService {
     try {
       this.logger.log(`邮箱验证: ${dto.token}`);
 
-      const result = await this.authAPI.verifyEmail({
-        body: {
-          token: dto.token,
-        },
+      const result = await this.apiClient.verifyEmail({
+        token: dto.token,
       });
 
       if (!result) {
@@ -189,10 +158,8 @@ export class AuthService {
     try {
       this.logger.log(`忘记密码: ${dto.email}`);
 
-      await this.authAPI.requestPasswordReset({
-        body: {
-          email: dto.email,
-        },
+      await this.apiClient.forgotPassword({
+        email: dto.email,
       });
 
       this.logger.log(`密码重置邮件已发送: ${dto.email}`);
@@ -218,11 +185,9 @@ export class AuthService {
     try {
       this.logger.log(`重置密码: ${dto.token}`);
 
-      const result = await this.authAPI.resetPassword({
-        body: {
-          token: dto.token,
-          newPassword: dto.newPassword,
-        },
+      const result = await this.apiClient.resetPassword({
+        token: dto.token,
+        newPassword: dto.newPassword,
       });
 
       if (!result) {
@@ -246,11 +211,7 @@ export class AuthService {
    */
   async getSession(token: string): Promise<AuthResponse> {
     try {
-      const result = await this.authAPI.getSession({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
+      const result = await this.apiClient.getSession(token);
 
       if (!result) {
         throw new UnauthorizedException("未登录或会话已过期");
@@ -273,11 +234,7 @@ export class AuthService {
    */
   async signOut(token: string): Promise<AuthResponse> {
     try {
-      await this.authAPI.signOut({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
+      await this.apiClient.signOut(token);
 
       this.logger.log(`用户登出成功`);
 
@@ -305,10 +262,8 @@ export class AuthService {
 
       // 临时方案：使用 sendVerificationEmail
       // Better Auth 的 Magic Link 需要 Email OTP 插件
-      await this.authAPI.sendVerificationEmail({
-        body: {
-          email: dto.email,
-        },
+      await this.apiClient.sendMagicLink({
+        email: dto.email,
       });
 
       this.logger.log(`Magic Link 已发送: ${dto.email}`);
@@ -338,14 +293,12 @@ export class AuthService {
     try {
       this.logger.log(`启用双因素认证`);
 
-      const result = await this.authAPI.enableTwoFactor({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-        body: {
+      const result = await this.apiClient.enableTwoFactor(
+        {
           password: dto.password,
         },
-      });
+        token
+      );
 
       if (!result) {
         throw new BadRequestException("启用 2FA 失败");
@@ -375,15 +328,13 @@ export class AuthService {
     try {
       this.logger.log(`验证双因素认证代码`);
 
-      const result = await this.authAPI.verifyTwoFactor({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-        body: {
+      const result = await this.apiClient.verifyTwoFactor(
+        {
           code: dto.code,
           trustDevice: dto.trustDevice,
         },
-      });
+        token
+      );
 
       if (!result) {
         throw new BadRequestException("验证码错误或已过期");
@@ -412,14 +363,12 @@ export class AuthService {
     try {
       this.logger.log(`禁用双因素认证`);
 
-      await this.authAPI.disableTwoFactor({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-        body: {
+      await this.apiClient.disableTwoFactor(
+        {
           password: dto.password,
         },
-      });
+        token
+      );
 
       this.logger.log(`双因素认证禁用成功`);
 
@@ -471,7 +420,7 @@ export class AuthService {
    * @description
    * 结束当前模拟会话，恢复到原始管理员身份
    */
-  async stopImpersonation(sessionToken: string): Promise<AuthResponse> {
+  async stopImpersonation(_sessionToken: string): Promise<AuthResponse> {
     try {
       this.logger.log(`停止模拟用户`);
 

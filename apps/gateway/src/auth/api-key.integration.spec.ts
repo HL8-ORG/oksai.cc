@@ -7,19 +7,20 @@
 
 import { UnauthorizedException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiKeyGuard, type ApiKeyPayload } from "./api-key.guard";
 
-// Mock Better Auth API
-vi.mock("./auth", () => ({
-  auth: {
-    api: {
-      verifyApiKey: vi.fn(),
-    },
-  },
-}));
+// 类型检查辅助函数
+function ensureApiClientExists(): typeof BetterAuthApiClient {
+  return BetterAuthApiClient;
+}
 
 describe("API Key 认证", () => {
+  // 确保类型检查通过
+  beforeAll(() => {
+    ensureApiClientExists();
+  });
   let apiKeyGuard: ApiKeyGuard;
 
   beforeEach(async () => {
@@ -44,9 +45,9 @@ describe("API Key 认证", () => {
         prefix: "oks_valid",
       };
 
-      // Mock Better Auth API
-      const { auth } = await import("./auth");
-      (auth.api.verifyApiKey as any).mockResolvedValueOnce({
+      // Mock Better Auth API Client
+      const { BetterAuthApiClient } = await import("@oksai/nestjs-better-auth");
+      (BetterAuthApiClient.prototype.verifyApiKey as any).mockResolvedValueOnce({
         valid: true,
         key: {
           id: mockPayload.id,
@@ -85,9 +86,9 @@ describe("API Key 认证", () => {
     it("无效的 API Key 应该抛出 UnauthorizedException", async () => {
       const apiKey = "oks_invalid_key";
 
-      // Mock Better Auth API 返回无效结果
-      const { auth } = await import("./auth");
-      (auth.api.verifyApiKey as any).mockResolvedValueOnce({
+      // Mock Better Auth API Client 返回无效结果
+      const { BetterAuthApiClient } = await import("@oksai/nestjs-better-auth");
+      (BetterAuthApiClient.prototype.verifyApiKey as any).mockResolvedValueOnce({
         valid: false,
         key: null,
       });
@@ -114,8 +115,8 @@ describe("API Key 认证", () => {
         prefix: "oks_bearer",
       };
 
-      const { auth } = await import("./auth");
-      (auth.api.verifyApiKey as any).mockResolvedValueOnce({
+      const { BetterAuthApiClient } = await import("@oksai/nestjs-better-auth");
+      (BetterAuthApiClient.prototype.verifyApiKey as any).mockResolvedValueOnce({
         valid: true,
         key: {
           id: mockPayload.id,
