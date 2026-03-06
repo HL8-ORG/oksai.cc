@@ -14,8 +14,8 @@ import {
   Post,
   Put,
 } from "@nestjs/common";
-import { ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { CreateWebhookDto, UpdateWebhookDto } from "./dto";
+import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { CreateWebhookDto, UpdateWebhookDto, WebhookResponse } from "./dto";
 import { WebhookService } from "./webhook.service";
 
 @ApiTags("Webhook 管理")
@@ -31,10 +31,11 @@ export class WebhookController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "创建 Webhook", description: "创建新的 Webhook 端点，用于接收事件通知" })
+  @ApiBody({ type: CreateWebhookDto })
   @ApiResponse({
     status: 201,
     description: "Webhook 创建成功",
-    schema: { example: { id: "xxx", url: "https://...", events: ["user.created"] } },
+    type: WebhookResponse,
   })
   @ApiResponse({ status: 400, description: "参数错误" })
   @ApiResponse({ status: 401, description: "未认证" })
@@ -67,10 +68,11 @@ export class WebhookController {
   @Put(":id")
   @ApiOperation({ summary: "更新 Webhook", description: "更新 Webhook 的配置（URL、事件类型等）" })
   @ApiParam({ name: "id", description: "Webhook ID", type: "string" })
+  @ApiBody({ type: UpdateWebhookDto })
   @ApiResponse({
     status: 200,
     description: "成功",
-    schema: { example: { id: "xxx", url: "https://...", events: ["user.created"] } },
+    type: WebhookResponse,
   })
   @ApiResponse({ status: 404, description: "Webhook 不存在" })
   @ApiResponse({ status: 401, description: "未认证" })

@@ -26,11 +26,11 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { UserSession } from "@oksai/nestjs-better-auth";
 import { BetterAuthApiClient, Session } from "@oksai/nestjs-better-auth";
 import { auth } from "./auth";
-import type {
+import {
   AdminImpersonateResponse,
   AdminSessionListResponse,
   AdminUserListResponse,
@@ -90,7 +90,7 @@ export class AdminController {
   @ApiQuery({ name: "searchValue", description: "搜索关键词", type: "string", required: false })
   @ApiQuery({ name: "limit", description: "每页数量", type: "number", required: false })
   @ApiQuery({ name: "offset", description: "偏移量", type: "number", required: false })
-  @ApiResponse({ status: 200, description: "成功" })
+  @ApiResponse({ status: 200, description: "成功", type: AdminUserListResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Get("users")
   async listUsers(
@@ -136,7 +136,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "获取用户详情", description: "获取指定用户的详细信息" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
-  @ApiResponse({ status: 200, description: "成功" })
+  @ApiResponse({ status: 200, description: "成功", type: AdminUserResponse })
   @ApiResponse({ status: 404, description: "用户不存在" })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Get("users/:id")
@@ -165,7 +165,8 @@ export class AdminController {
    * }
    */
   @ApiOperation({ summary: "创建用户", description: "创建新用户" })
-  @ApiResponse({ status: 201, description: "创建成功" })
+  @ApiBody({ type: CreateAdminUserDto })
+  @ApiResponse({ status: 201, description: "创建成功", type: AdminUserResponse })
   @ApiResponse({ status: 400, description: "参数错误" })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("users")
@@ -202,7 +203,8 @@ export class AdminController {
    */
   @ApiOperation({ summary: "更新用户", description: "更新用户信息" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
-  @ApiResponse({ status: 200, description: "更新成功" })
+  @ApiBody({ type: UpdateAdminUserDto })
+  @ApiResponse({ status: 200, description: "更新成功", type: AdminUserResponse })
   @ApiResponse({ status: 404, description: "用户不存在" })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Put("users/:id")
@@ -265,6 +267,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "设置用户角色", description: "设置用户的角色权限" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
+  @ApiBody({ type: SetUserRoleDto })
   @ApiResponse({ status: 200, description: "设置成功" })
   @ApiResponse({ status: 403, description: "无权限" })
   @Post("users/:id/role")
@@ -301,7 +304,8 @@ export class AdminController {
    * }
    */
   @ApiOperation({ summary: "检查权限", description: "检查用户是否拥有指定权限" })
-  @ApiResponse({ status: 200, description: "检查成功" })
+  @ApiBody({ type: CheckPermissionDto })
+  @ApiResponse({ status: 200, description: "检查成功", type: CheckPermissionResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("check-permission")
   async checkPermission(
@@ -336,6 +340,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "封禁用户", description: "封禁指定用户" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
+  @ApiBody({ type: BanUserDto })
   @ApiResponse({ status: 200, description: "封禁成功" })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("users/:id/ban")
@@ -364,7 +369,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "解封用户", description: "解除用户的封禁状态" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
-  @ApiResponse({ status: 200, description: "解封成功" })
+  @ApiResponse({ status: 200, description: "解封成功", type: UnbanUserResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("users/:id/unban")
   async unbanUser(@Session() session: UserSession, @Param("id") userId: string): Promise<UnbanUserResponse> {
@@ -395,7 +400,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "列出用户会话", description: "获取用户的所有活动会话" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
-  @ApiResponse({ status: 200, description: "成功" })
+  @ApiResponse({ status: 200, description: "成功", type: AdminSessionListResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Get("users/:id/sessions")
   async listUserSessions(
@@ -425,7 +430,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "撤销会话", description: "强制撤销用户会话" })
   @ApiParam({ name: "token", description: "会话 Token", type: "string" })
-  @ApiResponse({ status: 200, description: "撤销成功" })
+  @ApiResponse({ status: 200, description: "撤销成功", type: RevokeSessionResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("sessions/:token/revoke")
   async revokeUserSession(
@@ -469,7 +474,7 @@ export class AdminController {
    */
   @ApiOperation({ summary: "模拟用户", description: "管理员以其他用户身份登录" })
   @ApiParam({ name: "id", description: "用户 ID", type: "string" })
-  @ApiResponse({ status: 200, description: "模拟登录成功" })
+  @ApiResponse({ status: 200, description: "模拟登录成功", type: AdminImpersonateResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("impersonate/:id")
   async impersonateUser(
@@ -499,7 +504,7 @@ export class AdminController {
    * }
    */
   @ApiOperation({ summary: "停止模拟", description: "停止用户模拟，恢复管理员身份" })
-  @ApiResponse({ status: 200, description: "停止模拟成功" })
+  @ApiResponse({ status: 200, description: "停止模拟成功", type: StopImpersonatingResponse })
   @ApiResponse({ status: 403, description: "需要管理员权限" })
   @Post("stop-impersonating")
   async stopImpersonating(@Session() session: UserSession): Promise<StopImpersonatingResponse> {

@@ -1,7 +1,6 @@
 /**
  * OAuth Client 管理 Controller
  */
-
 import {
   Body,
   Controller,
@@ -16,7 +15,8 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
-import type {
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
   CreateOAuthClientDto,
   OAuthClientCreatedResponse,
   OAuthClientListResponse,
@@ -40,6 +40,7 @@ import { OAuthService } from "./oauth.service";
  * - DELETE /oauth/clients/:id - 删除客户端
  * - POST /oauth/clients/:id/rotate-secret - 轮换客户端密钥
  */
+@ApiTags("OAuth Client 管理")
 @Controller("oauth/clients")
 export class OAuthClientController {
   constructor(private readonly oauthService: OAuthService) {}
@@ -57,6 +58,10 @@ export class OAuthClientController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "创建 OAuth 客户端", description: "注册新的 OAuth 客户端应用" })
+  @ApiBody({ type: CreateOAuthClientDto })
+  @ApiResponse({ status: 201, description: "客户端注册成功", type: OAuthClientCreatedResponse })
+  @ApiResponse({ status: 400, description: "参数错误" })
   async createClient(@Body() dto: CreateOAuthClientDto): Promise<OAuthClientCreatedResponse> {
     const result = await this.oauthService.createClient({
       ...dto,
@@ -82,6 +87,14 @@ export class OAuthClientController {
    * Response: { clients: [...], total: 10 }
    */
   @Get()
+  @ApiOperation({ summary: "获取 OAuth 客户端列表", description: "获取所有 OAuth 客户端（需要认证）" })
+  @ApiQuery({
+    name: "includeInactive",
+    description: "是否包含已禁用的客户端",
+    type: "boolean",
+    required: false,
+  })
+  @ApiResponse({ status: 200, description: "成功", type: OAuthClientListResponse })
   async listClients(
     @Query("includeInactive", new ParseBoolPipe({ optional: true })) includeInactive?: boolean
   ): Promise<OAuthClientListResponse> {
@@ -99,6 +112,10 @@ export class OAuthClientController {
    * Response: { id: "...", clientId: "...", ... }
    */
   @Get(":id")
+  @ApiOperation({ summary: "获取 OAuth 客户端详情", description: "获取指定客户端的详细信息" })
+  @ApiParam({ name: "id", description: "客户端 ID", type: "string" })
+  @ApiResponse({ status: 200, description: "成功", type: OAuthClientResponse })
+  @ApiResponse({ status: 404, description: "客户端不存在" })
   async getClient(@Param("id") id: string): Promise<OAuthClientResponse> {
     const client = await this.oauthService.getClientById(id);
 
@@ -121,6 +138,11 @@ export class OAuthClientController {
    * Response: { id: "...", ... }
    */
   @Put(":id")
+  @ApiOperation({ summary: "更新 OAuth 客户端", description: "更新客户端配置信息" })
+  @ApiParam({ name: "id", description: "客户端 ID", type: "string" })
+  @ApiBody({ type: UpdateOAuthClientDto })
+  @ApiResponse({ status: 200, description: "成功", type: OAuthClientResponse })
+  @ApiResponse({ status: 404, description: "客户端不存在" })
   async updateClient(
     @Param("id") id: string,
     @Body() dto: UpdateOAuthClientDto
@@ -146,6 +168,14 @@ export class OAuthClientController {
    */
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "删除 OAuth 客户端", description: "删除（撤销）指定的 OAuth 客户端" })
+  @ApiParam({ name: "id", description: "客户端 ID", type: "string" })
+  @ApiResponse({
+    status: 200,
+    description: "删除成功",
+    schema: { example: { success: true, message: "客户端已删除" } },
+  })
+  @ApiResponse({ status: 404, description: "客户端不存在" })
   async deleteClient(@Param("id") id: string): Promise<{ success: boolean; message: string }> {
     await this.oauthService.deleteClient(id);
 
@@ -167,6 +197,10 @@ export class OAuthClientController {
    */
   @Post(":id/rotate-secret")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "轮换客户端密钥", description: "生成新的客户端密钥（仅机密客户端）" })
+  @ApiParam({ name: "id", description: "客户端 ID", type: "string" })
+  @ApiResponse({ status: 200, description: "轮换成功", type: RotateClientSecretResponse })
+  @ApiResponse({ status: 404, description: "客户端不存在" })
   async rotateSecret(@Param("id") id: string): Promise<RotateClientSecretResponse> {
     const result = await this.oauthService.rotateClientSecret(id);
     return {

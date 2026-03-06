@@ -14,8 +14,8 @@ import {
   Post,
   Put,
 } from "@nestjs/common";
-import { ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type {
+import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
   CreateOrganizationDto,
   InviteMemberDto,
   OrganizationListResponse,
@@ -57,22 +57,11 @@ export class OrganizationController {
    */
   @Post()
   @ApiOperation({ summary: "创建组织", description: "创建新组织，创建者自动成为 owner" })
+  @ApiBody({ type: CreateOrganizationDto })
   @ApiResponse({
     status: 201,
     description: "创建成功",
-    schema: {
-      example: {
-        success: true,
-        message: "组织创建成功",
-        organization: {
-          id: "xxx",
-          name: "My Organization",
-          slug: "my-org",
-          logo: "https://...",
-          createdAt: "2026-03-06T05:30:00Z",
-        },
-      },
-    },
+    type: OrganizationResponse,
   })
   @ApiResponse({ status: 400, description: "参数错误" })
   @ApiResponse({ status: 401, description: "未认证" })
@@ -114,19 +103,7 @@ export class OrganizationController {
   @ApiResponse({
     status: 200,
     description: "成功",
-    schema: {
-      example: {
-        success: true,
-        message: "获取组织成功",
-        organization: {
-          id: "xxx",
-          name: "My Organization",
-          slug: "my-org",
-          logo: "https://...",
-          createdAt: "2026-03-06T05:30:00Z",
-        },
-      },
-    },
+    type: OrganizationResponse,
   })
   @ApiResponse({ status: 404, description: "组织不存在" })
   @ApiResponse({ status: 401, description: "未认证" })
@@ -167,23 +144,7 @@ export class OrganizationController {
   @ApiResponse({
     status: 200,
     description: "成功",
-    schema: {
-      example: {
-        success: true,
-        message: "获取组织列表成功",
-        organizations: [
-          {
-            id: "xxx",
-            name: "Organization 1",
-            slug: "org-1",
-            logo: null,
-            createdAt: "2026-03-06T05:30:00Z",
-            memberId: "xxx",
-            role: "owner",
-          },
-        ],
-      },
-    },
+    type: OrganizationListResponse,
   })
   @ApiResponse({ status: 401, description: "未认证" })
   async listOrganizations(
@@ -223,22 +184,11 @@ export class OrganizationController {
   @Put(":id")
   @ApiOperation({ summary: "更新组织", description: "更新组织信息（需要 owner 权限）" })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
+  @ApiBody({ type: UpdateOrganizationDto })
   @ApiResponse({
     status: 200,
     description: "更新成功",
-    schema: {
-      example: {
-        success: true,
-        message: "组织更新成功",
-        organization: {
-          id: "xxx",
-          name: "New Name",
-          slug: "my-org",
-          logo: "https://...",
-          createdAt: "2026-03-06T05:30:00Z",
-        },
-      },
-    },
+    type: OrganizationResponse,
   })
   @ApiResponse({ status: 404, description: "组织不存在" })
   @ApiResponse({ status: 403, description: "无权限（需要 owner）" })
@@ -318,6 +268,7 @@ export class OrganizationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "邀请成员", description: "邀请新成员加入组织（需要 owner 或 admin 权限）" })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
+  @ApiBody({ type: InviteMemberDto })
   @ApiResponse({
     status: 200,
     description: "邀请成功",
@@ -447,6 +398,7 @@ export class OrganizationController {
   @ApiOperation({ summary: "更新成员角色", description: "更新成员在组织中的角色（需要 owner 权限）" })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiParam({ name: "memberId", description: "成员 ID", type: "string" })
+  @ApiBody({ type: UpdateMemberRoleDto })
   @ApiResponse({
     status: 200,
     description: "更新成功",

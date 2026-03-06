@@ -10,8 +10,8 @@ import {
   Post,
   Put,
 } from "@nestjs/common";
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./dto";
+import { ApiBody, ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./dto";
 import { SessionService } from "./session.service";
 
 /**
@@ -44,7 +44,7 @@ export class SessionController {
     description: "获取当前用户的所有活跃会话（包括其他设备）",
   })
   @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
-  @ApiResponse({ status: 200, description: "成功", schema: { example: { success: true, sessions: [] } } })
+  @ApiResponse({ status: 200, description: "成功", type: SessionListResponse })
   async listSessions(@Headers("authorization") _authorization: string): Promise<SessionListResponse> {
     // TODO: 从 token 中提取 userId 和 sessionToken
     const userId = "temp-user-id";
@@ -69,7 +69,7 @@ export class SessionController {
   @ApiResponse({
     status: 200,
     description: "成功",
-    schema: { example: { success: true, sessionTimeout: 604800 } },
+    type: SessionConfigResponse,
   })
   async getConfig(@Headers("authorization") _authorization: string): Promise<SessionConfigResponse> {
     // TODO: 从 token 中提取 userId
@@ -92,10 +92,11 @@ export class SessionController {
   @Put("config")
   @ApiOperation({ summary: "更新 Session 配置", description: "更新当前用户的会话超时配置和并发登录设置" })
   @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
+  @ApiBody({ type: UpdateSessionConfigDto })
   @ApiResponse({
     status: 200,
     description: "成功",
-    schema: { example: { success: true, sessionTimeout: 86400 } },
+    type: SessionConfigResponse,
   })
   async updateConfig(
     @Headers("authorization") _authorization: string,

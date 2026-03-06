@@ -2,6 +2,7 @@ import process from "node:process";
 import { MikroORM } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { ApiExtraModels } from "@nestjs/swagger";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ConfigModule, ConfigService } from "@oksai/config";
 import { MikroOrmDatabaseModule } from "@oksai/database";
@@ -12,6 +13,53 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { createAuthInstance } from "./auth/auth";
 import { AuthFeatureModule } from "./auth/auth.module";
+import {
+  AdminImpersonateResponse,
+  AdminSessionListResponse,
+  AdminUserListResponse,
+  AdminUserResponse,
+  ApiKeyListResponse,
+  ApiKeyResponse,
+  BanUserDto,
+  CheckPermissionDto,
+  CheckPermissionResponse,
+  CreateAdminUserDto,
+  CreateApiKeyDto,
+  CreateOrganizationDto,
+  CreateWebhookDto,
+  DisableTwoFactorDto,
+  EnableTwoFactorDto,
+  ForgotPasswordDto,
+  ImpersonateUserDto,
+  InviteMemberDto,
+  ListUsersDto,
+  MagicLinkDto,
+  OAuthClientCreatedResponse,
+  OAuthClientListResponse,
+  OAuthClientResponse,
+  OrganizationListResponse,
+  OrganizationResponse,
+  RegisterOAuthClientDto,
+  ResetPasswordDto,
+  RotateClientSecretResponse,
+  SessionConfigResponse,
+  SessionListResponse,
+  SetUserRoleDto,
+  SignInDto,
+  SignUpDto,
+  StopImpersonatingResponse,
+  UnbanUserResponse,
+  UpdateApiKeyDto,
+  UpdateMemberRoleDto,
+  UpdateOAuthClientDto,
+  UpdateOrganizationDto,
+  UpdateSessionConfigDto,
+  UpdateWebhookDto,
+  VerifyEmailDto,
+  VerifyTwoFactorDto,
+  WebhookDeliveryResponse,
+  WebhookResponse,
+} from "./auth/dto";
 import { UserController } from "./auth/user.controller";
 import { CacheModule } from "./common/cache.module";
 import { CacheMonitorController } from "./common/cache-monitor.controller";
@@ -33,6 +81,53 @@ import { HealthController } from "./health/health.controller";
  * 注意：AuthModule 默认注册全局 AuthGuard
  * 所有路由默认需要认证，使用 @AllowAnonymous() 或 @OptionalAuth() 开放访问
  */
+@ApiExtraModels(
+  AdminImpersonateResponse,
+  AdminSessionListResponse,
+  AdminUserListResponse,
+  AdminUserResponse,
+  ApiKeyListResponse,
+  ApiKeyResponse,
+  BanUserDto,
+  CheckPermissionDto,
+  CheckPermissionResponse,
+  CreateAdminUserDto,
+  CreateApiKeyDto,
+  CreateOrganizationDto,
+  CreateWebhookDto,
+  DisableTwoFactorDto,
+  EnableTwoFactorDto,
+  ForgotPasswordDto,
+  ImpersonateUserDto,
+  InviteMemberDto,
+  ListUsersDto,
+  MagicLinkDto,
+  OAuthClientCreatedResponse,
+  OAuthClientListResponse,
+  OAuthClientResponse,
+  OrganizationListResponse,
+  OrganizationResponse,
+  RegisterOAuthClientDto,
+  ResetPasswordDto,
+  RotateClientSecretResponse,
+  SessionConfigResponse,
+  SessionListResponse,
+  SetUserRoleDto,
+  SignInDto,
+  SignUpDto,
+  StopImpersonatingResponse,
+  UnbanUserResponse,
+  UpdateApiKeyDto,
+  UpdateMemberRoleDto,
+  UpdateOAuthClientDto,
+  UpdateOrganizationDto,
+  UpdateSessionConfigDto,
+  UpdateWebhookDto,
+  VerifyEmailDto,
+  VerifyTwoFactorDto,
+  WebhookDeliveryResponse,
+  WebhookResponse
+)
 @Module({
   imports: [
     ConfigModule.forRoot({

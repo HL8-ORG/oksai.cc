@@ -14,7 +14,7 @@ import {
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
 import { RateLimit, RateLimitPresets } from "../common/rate-limit.decorator";
 import { type AuthResponse, AuthService } from "./auth.service";
-import type {
+import {
   DisableTwoFactorDto,
   EnableTwoFactorDto,
   ForgotPasswordDto,
@@ -59,7 +59,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @RateLimit(RateLimitPresets.REGISTER)
   @ApiOperation({ summary: "用户注册", description: "使用邮箱和密码注册新用户，注册成功后会发送验证邮件" })
-  @ApiBody({ schema: { example: { email: "user@example.com", password: "Password123!", name: "张三" } } })
+  @ApiBody({ type: SignUpDto })
   @ApiResponse({
     status: 201,
     description: "注册成功",
@@ -86,7 +86,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPresets.LOGIN)
   @ApiOperation({ summary: "用户登录", description: "使用邮箱和密码登录，返回 Session Token" })
-  @ApiBody({ schema: { example: { email: "user@example.com", password: "Password123!" } } })
+  @ApiBody({ type: SignInDto })
   @ApiResponse({
     status: 200,
     description: "登录成功",
@@ -112,7 +112,7 @@ export class AuthController {
   @AllowAnonymous()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "邮箱验证", description: "验证用户邮箱地址" })
-  @ApiBody({ schema: { example: { token: "verification-token-from-email" } } })
+  @ApiBody({ type: VerifyEmailDto })
   @ApiResponse({ status: 200, description: "邮箱验证成功" })
   @ApiResponse({ status: 400, description: "验证 Token 无效或已过期" })
   async verifyEmail(@Body() dto: VerifyEmailDto): Promise<AuthResponse> {
@@ -135,7 +135,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPresets.PASSWORD_RESET)
   @ApiOperation({ summary: "忘记密码", description: "发送密码重置邮件到用户邮箱" })
-  @ApiBody({ schema: { example: { email: "user@example.com" } } })
+  @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({ status: 200, description: "密码重置邮件已发送" })
   async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<AuthResponse> {
     return this.authService.forgotPassword(dto);
@@ -157,7 +157,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPresets.PASSWORD_RESET)
   @ApiOperation({ summary: "重置密码", description: "使用邮件中的 Token 重置密码" })
-  @ApiBody({ schema: { example: { token: "reset-token-from-email", newPassword: "NewPassword123!" } } })
+  @ApiBody({ type: ResetPasswordDto })
   @ApiResponse({ status: 200, description: "密码重置成功" })
   @ApiResponse({ status: 400, description: "Token 无效或已过期" })
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<AuthResponse> {
@@ -237,7 +237,7 @@ export class AuthController {
     summary: "Magic Link 登录",
     description: "发送 Magic Link 到用户邮箱，用户点击链接即可登录",
   })
-  @ApiBody({ schema: { example: { email: "user@example.com" } } })
+  @ApiBody({ type: MagicLinkDto })
   @ApiResponse({ status: 200, description: "Magic Link 已发送" })
   async sendMagicLink(@Body() dto: MagicLinkDto): Promise<AuthResponse> {
     return this.authService.sendMagicLink(dto);
@@ -260,7 +260,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "启用双因素认证", description: "生成 TOTP secret 和 QR code" })
   @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
-  @ApiBody({ schema: { example: { password: "CurrentPassword123!" } } })
+  @ApiBody({ type: EnableTwoFactorDto })
   @ApiResponse({
     status: 200,
     description: "双因素认证已启用",
@@ -297,7 +297,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "验证双因素认证代码", description: "验证 TOTP 验证码，验证成功后 2FA 正式启用" })
   @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
-  @ApiBody({ schema: { example: { code: "123456", trustDevice: true } } })
+  @ApiBody({ type: VerifyTwoFactorDto })
   @ApiResponse({
     status: 200,
     description: "双因素认证验证成功",
@@ -333,7 +333,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "禁用双因素认证", description: "禁用用户的 2FA 功能" })
   @ApiHeader({ name: "authorization", description: "Bearer Token", required: true })
-  @ApiBody({ schema: { example: { password: "CurrentPassword123!" } } })
+  @ApiBody({ type: DisableTwoFactorDto })
   @ApiResponse({ status: 200, description: "双因素认证已禁用" })
   async disableTwoFactor(
     @Headers("authorization") authorization: string,

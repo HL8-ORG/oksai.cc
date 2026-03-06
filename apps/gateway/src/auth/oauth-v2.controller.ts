@@ -3,9 +3,9 @@
  */
 
 import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
-import { ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
-import type { RegisterOAuthClientDto } from "./dto";
+import { RegisterOAuthClientDto } from "./dto";
 import { OAuthService } from "./oauth.service";
 
 /**
@@ -46,6 +46,7 @@ export class OAuthV2Controller {
   @HttpCode(HttpStatus.CREATED)
   @AllowAnonymous()
   @ApiOperation({ summary: "注册 OAuth 客户端", description: "注册新的 OAuth 客户端应用" })
+  @ApiBody({ type: RegisterOAuthClientDto })
   @ApiResponse({
     status: 201,
     description: "客户端注册成功",
