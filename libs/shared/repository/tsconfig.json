@@ -20,7 +20,7 @@
       "path": "../event-store"
     },
     {
-      "path": "../../database"
+      "path": "../database"
     }
   ]
 }

@@ -9,7 +9,7 @@ libs_tsup=(
   "libs/shared/logger"
   "libs/shared/config"
   "libs/shared/constants"
-  "libs/database"
+  "libs/shared/database"
   "libs/notification/email"
   "libs/shared/better-auth-mikro-orm"
   "libs/shared/nestjs-better-auth"

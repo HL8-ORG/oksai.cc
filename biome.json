@@ -269,7 +269,7 @@
       }
     },
     {
-      "includes": ["libs/database/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "includes": ["libs/shared/database/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
       "linter": {
         "rules": {
           "style": {

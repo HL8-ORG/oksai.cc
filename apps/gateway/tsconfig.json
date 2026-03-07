@@ -11,7 +11,7 @@
   "references": [
     { "path": "../../libs/shared/nestjs-better-auth" },
     { "path": "../../libs/shared/logger" },
-    { "path": "../../libs/database" },
+    { "path": "../../libs/shared/database" },
     { "path": "../../libs/shared/context" },
     { "path": "../../libs/shared/constants" },
     { "path": "../../libs/shared/config" },

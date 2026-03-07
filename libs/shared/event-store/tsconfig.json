@@ -17,7 +17,7 @@
       "path": "../kernel"
     },
     {
-      "path": "../../database"
+      "path": "../database"
     }
   ]
 }

@@ -266,8 +266,8 @@ function checkDatabaseSchema() {
   log('━'.repeat(80));
 
   const checks = [
-    { path: 'libs/database/src/schema/index.ts', desc: '数据库 Schema' },
-    { path: 'libs/database/src/index.ts', desc: '数据库导出' },
+    { path: 'libs/shared/database/src/schema/index.ts', desc: '数据库 Schema' },
+    { path: 'libs/shared/database/src/index.ts', desc: '数据库导出' },
   ];
 
   const filesExist = checks.every((check) =>
@@ -281,6 +281,7 @@ function checkDatabaseSchema() {
     __dirname,
     '..',
     'libs',
+    'shared',
     'database',
     'src',
     'schema',

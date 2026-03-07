@@ -13,7 +13,7 @@ COPY pnpm-lock.yaml package.json pnpm-workspace.yaml nx.json tsconfig.base.json 
 COPY apps/gateway/package.json ./apps/gateway/
 COPY libs/shared/types/package.json ./libs/shared/types/
 COPY libs/shared/utils/package.json ./libs/shared/utils/
-COPY libs/database/package.json ./libs/database/
+COPY libs/shared/database/package.json ./libs/shared/database/
 COPY libs/auth/nestjs-better-auth/package.json ./libs/auth/nestjs-better-auth/
 
 # Install dependencies

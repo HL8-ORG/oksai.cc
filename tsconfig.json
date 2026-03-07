@@ -10,7 +10,7 @@
       "@oksai/config": ["libs/shared/config/src/index.ts"],
       "@oksai/constants": ["libs/shared/constants/src/index.ts"],
       "@oksai/context": ["libs/shared/context/src/index.ts"],
-      "@oksai/database": ["libs/database/src/index.ts"],
+      "@oksai/database": ["libs/shared/database/src/index.ts"],
       "@oksai/email": ["libs/notification/email/src/index.ts"],
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
       "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
@@ -23,7 +23,7 @@
       "path": "./apps/gateway"
     },
     {
-      "path": "./libs/database"
+      "path": "./libs/shared/database"
     },
     {
       "path": "./libs/notification/email"

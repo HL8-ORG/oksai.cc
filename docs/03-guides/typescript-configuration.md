@@ -30,12 +30,12 @@ oksai.cc/
 │   └── web-admin/          # TanStack Start 管理后台
 ├── libs/                    # 共享库
 │   ├── tsconfig/           # TypeScript 共享配置包
-│   ├── database/           # 数据库层
 │   ├── oauth/              # OAuth 服务
 │   ├── testing/            # 测试工具
 │   ├── notification/       # 通知服务
 │   │   └── email/          # 邮件服务
 │   └── shared/             # 共享业务逻辑
+│       ├── database/       # 数据库层
 │       ├── kernel/         # DDD 核心基类
 │       ├── config/         # 配置管理
 │       ├── logger/         # 日志服务
@@ -235,7 +235,7 @@ libs/tsconfig/
       "@oksai/config": ["libs/shared/config/src/index.ts"],
       "@oksai/constants": ["libs/shared/constants/src/index.ts"],
       "@oksai/context": ["libs/shared/context/src/index.ts"],
-      "@oksai/database": ["libs/database/src/index.ts"],
+      "@oksai/database": ["libs/shared/database/src/index.ts"],
       "@oksai/email": ["libs/notification/email/src/index.ts"],
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
       "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
@@ -246,7 +246,7 @@ libs/tsconfig/
   "references": [
     {"path": "./apps/gateway"},
     {"path": "./apps/web-admin"},
-    {"path": "./libs/database"},
+    {"path": "./libs/shared/database"},
     {"path": "./libs/shared/kernel"},
     ...
   ],
@@ -279,7 +279,7 @@ libs/tsconfig/
   "references": [
     {"path": "../../libs/shared/nestjs-better-auth"},
     {"path": "../../libs/shared/logger"},
-    {"path": "../../libs/database"},
+    {"path": "../../libs/shared/database"},
     ...
   ]
 }

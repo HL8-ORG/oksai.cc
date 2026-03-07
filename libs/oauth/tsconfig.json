@@ -23,7 +23,7 @@
       "path": "../shared/event-store"
     },
     {
-      "path": "../database"
+      "path": "../shared/database"
     }
   ]
 }

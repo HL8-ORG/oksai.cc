@@ -1,0 +1,424 @@
+---
+description: 面向系统提示词与工具描述的上下文工程指南（中文）
+globs:
+  - "**/tools/**/*.ts"
+  - "**/prompts/**/*.ts"
+  - "**/*.prompt.ts"
+alwaysApply: false
+---
+
+# 上下文工程指南
+
+这是一个关于如何优化 LLM Agent 的系统提示词与工具描述的综合指南，内容综合了 2025 年 7 月以来发布的 30+ 篇资料。
+
+**关键来源**：
+- [Anthropic: Effective Context Engineering for AI Agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)（2025 年 9 月）
+- [Mei et al.: A Survey of Context Engineering for LLMs](https://huggingface.co/papers/2507.13334)（2025 年 7 月）
+- [Jiang & Nam: Empirical Study on Developer-Provided Context](https://arxiv.org/abs/2512.18925)（2025 年 12 月）
+- [Gartner: Context Engineering as Strategic Priority](https://www.gartner.com/en/articles/context-engineering)（2025 年 10 月）
+- [InfoWorld: Four Important Lessons About Context Engineering](https://www.infoworld.com/article/4085355/four-important-lessons-about-context-engineering.html)（2026 年 1 月）
+
+---
+
+## 第一部分：基础原则
+
+### 核心论点
+
+上下文工程是一门正式学科，它通过系统化方式优化传给 LLM 的信息负载；其范围远超提示词设计，覆盖整个信息环境（Mei et al., 2025）。
+
+**目标**：找到*最小且高信号*的 token 集合，以最大化目标结果（Anthropic, 2025）。
+
+### 为什么上下文是有限的
+
+LLM 的“注意力预算”受 Transformer 架构限制：
+- 对 n 个 token 存在 **n² 两两关系**，规模上升会导致性能下降
+- **上下文腐化（context rot）**：token 越多，召回准确率越低
+- 模型训练中短序列更常见，因此形成了相应注意力模式
+
+每个 token 都在竞争注意力。与任务无直接关系的 token 会稀释模型焦点。
+
+### 上下文工程分类法（Mei et al., 2025）
+
+上下文工程可拆分为三大基础组件：
+
+| 组件 | 描述 | 示例 |
+|------|------|------|
+| **上下文检索与生成** | 设计并组装输入负载 | 提示词构建、RAG、工具输出 |
+| **上下文处理** | 将上下文转化为优化表示 | 摘要、分块、压缩 |
+| **上下文管理** | 存储、持久化与刷新上下文 | 记忆系统、缓存、压实 |
+
+这些组件最终集成到系统实现中：RAG、记忆系统、工具集成推理、多 Agent 架构。
+
+### 开发者提供上下文的分类（Jiang & Nam, 2025）
+
+对 401 个开源仓库（含 Cursor rules）的实证研究识别了五类关键上下文：
+
+1. **约定（Conventions）**：编码风格、命名模式、格式规则
+2. **指南（Guidelines）**：决策启发式、工作流模式
+3. **项目信息（Project Information）**：架构、依赖、领域知识
+4. **LLM 指令（LLM Directives）**：行为指令、输出格式要求
+5. **示例（Examples）**：标准代码样例、输入输出示范
+
+**洞见**：按这五类组织开发者上下文，清晰度最高。
+
+---
+
+## 第二部分：核心设计原则
+
+### 1. 合适抽象高度（Anthropic, 2025）
+
+在两种失败模式之间取得平衡：
+
+| 过低（脆弱） | 甜蜜点 | 过高（模糊） |
+|-------------|--------|-------------|
+| 硬编码 if-else 逻辑 | 明确启发式 | 泛泛指导 |
+| 规定性步骤清单 | 清晰决策标准 | 假设共享上下文 |
+| 边界场景易崩 | 模型可智能应用 | 行为不一致 |
+
+**校准测试**：这个细节程度，资深工程师会需要，还是能自行推断？
+
+### 2. 单一事实来源（Single Source of Truth）
+
+同一概念不要解释两次。重复会浪费 token，也会引入不一致。
+
+| 信息类型 | 放置位置 | 内容 |
+|---------|---------|------|
+| 工具机制 | 工具描述 | HOW：参数、输出格式、技术行为 |
+| 工具流程 | 系统提示词 | WHEN：决策点、顺序、优先级 |
+| 领域知识 | technicalResources | 参考资料、示例、API 文档 |
+
+### 3. 用示例优于规则
+
+示例是“胜过千言万语的图像”（Anthropic, 2025）。它们可以：
+- 同时展示多个概念
+- 比显式规则更能覆盖边界情况
+- 相比等价规则集合更省 token
+
+**模式**：一个完整示例 > 三段解释文字。
+
+### 4. 信任模型能力
+
+现代 LLM 已具备很强能力。应避免：
+- 解释明显步骤（如“分析错误、理解错误、修复错误”）
+- 防御性重复（“MUST”“NEVER”“CRITICAL”“IMPORTANT”）
+- 对标准编程实践过度细化
+
+**测试**：如果一个合格开发者不需要这条指令，模型大概率也不需要。
+
+---
+
+## 第三部分：优化技术
+
+### 语义分块（InfoWorld, 2026）
+
+按主题或章节进行有意义分段，而非按任意 token 长度切分。
+
+**效果**：上下文体积降低 60-80%，质量提升 20-30%。
+
+```
+之前：把整个代码库塞进上下文
+之后：通过向量检索仅拉取与当前任务相关文件
+```
+
+### 渐进式上下文加载
+
+先给最小上下文，再按需增加：
+
+1. **初始**：角色 + 当前任务 + 即时上下文
+2. **按需**：需要时再检索附加上下文
+3. **升级**：仅在复杂场景拉取更多细节
+
+**效果**：在处理复杂查询时保持质量，同时降低延迟与成本。
+
+### 上下文压缩技术
+
+| 技术 | 描述 | 适用场景 |
+|------|------|---------|
+| 实体提取 | 保留命名实体，丢弃冗余 prose | 参考数据 |
+| 摘要 | 压缩冗长内容 | 长文档 |
+| Schema 约束 | 结构化输出格式 | API 响应 |
+| 清理工具结果 | 移除旧工具输出 | 长对话 |
+
+### 智能缓存（Anthropic, 2025）
+
+组织上下文时让稳定部分可缓存：
+
+```
+[可缓存：系统提示词 + 工具定义 + 静态示例]
+[动态部分：对话历史 + 当前任务 + 检索上下文]
+```
+
+提示词缓存可显著降低可缓存部分的输入成本。
+
+### 滑动上下文窗口
+
+对对话系统维护不同大小窗口：
+
+| 窗口 | 大小 | 内容 |
+|------|------|------|
+| 即时 | 最近 2-3 轮 | 完整细节 |
+| 近期 | 最近 10 轮 | 摘要化 |
+| 历史 | 会话起始以来 | 仅关键决策 |
+
+### 动态工具发现（Elastic, 2025）
+
+解决大量工具描述导致的“提示词膨胀”：
+
+**问题**：每次请求都加载 50+ 工具描述会浪费上下文。
+
+**方案**：运行时对工具元数据做语义检索：
+1. 将工具描述嵌入向量库
+2. 将用户意图匹配到相关工具
+3. 仅加载必要的工具定义
+
+**效果**：减少静态提示词体积，提高工具选择准确率。
+
+---
+
+## 第四部分：系统提示词指南
+
+### 用清晰分段组织结构
+
+使用 XML 标签或 Markdown 标题划分区块：
+
+```xml
+<role_definition>最多一段</role_definition>
+<workflow>工具顺序与决策点</workflow>
+<constraints>硬性规则与边界</constraints>
+```
+
+**原因**：帮助模型解析并定位特定指导，支持选择性注意力。
+
+### 引用工具，不重复解释
+
+**反模式**（浪费）：
+```
+## 文件系统工具
+- **read_file**：读取任意文件内容，支持行偏移和行数限制...
+- **edit_file**：精确编辑已有文件，使用 // ... existing code ... 语法...
+```
+
+**更好**（高效）：
+```
+## 工作流
+1. 编辑前先读取现有文件
+2. 修改用 edit_file，新建用 create_file
+3. 变更后用 get_kernel_result 验证
+```
+
+工具描述已说明 HOW；提示词只需说明 WHEN。
+
+### 压缩规定性步骤列表
+
+**反模式**（30 tokens）：
+```
+当收到错误反馈时：
+1. 仔细分析具体错误信息
+2. 保留上一次迭代中成功的几何部分
+3. 增量修复而非重写
+4. 测试可能导致失败的边界情况
+5. 验证参数边界是否合理
+```
+
+**更好**（15 tokens）：
+```
+遇到错误：分析根因，增量修复，保留可用代码。
+```
+
+### 合并重复概念
+
+若同一概念出现多次，统一到**一个权威位置**：
+
+| 症状 | 解决方案 |
+|------|---------|
+| 同一工作流出现在 3 个章节 | 保留在 `<workflow>`，其他处引用 |
+| 工具在提示词和描述都解释 | 从提示词移除 |
+| 示例变体重复出现 | 保留一个标准示例 |
+
+### 简洁专业语言
+
+| 冗长 | 简洁 |
+|------|------|
+| “这种透明度可以确保用户理解你的思考过程并在需要时提供输入。” | 直接删除 |
+| “CRITICAL: You MUST always do X. Never forget X.” | “Do X after Y.” |
+| “目标是获得一个不仅能无错执行而且还能...” | “目标：可运行且满足需求。” |
+
+---
+
+## 第五部分：工具描述指南
+
+### 最佳结构
+
+```typescript
+description: `[一句话说明目的]
+
+[何时使用 - 最多 2-3 条要点]
+
+[关键行为/输出 - 仅在不直观时说明]`
+```
+
+**目标**：每个工具说明控制在 150 词以内。
+
+### 让 Schema 自解释
+
+参数文档应放在 Zod schema，不应堆在 description：
+
+```typescript
+// 好：由 Schema 描述参数
+const schema = z.object({
+  pattern: z.string().describe('Glob pattern (e.g., "**/*.ts")'),
+  directory: z.string().optional().describe('Directory to search'),
+});
+
+// 工具描述聚焦目的与行为
+description: `Find files matching a glob pattern. Use for locating files by type or name.`
+```
+
+### 关注点分离
+
+| 工具描述 | 系统提示词 |
+|---------|-----------|
+| 工具做什么 | 工作流中何时用 |
+| 参数语义 | 与其他工具的顺序 |
+| 输出格式 | 优先级与决策标准 |
+| 错误条件 | 领域特定指导 |
+
+---
+
+## 第六部分：高级模式
+
+### 计划感知上下文工程（PAACE, Yuksel 2025）
+
+针对长周期任务，按后续计划优化上下文：
+
+1. **Next-k 相关性建模**：仅保留与后续 k 步相关上下文
+2. **计划结构分析**：识别步骤间依赖
+3. **功能保持压缩**：压缩已完成步骤上下文，但保留输出功能
+
+**效果**：显著降低上下文负载，同时提升 Agent 正确性。
+
+### 多 Agent 上下文模式（Haseeb, 2025）
+
+对复杂任务，使用专职 Agent + 干净上下文窗口：
+
+```
+主 Agent：高层规划，协调子 Agent
+├── 意图澄清 Agent：用户需求 → 结构化规格
+├── 检索 Agent：语义检索相关上下文
+├── 代码生成 Agent：在聚焦上下文中实现
+└── 验证 Agent：测试与校验
+```
+
+每个子 Agent 只携带最小、任务相关上下文，而不是整段会话历史。
+
+### 上下文压实（Anthropic, 2025）
+
+临近上下文上限时，进行总结并重初始化：
+
+1. 将完整历史消息交给模型做摘要
+2. 保留：架构决策、未解决问题、关键输出
+3. 丢弃：冗余工具输出、冗长中间步骤
+4. 用压缩上下文 + 最近文件继续
+
+**最轻触方案**：清除旧消息中的工具结果（保留调用，移除结果）。
+
+### 演化型上下文（ACE Framework, Zhang 2025）
+
+把上下文当作会积累策略的“作战手册”：
+
+1. **生成**：根据任务需求创建初始上下文
+2. **反思**：分析执行中的成功/失败
+3. **策展**：将学习到的模式回写上下文
+
+可防止“上下文坍塌”（重复模式逐渐退化为噪声）。
+
+---
+
+## 第七部分：反模式
+
+### 1. 冗余工具文档
+❌ 工具描述 + 提示词章节 + 行内说明重复讲同一工具
+✅ 工具描述 = HOW，提示词 = WHEN（仅引用）
+
+### 2. 冗长内联示例
+❌ 多个代码示例重复说明相似概念
+✅ 一个标准示例，或外部 `technicalResources` 引用
+
+### 3. 规定性步骤清单
+❌ “1 分析 2 理解 3 修复 4 验证”（显而易见）
+✅ “增量修复，修改后验证”
+
+### 4. 防御性过度解释
+❌ “IMPORTANT: You MUST always... NEVER forget... CRITICAL...”
+✅ 说一次即可，信任模型能力
+
+### 5. 静态工具过载
+❌ 每次请求都加载全部 50 个工具定义
+✅ 基于任务意图动态发现工具
+
+### 6. 上下文囤积
+❌ 无限保留全部对话历史
+✅ 用滑动窗口 + 摘要处理旧内容
+
+---
+
+## 第八部分：审计清单
+
+审查提示词或工具描述时：
+
+| 问题 | 若是，则 |
+|------|---------|
+| 这条是否已在别处解释？ | 合并到单一位置 |
+| 资深开发者是否需要这条？ | 显而易见则删除 |
+| 能否改为示例表达？ | 一个示例胜过多段规则 |
+| 抽象高度是否合适？ | 调整脆弱 ↔ 模糊平衡 |
+| 是否存在规定性列表？ | 压缩为句子 |
+| 是否防御性重复？ | 只说一次，移除强调 |
+| 是否重复工具文档？ | 仅保留在工具描述 |
+| 是否在多请求间稳定？ | 移到可缓存部分 |
+
+---
+
+## 第九部分：Token 预算指南
+
+| 组件 | 目标 | 理由 |
+|------|------|------|
+| 角色定义 | <100 tokens | 一段即可确立角色 |
+| 单工具描述 | <150 words | 目的 + 何时 + 关键行为 |
+| 工作流章节 | <300 tokens | 引用工具，不重复解释 |
+| 错误处理 | <100 tokens | 信任模型能力 |
+| 示例 | 外部引用 | 放入 `technicalResources` |
+| 静态提示词总量 | <3000 tokens | 留出动态上下文空间 |
+
+---
+
+## 附录 A：研究来源
+
+### 主要来源（2025-2026）
+
+1. Anthropic（2025 年 9 月）- Effective Context Engineering for AI Agents
+2. Mei et al.（2025 年 7 月）- A Survey of Context Engineering for LLMs
+3. Jiang & Nam（2025 年 12 月）- Empirical Study of Developer-Provided Context
+4. Yuksel（2025 年 12 月）- PAACE: Plan-Aware Automated Context Engineering
+5. Xu et al.（2025 年 12 月）- Agentic File System Abstraction
+6. Zhang & Wang（2025 年 12 月）- Monadic Context Engineering
+7. Haseeb（2025 年 8 月）- Multi-Agent LLM Code Assistants
+8. Rivasseau（2025 年 12 月）- Invasive Context Engineering for LLM Control
+9. Hua et al.（2025 年 10 月）- Historical Landscape of Context Engineering
+10. Wang et al.（2025 年 4 月）- Context Utilization in Code Intelligence
+11. Zhang et al.（2025 年 10 月）- ACE: Evolving Contexts for Self-Improving LLMs
+12. Gartner（2025 年 10 月）- Context Engineering as Strategic Priority
+13. Forbes（2025 年 9 月）- Cost-Effective Context Engineering Strategies
+14. InfoWorld（2026 年 1 月）- Four Important Lessons About Context Engineering
+15. Elastic（2025）- Dynamic Tool Discovery and Context Engineering
+16. ResearchGate - Comprehensive Contextual Management for LLMs
+17. Emergent Mind - Context Engineering Foundations and Techniques
+18. Frontiers in AI（2025 年 11 月）- Context-Aware RAG in Engineering Research
+
+### 关键仓库
+
+- [Awesome-Context-Engineering](https://github.com/Meirtz/Awesome-Context-Engineering) - 论文与框架精选
+- AIGNE Framework - 开源上下文工程流水线
+---
+alwaysApply: true
+---
