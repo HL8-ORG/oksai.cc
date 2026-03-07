@@ -440,8 +440,9 @@ Tests       13 passed (13)
 
 **预计时间**：2-3 小时 ✅ 完成
 
-**待办**：
-- ⏳ 更新 SessionService 测试（测试 mock 需要从 em.find 改为 apiClient）
+**测试更新** ✅：
+- ✅ 更新 SessionService 测试（mock 从 em.find 改为 apiClient）
+- ✅ 所有测试通过（20/20）
 
 ### Phase 3.2: OAuthService 迁移 ⏳
 
