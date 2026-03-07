@@ -1,57 +1,58 @@
 {
-	"name": "@oksai/better-auth-mikro-orm",
-	"version": "0.1.0",
-	"description": "Mikro ORM Adapter for Better Auth - oksai.cc 定制版",
-	"keywords": [
-		"auth",
-		"better-auth",
-		"database",
-		"adapter",
-		"mikro-orm"
-	],
-	"license": "MIT",
-	"private": true,
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"require": "./dist/index.js",
-			"default": "./dist/index.js"
-		},
-		"./adapter": {
-			"types": "./dist/adapter.d.ts",
-			"import": "./dist/adapter.js",
-			"require": "./dist/adapter.js",
-			"default": "./dist/adapter.js"
-		}
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
-		"build:watch": "tsc -p tsconfig.build.json --watch",
-		"typecheck": "tsc --noEmit",
-		"clean": "pnpm exec rimraf dist coverage",
-		"test": "vitest run",
-		"test:watch": "vitest watch",
-		"test:coverage": "vitest run --coverage"
-	},
-	"dependencies": {
-		"@mikro-orm/core": "^6.6.8",
-		"better-auth": "catalog:",
-		"dset": "^3.1.4"
-	},
-	"devDependencies": {
-		"@mikro-orm/postgresql": "^6.6.8",
-		"@mikro-orm/reflection": "^6.6.8",
-		"@mikro-orm/sqlite": "^6.6.8",
-		"@oksai/config": "workspace:*",
-		"@types/node": "^20.17.16",
-		"rimraf": "^6.0.1",
-		"typescript": "^5.7.3",
-		"vitest": "^3.0.5"
-	}
+  "name": "@oksai/better-auth-mikro-orm",
+  "version": "0.1.0",
+  "description": "Mikro ORM Adapter for Better Auth - oksai.cc 定制版",
+  "keywords": [
+    "auth",
+    "better-auth",
+    "database",
+    "adapter",
+    "mikro-orm"
+  ],
+  "license": "MIT",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./adapter": {
+      "types": "./dist/adapter.d.ts",
+      "import": "./dist/adapter.js",
+      "require": "./dist/adapter.js",
+      "default": "./dist/adapter.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "pnpm exec rimraf dist coverage",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "^6.6.8",
+    "better-auth": "catalog:",
+    "dset": "^3.1.4"
+  },
+  "devDependencies": {
+    "@mikro-orm/postgresql": "^6.6.8",
+    "@mikro-orm/reflection": "^6.6.8",
+    "@mikro-orm/sqlite": "^6.6.8",
+    "@oksai/config": "workspace:*",
+    "@oksai/tsconfig": "workspace:*",
+    "@types/node": "^20.17.16",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
 }

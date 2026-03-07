@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "oksai.cc Build Config",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "noEmit": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.int-spec.ts",
+    "**/*.e2e-spec.ts",
+    "**/*.e2e.ts"
+  ]
+}

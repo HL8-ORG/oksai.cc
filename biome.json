@@ -76,7 +76,10 @@
     },
     "rules": {
       "recommended": true,
-      "a11y": "off"
+      "a11y": "off",
+      "style": {
+        "useImportType": "off"
+      }
     }
   },
   "overrides": [
@@ -187,7 +190,34 @@
         "rules": {
           "correctness": {
             "useHookAtTopLevel": "off"
-          },
+          }
+        }
+      }
+    },
+    {
+      "includes": ["libs/shared/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["../database/**"],
+                    "message": "shared 包不应从 database 包导入以避免循环依赖。"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["libs/**/*.{ts,tsx,js,jsx,mts,mjs,cjs,cts}"],
+      "linter": {
+        "rules": {
           "style": {
             "useImportType": "off"
           }

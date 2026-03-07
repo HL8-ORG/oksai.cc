@@ -179,6 +179,9 @@ importers:
       '@nx/webpack':
         specifier: ^22.5.3
         version: 22.5.3(@babel/traverse@7.29.0)(@swc-node/register@1.11.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.25.12)(lightningcss@1.31.1)(nx@22.5.1(@swc-node/register@1.11.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.8(@swc/helpers@0.5.18)))(typescript@5.9.3)(verdaccio@6.2.9(encoding@0.1.13)(typanion@3.14.0))
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:libs/tsconfig
       '@swc-node/register':
         specifier: 'catalog:'
         version: 1.11.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(@swc/types@0.1.25)(typescript@5.9.3)
@@ -354,6 +357,9 @@ importers:
       '@nestjs/testing':
         specifier: 'catalog:'
         version: 11.1.14(@nestjs/common@11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)(@nestjs/microservices@11.1.14)(@nestjs/platform-express@11.1.14)
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../libs/tsconfig
       '@types/express':
         specifier: 'catalog:'
         version: 5.0.6
@@ -442,6 +448,9 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../libs/tsconfig
       '@tailwindcss/vite':
         specifier: ^4.2.1
         version: 4.2.1(vite@8.0.0-beta.16(@types/node@24.11.0)(esbuild@0.27.3)(jiti@2.6.1)(less@4.5.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -503,6 +512,9 @@ importers:
         specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 20.19.9
@@ -527,10 +539,16 @@ importers:
       '@oksai/kernel':
         specifier: workspace:*
         version: link:../shared/kernel
+      pino:
+        specifier: 'catalog:'
+        version: 10.3.1
       postgres:
         specifier: 'catalog:'
         version: 3.4.8
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 20.19.9
@@ -550,6 +568,9 @@ importers:
         specifier: ^6.9.16
         version: 6.10.1
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.9
@@ -590,6 +611,9 @@ importers:
         specifier: ^0.2.0
         version: 0.2.2
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.0.18(vitest@4.0.18)
@@ -624,6 +648,9 @@ importers:
       '@oksai/config':
         specifier: workspace:*
         version: link:../config
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       '@types/node':
         specifier: ^20.17.16
         version: 20.19.9
@@ -652,12 +679,18 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   libs/shared/constants:
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -670,6 +703,10 @@ importers:
       '@oksai/kernel':
         specifier: workspace:*
         version: link:../kernel
+    devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
 
   libs/shared/event-store:
     dependencies:
@@ -686,6 +723,9 @@ importers:
         specifier: ^0.2.0
         version: 0.2.2
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -696,6 +736,9 @@ importers:
         specifier: ^11.0.11
         version: 11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -710,10 +753,10 @@ importers:
         version: 4.0.18(@types/node@22.19.13)(@vitest/ui@4.0.18)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   libs/shared/kernel:
-    dependencies:
-      reflect-metadata:
-        specifier: ^0.2.0
-        version: 0.2.2
+    devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
 
   libs/shared/logger:
     dependencies:
@@ -739,6 +782,9 @@ importers:
         specifier: 'catalog:'
         version: 10.3.1
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       pino-pretty:
         specifier: 'catalog:'
         version: 13.1.3
@@ -767,6 +813,9 @@ importers:
       '@nestjs/websockets':
         specifier: 'catalog:'
         version: 11.1.14(@nestjs/common@11.1.14(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       '@types/body-parser':
         specifier: ^1.19.6
         version: 1.19.6
@@ -803,6 +852,9 @@ importers:
       '@nestjs/swagger':
         specifier: 'catalog:'
         version: 11.2.6(@nestjs/common@11.1.14(class-transformer@0.5.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)(class-transformer@0.5.1)(reflect-metadata@0.2.2)
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -828,12 +880,18 @@ importers:
         specifier: ^0.2.0
         version: 0.2.2
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   libs/shared/types:
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -847,6 +905,9 @@ importers:
         specifier: ^5.0.0
         version: 5.1.6
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -881,6 +942,9 @@ importers:
         specifier: ^0.2.0
         version: 0.2.2
     devDependencies:
+      '@oksai/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.0.18(vitest@4.0.18)
@@ -890,6 +954,8 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
+  libs/tsconfig: {}
 
 packages:
 
@@ -16312,6 +16378,14 @@ snapshots:
       vite: 7.3.1(@types/node@24.11.0)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
     optional: true
 
+  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))':
+    dependencies:
+      '@vitest/spy': 4.0.18
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.3.1(@types/node@25.3.3)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
   '@vitest/pretty-format@3.2.4':
     dependencies:
       tinyrainbow: 2.0.0
@@ -22855,7 +22929,7 @@ snapshots:
   vitest@4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@20.19.9)(jiti@2.4.2)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18

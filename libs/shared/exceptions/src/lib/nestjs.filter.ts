@@ -57,7 +57,7 @@ export class UnifiedExceptionFilter implements ExceptionFilter {
   /**
    * 记录异常日志
    */
-  private logException(exception: BaseException, request: Request) {
+  private logException(exception: BaseException, _request: Request) {
     const context = createExceptionContext(exception);
 
     // 客户端错误使用 warn 级别

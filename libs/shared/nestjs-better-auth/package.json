@@ -52,6 +52,7 @@
   "devDependencies": {
     "@nestjs/testing": "catalog:",
     "@nestjs/websockets": "catalog:",
+    "@oksai/tsconfig": "workspace:*",
     "@types/body-parser": "^1.19.6",
     "@types/express": "catalog:",
     "graphql": "^16.13.0",

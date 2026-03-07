@@ -34,6 +34,7 @@
     "reflect-metadata": "catalog:"
   },
   "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
     "@types/node": "catalog:"
   },
   "peerDependencies": {

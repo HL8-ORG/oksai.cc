@@ -1,50 +1,51 @@
 {
-	"name": "@oksai/testing",
-	"version": "0.1.0",
-	"description": "测试工具库 - 提供测试基类和工具函数",
-	"license": "AGPL-3.0",
-	"private": true,
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs",
-			"default": "./dist/index.js"
-		}
-	},
-	"scripts": {
-		"build": "pnpm exec tsup",
-		"build:watch": "pnpm exec tsup --watch",
-		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
-		"test:watch": "vitest watch",
-		"test:coverage": "vitest run --coverage",
-		"lint": "biome check --write .",
-		"lint:check": "biome check .",
-		"format": "biome format --write .",
-		"clean": "pnpm exec rimraf dist coverage"
-	},
-	"dependencies": {
-		"@mikro-orm/core": "catalog:",
-		"@mikro-orm/nestjs": "catalog:",
-		"@mikro-orm/postgresql": "catalog:",
-		"@nestjs/common": "catalog:",
-		"@nestjs/testing": "catalog:",
-		"@oksai/database": "workspace:*",
-		"@oksai/event-store": "workspace:*"
-	},
-	"devDependencies": {
-		"vitest": "catalog:",
-		"@vitest/coverage-v8": "catalog:",
-		"tsup": "catalog:"
-	},
-	"peerDependencies": {
-		"reflect-metadata": "^0.2.0"
-	},
-	"engines": {
-		"node": ">=20"
-	}
+  "name": "@oksai/testing",
+  "version": "0.1.0",
+  "description": "测试工具库 - 提供测试基类和工具函数",
+  "license": "AGPL-3.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm exec tsup",
+    "build:watch": "pnpm exec tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/nestjs": "catalog:",
+    "@mikro-orm/postgresql": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@nestjs/testing": "catalog:",
+    "@oksai/database": "workspace:*",
+    "@oksai/event-store": "workspace:*"
+  },
+  "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "catalog:",
+    "tsup": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "^0.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

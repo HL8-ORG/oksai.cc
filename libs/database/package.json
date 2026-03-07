@@ -13,10 +13,10 @@
       "default": "./dist/index.js"
     }
   },
-	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --dts --external @oksai/kernel --external ts-morph --external @ts-morph/common --external @mikro-orm/reflection",
-		"clean": "pnpm exec rimraf dist coverage"
-	},
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --external @oksai/kernel --external ts-morph --external @ts-morph/common --external @mikro-orm/reflection",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
   "dependencies": {
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/nestjs": "catalog:",
@@ -24,9 +24,11 @@
     "@mikro-orm/reflection": "catalog:",
     "@nestjs/common": "catalog:",
     "@oksai/kernel": "workspace:*",
+    "pino": "catalog:",
     "postgres": "catalog:"
   },
   "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "rimraf": "^6.0.1",
     "tsup": "catalog:",

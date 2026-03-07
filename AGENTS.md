@@ -133,6 +133,7 @@ pnpm vitest run -t "Decorators"
 ```
 
 **迁移说明：**
+
 - ✅ 已从 Jest 迁移到 Vitest
 - ✅ 所有测试文件使用 `vi.fn()` 替代 `jest.fn()`
 - ✅ 兼容 Jest API，迁移成本低
@@ -140,11 +141,13 @@ pnpm vitest run -t "Decorators"
 - 📚 详见 `docs/migration/vitest-migration.md`
 
 **测试最佳实践：**
+
 - 使用 `vi.fn()` 创建 mock 函数
 - 使用 `vi.mock()` mock 模块
 - 使用 `vi.importActual()` 获取真实模块
 - 优先使用 async/await 而非 done() callback
-```
+
+````
 
 ### Database Commands
 
@@ -156,9 +159,10 @@ pnpm mikro-orm migration:create # 创建迁移文件
 pnpm mikro-orm migration:up     # 运行迁移
 pnpm mikro-orm migration:down   # 回滚迁移
 pnpm mikro-orm migration:pending # 查看待执行迁移
-```
+````
 
 **Drizzle (已废弃)**:
+
 ```bash
 # Drizzle 命令（已移除，仅供参考）
 # pnpm db:generate  # Generate Drizzle schema migrations
@@ -168,12 +172,12 @@ pnpm mikro-orm migration:pending # 查看待执行迁移
 ```
 
 **说明**:
+
 - ✅ 项目已完成从 Drizzle 到 MikroORM 的迁移（2026-03-06）
 - ✅ Better Auth 已使用 MikroORM 适配器
 - ✅ 所有数据库操作统一使用 MikroORM
 - 📚 迁移详情：`docs/migration/drizzle-to-mikro-orm.md`
 - 📊 进度报告：`docs/drizzle-removal-phase4-complete.md`
-
 
 ### Development Commands
 
@@ -295,39 +299,179 @@ try {
 
 ## 五、TypeScript Configuration Rules
 
-> **重要**: 完整配置文档请参考 `docs/guides/typescript-configuration.md`
+> **重要**: 完整配置文档请参考：
+>
+> - 配置包：`libs/tsconfig/`（已与 Novu 对齐）
+> - 配置模板：`docs/templates/tsconfig-templates.md`
+> - 迁移指南：`docs/guides/tsconfig-migration-guide.md`
+>
+> **配置策略**：与 Novu 对齐，使用独立的 tsconfig 共享包（`@oksai/tsconfig`）
 
-### 5.1 Import Type 使用规则
+### 5.0 配置策略概览
+
+#### 新的配置方式（与 Novu 对齐）
+
+从 2026-03-07 开始，项目使用独立的 TypeScript 配置包 `@oksai/tsconfig`，与 Novu 保持一致。
+
+**配置包结构**：
+
+```
+libs/tsconfig/
+├── base.json              # 基础配置（最严格）
+├── nestjs.json            # NestJS 应用配置
+├── node-library.json      # Node.js 库配置
+├── react-library.json     # React 库配置
+├── tanstack-start.json    # TanStack Start 应用配置
+└── build.json             # 构建配置（用于 tsconfig.build.json）
+```
+
+libs/shared/tsconfig/
+├── base.json # 基础配置（最严格）
+├── nestjs.json # NestJS 应用配置
+├── node-library.json # Node.js 库配置
+├── react-library.json # React 库配置
+├── tanstack-start.json # TanStack Start 应用配置
+└── build.json # 构建配置（用于 tsconfig.build.json）
+
+````
+
+#### 使用方式
+
+**Node.js 库**：
+
+```json
+{
+  "extends": "@oksai/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  }
+}
+````
+
+**NestJS 应用**：
+
+```json
+{
+  "extends": "@oksai/tsconfig/nestjs.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./"
+  }
+}
+```
+
+**构建配置**：
+
+```json
+{
+  "extends": [
+    "@oksai/tsconfig/node-library.json",
+    "@oksai/tsconfig/build.json"
+  ],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "composite": false
+  }
+}
+```
+
+#### 分层配置原则
+
+```
+@oksai/tsconfig/base.json        # 根配置：最严格（ES2022 + Strict Mode）
+├── @oksai/tsconfig/nestjs.json  # NestJS 应用
+├── @oksai/tsconfig/node-library.json  # Node.js 库
+├── @oksai/tsconfig/react-library.json # React 库
+└── @oksai/tsconfig/tanstack-start.json # TanStack Start 应用
+```
+
+#### 关键配置说明
+
+| 配置项                  | base    | nestjs   | node-library | react-library |
+| ----------------------- | ------- | -------- | ------------ | ------------- |
+| `strict`                | ✅ true | ✅ true  | ✅ true      | ✅ true       |
+| `module`                | -       | CommonJS | ESNext       | ESNext        |
+| `moduleResolution`      | node    | Node     | Bundler      | Bundler       |
+| `composite`             | false   | -        | true         | -             |
+| `emitDecoratorMetadata` | true    | true     | -            | -             |
+| `noUnusedLocals`        | true    | true     | true         | true          |
+
+#### Nx 构建优化
+
+```json
+// nx.json targetDefaults 配置
+{
+  "build": {
+    "dependsOn": ["^build"],
+    "inputs": ["production", "^production"],
+    "cache": true,
+    "outputs": ["{projectRoot}/dist", "{projectRoot}/.tsbuildinfo"]
+  },
+  "test": {
+    "dependsOn": ["^build"],
+    "inputs": ["default", "^production"],
+    "cache": true
+  }
+}
+```
+
+**好处**：
+
+- ✅ 自动处理依赖构建顺序
+- ✅ 缓存优化，避免重复构建
+- ✅ 增量构建，只构建受影响的项目
+- ✅ 与 Novu 配置对齐，便于引入 Novu 模块
+
+### 5.1 添加依赖
+
+在使用新配置前，需要在 `package.json` 中添加依赖：
+
+```json
+{
+  "devDependencies": {
+    "@oksai/tsconfig": "workspace:*"
+  }
+}
+```
+
+然后运行：
+
+```bash
+pnpm install
+```
+
+### 5.2 Import Type 使用规则
 
 **⚠️ 关键规则**: 在 NestJS 中，构造函数注入的服务**禁止**使用 `import type`
 
 ```typescript
 // ❌ 错误 - 会导致依赖注入元数据丢失
-import type { AppService } from "./app.service";
+import type { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}  // ❌ 运行时错误
+  constructor(private readonly appService: AppService) {} // ❌ 运行时错误
 }
 
 // ✅ 正确
-import { AppService } from "./app.service";
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}  // ✅ 正常工作
+  constructor(private readonly appService: AppService) {} // ✅ 正常工作
 }
 ```
 
 **规则总结：**
 
-| 场景 | 是否可以用 `import type` | 原因 |
-|------|------------------------|------|
-| 构造函数注入的 Service | ❌ **禁止** | 需要 `emitDecoratorMetadata` 生成运行时元数据 |
-| 方法参数类型 | ✅ 可以 | 纯类型，不需要运行时 |
-| 返回值类型 | ✅ 可以 | 纯类型，不需要运行时 |
-| 接口/DTO | ✅ 可以 | 纯类型，不需要运行时 |
-| 类装饰器 | ❌ **禁止** | 需要运行时引用 |
+| 场景                   | 是否可以用 `import type` | 原因                                          |
+| ---------------------- | ------------------------ | --------------------------------------------- |
+| 构造函数注入的 Service | ❌ **禁止**              | 需要 `emitDecoratorMetadata` 生成运行时元数据 |
+| 方法参数类型           | ✅ 可以                  | 纯类型，不需要运行时                          |
+| 返回值类型             | ✅ 可以                  | 纯类型，不需要运行时                          |
+| 接口/DTO               | ✅ 可以                  | 纯类型，不需要运行时                          |
+| 类装饰器               | ❌ **禁止**              | 需要运行时引用                                |
 
 **快速检查命令：**
 
@@ -364,6 +508,7 @@ grep -rn "import type.*Service" apps/gateway/src --include="*.ts"
 ```
 
 **适用范围：**
+
 - ✅ 所有使用 `tsc` 构建的库
 - ❌ 使用 `tsup` 构建的库不需要此配置
 
@@ -443,18 +588,15 @@ grep -rn "import type.*Service" apps/gateway/src --include="*.ts"
 
 ```typescript
 // libs/shared/lib-name/tsup.config.ts
-import { type Options } from "tsup";
+import { type Options } from 'tsup';
 
 const config: Options = {
-  entry: ["src/index.ts"],
-  format: ["cjs", "esm"],
+  entry: ['src/index.ts'],
+  format: ['cjs', 'esm'],
   dts: true,
   sourcemap: true,
   clean: true,
-  external: [
-    "@nestjs/common",
-    "@oksai/config"
-  ]
+  external: ['@nestjs/common', '@oksai/config'],
 };
 
 export default config;

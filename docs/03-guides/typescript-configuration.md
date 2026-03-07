@@ -1,7 +1,7 @@
 # TypeScript 配置方案和策略
 
-> **文档版本**: v1.0  
-> **最后更新**: 2026-03-05  
+> **文档版本**: v2.0  
+> **最后更新**: 2026-03-07  
 > **维护者**: Oksai Team
 
 ---
@@ -10,11 +10,12 @@
 
 1. [项目概述](#项目概述)
 2. [TypeScript 配置架构](#typescript-配置架构)
-3. [关键配置详解](#关键配置详解)
-4. [库构建策略](#库构建策略)
-5. [常见问题和解决方案](#常见问题和解决方案)
-6. [最佳实践](#最佳实践)
-7. [故障排除指南](#故障排除指南)
+3. [共享配置包](#共享配置包)
+4. [关键配置详解](#关键配置详解)
+5. [库构建策略](#库构建策略)
+6. [常见问题和解决方案](#常见问题和解决方案)
+7. [最佳实践](#最佳实践)
+8. [故障排除指南](#故障排除指南)
 
 ---
 
@@ -28,6 +29,7 @@ oksai.cc/
 │   ├── gateway/            # NestJS API Gateway
 │   └── web-admin/          # TanStack Start 管理后台
 ├── libs/                    # 共享库
+│   ├── tsconfig/           # TypeScript 共享配置包
 │   ├── database/           # 数据库层
 │   ├── oauth/              # OAuth 服务
 │   ├── testing/            # 测试工具
@@ -39,7 +41,7 @@ oksai.cc/
 │       ├── logger/         # 日志服务
 │       ├── context/        # 上下文管理
 │       └── ...
-├── tsconfig.base.json      # 基础 TypeScript 配置
+├── tsconfig.json           # 根 TypeScript 配置
 ├── nx.json                 # Nx 配置
 └── package.json            # 根 package.json
 ```
@@ -60,74 +62,127 @@ oksai.cc/
 ### 配置层次结构
 
 ```
-tsconfig.base.json (基础配置)
-    ↓
-┌───┴────────────────────┐
-│                        │
-tsconfig.json          tsconfig.build.json
-(开发配置)              (构建配置)
-    ↓                      ↓
-[IDE/类型检查]         [生产构建]
+@oksai/tsconfig (共享配置包)
+├── base.json (严格基础配置)
+├── nestjs.json (NestJS 应用)
+├── node-library.json (Node.js 库)
+├── react-library.json (React 库)
+├── tanstack-start.json (TanStack Start 应用)
+└── build.json (构建配置)
+
+tsconfig.json (根目录)
+└── extends @oksai/tsconfig/base.json + paths
+
+apps/*/
+├── tsconfig.json (extends @oksai/tsconfig/*)
+└── tsconfig.build.json (extends @oksai/tsconfig/* + build.json)
+
+libs/*/
+├── tsconfig.json (统一模板)
+└── tsconfig.build.json (统一模板)
 ```
 
-### 三层配置策略
+### 配置策略概览
 
-#### 1. 基础配置 (`tsconfig.base.json`)
+与 Novu 对齐，使用独立的 TypeScript 配置包 `@oksai/tsconfig`：
 
-所有项目共享的基础配置：
-
-```json
-{
-  "compilerOptions": {
-    // 模块系统
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "target": "es2022",
-    "lib": ["es2022"],
-    
-    // 类型检查
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    
-    // 输出配置
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    
-    // 互操作性
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    
-    // 路径映射
-    "baseUrl": ".",
-    "paths": {
-      "@oksai/*": ["libs/*", "libs/shared/*"]
-    }
-  }
-}
-```
-
-**关键点：**
-- ✅ `composite: true` - 启用项目引用（用于增量构建）
-- ✅ `moduleResolution: "bundler"` - 现代 Node.js 解析策略
-- ✅ `strict: true` - 严格类型检查
-- ⚠️ **不使用 `noEmit`** - 允许生成构建产物
+| 配置项                  | base    | nestjs   | node-library | react-library |
+| ----------------------- | ------- | -------- | ------------ | ------------- |
+| `strict`                | ✅ true | ✅ true  | ✅ true      | ✅ true       |
+| `module`                | -       | CommonJS | CommonJS     | ESNext        |
+| `moduleResolution`      | node    | Node     | Node         | Bundler       |
+| `composite`             | false   | -        | true         | -             |
+| `emitDecoratorMetadata` | true    | true     | -            | -             |
+| `noUnusedLocals`        | true    | true     | true         | true          |
 
 ---
 
-#### 2. 开发配置 (`tsconfig.json`)
+## 共享配置包
 
-每个项目的开发配置（IDE + 类型检查）：
+### libs/tsconfig/ 目录结构
+
+```
+libs/tsconfig/
+├── base.json              # 基础配置（最严格）
+├── nestjs.json            # NestJS 应用配置
+├── node-library.json      # Node.js 库配置
+├── react-library.json     # React 库配置
+├── tanstack-start.json    # TanStack Start 应用配置
+├── build.json             # 构建配置
+└── package.json           # 包定义
+```
+
+### 基础配置 (base.json)
 
 ```json
 {
-  "extends": "../../tsconfig.base.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "oksai.cc Base Config",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "target": "ES2022",
+    "resolveJsonModule": true
+  },
+  "exclude": ["node_modules"]
+}
+```
+
+### NestJS 配置 (nestjs.json)
+
+```json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "oksai.cc NestJS Application",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "sourceMap": true,
+    "incremental": true,
+    "noEmit": false,
+    "types": ["node", "@nestjs/core"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.e2e.ts"]
+}
+```
+
+### Node.js 库配置 (node-library.json)
+
+```json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "oksai.cc Node.js Library",
+  "extends": "./base.json",
   "compilerOptions": {
     "composite": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "sourceMap": true,
+    "noEmit": false,
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*"],
@@ -135,113 +190,195 @@ tsconfig.json          tsconfig.build.json
 }
 ```
 
-**用途：**
-- IDE 类型提示
-- `pnpm tsc --noEmit` 类型检查
-- 项目引用（Project References）
-
----
-
-#### 3. 构建配置 (`tsconfig.build.json`)
-
-生产构建专用配置：
+### 构建配置 (build.json)
 
 ```json
 {
-  "extends": "./tsconfig.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "oksai.cc Build Config",
   "compilerOptions": {
-    "composite": false,  // ⚠️ 关键：禁用增量编译缓存
-    "module": "node16",
-    "moduleResolution": "node16",
-    "removeComments": true,
+    "composite": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "removeComments": true,
+    "noEmit": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "exclude": [
     "node_modules",
     "dist",
     "**/*.spec.ts",
+    "**/*.test.ts",
     "**/*.int-spec.ts",
-    "**/*.e2e-spec.ts"
+    "**/*.e2e-spec.ts",
+    "**/*.e2e.ts"
   ]
 }
 ```
-
-**关键决策：**
-
-| 配置项 | 值 | 原因 |
-|--------|---|------|
-| `composite` | `false` | 避免增量编译缓存导致构建产物不更新 |
-| `module` | `"node16"` | 支持 ESM/CommonJS 互操作 |
-| `moduleResolution` | `"node16"` | 正确解析 package.json exports |
 
 ---
 
 ## 关键配置详解
 
-### 1. `composite` 配置策略
+### 1. 根配置 (tsconfig.json)
 
-#### 问题背景
-
-TypeScript 的 `composite: true` 会生成 `.tsbuildinfo` 缓存文件，导致以下问题：
-
-```bash
-# 问题场景
-pnpm nx run @oksai/kernel:clean  # 删除 dist/
-pnpm nx run @oksai/kernel:build  # ❌ 不生成 dist/，因为有缓存
-```
-
-#### 解决方案
-
-**开发配置（`tsconfig.json`）：**
 ```json
 {
+  "extends": "@oksai/tsconfig/base.json",
   "compilerOptions": {
-    "composite": true  // ✅ 启用，用于项目引用和 IDE
-  }
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@oksai/better-auth-mikro-orm": ["libs/shared/better-auth-mikro-orm/src/index.ts"],
+      "@oksai/config": ["libs/shared/config/src/index.ts"],
+      "@oksai/constants": ["libs/shared/constants/src/index.ts"],
+      "@oksai/context": ["libs/shared/context/src/index.ts"],
+      "@oksai/database": ["libs/database/src/index.ts"],
+      "@oksai/email": ["libs/notification/email/src/index.ts"],
+      "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
+      "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
+      "@oksai/nestjs-utils": ["libs/shared/nestjs-utils/src/index.ts"],
+      "@oksai/cache": ["libs/cache/src/index.ts"]
+    }
+  },
+  "references": [
+    {"path": "./apps/gateway"},
+    {"path": "./apps/web-admin"},
+    {"path": "./libs/database"},
+    {"path": "./libs/shared/kernel"},
+    ...
+  ],
+  "exclude": ["node_modules", "dist", "apps"]
 }
 ```
 
-**构建配置（`tsconfig.build.json`）：**
+**关键点：**
+
+- ✅ 直接 extends `@oksai/tsconfig/base.json`
+- ✅ 只保留 workspace paths 映射
+- ✅ 项目引用 (references) 用于增量构建
+
+---
+
+### 2. 应用配置 (apps/gateway)
+
+#### tsconfig.json
+
 ```json
 {
+  "extends": "@oksai/tsconfig/nestjs.json",
   "compilerOptions": {
-    "composite": false  // ⚠️ 禁用，确保生成构建产物
-  }
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "types": ["node", "@nestjs/core", "@nestjs/swagger", "vitest/globals"]
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {"path": "../../libs/shared/nestjs-better-auth"},
+    {"path": "../../libs/shared/logger"},
+    {"path": "../../libs/database"},
+    ...
+  ]
 }
 ```
 
-#### 适用项目
+#### tsconfig.build.json
 
-需要此配置的库（使用 `tsc` 构建）：
-
-```
-✅ libs/shared/kernel/
-✅ libs/shared/context/
-✅ libs/shared/config/        (部分)
-✅ libs/shared/better-auth-mikro-orm/
-✅ libs/shared/constants/      (部分)
-```
-
-**不需要的库（使用 `tsup` 构建）：**
-
-```
-❌ libs/shared/logger/        (tsup)
-❌ libs/shared/nestjs-better-auth/ (tsup)
-❌ libs/database/             (tsup)
-❌ libs/oauth/                (tsup)
+```json
+{
+  "extends": ["@oksai/tsconfig/nestjs.json", "@oksai/tsconfig/build.json"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "noEmit": false
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.e2e.ts",
+    "test"
+  ]
+}
 ```
 
 ---
 
-### 2. `emitDecoratorMetadata` 配置
+### 3. 库配置 (libs/\*)
+
+#### 统一的 tsconfig.json 模板
+
+```json
+{
+  "extends": "@oksai/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+}
+```
+
+#### 有依赖的库（带 references）
+
+```json
+{
+  "extends": "@oksai/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"],
+  "references": [{ "path": "../kernel" }]
+}
+```
+
+#### 统一的 tsconfig.build.json 模板
+
+```json
+{
+  "extends": [
+    "@oksai/tsconfig/node-library.json",
+    "@oksai/tsconfig/build.json"
+  ],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "composite": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+}
+```
+
+---
+
+### 4. `composite` 配置策略
+
+#### 问题背景
+
+TypeScript 的 `composite: true` 会生成 `.tsbuildinfo` 缓存文件，导致构建产物不更新。
+
+#### 解决方案
+
+| 配置文件                          | composite | 用途                   |
+| --------------------------------- | --------- | ---------------------- |
+| `libs/tsconfig/base.json`         | `false`   | 基础配置，默认禁用     |
+| `libs/tsconfig/node-library.json` | `true`    | 开发配置，启用项目引用 |
+| `libs/*/tsconfig.build.json`      | `false`   | 构建配置，确保生成产物 |
+| `apps/*/tsconfig.build.json`      | `false`   | 构建配置，确保生成产物 |
+
+---
+
+### 5. `emitDecoratorMetadata` 配置
 
 #### NestJS 依赖注入原理
-
-NestJS 使用 TypeScript 的 `emitDecoratorMetadata` 在编译时生成元数据：
 
 ```typescript
 // 源代码
@@ -251,10 +388,10 @@ export class AppController {
 }
 
 // 编译后（正确）
-__metadata("design:paramtypes", [AppService])
+__metadata('design:paramtypes', [AppService]);
 
 // 编译后（错误）
-__metadata("design:paramtypes", [Function])  // ❌
+__metadata('design:paramtypes', [Function]); // ❌
 ```
 
 #### 关键规则
@@ -262,105 +399,33 @@ __metadata("design:paramtypes", [Function])  // ❌
 **✅ 正确用法：**
 
 ```typescript
-import { AppService } from "./app.service";
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}  // ✅
+  constructor(private readonly appService: AppService) {} // ✅
 }
 ```
 
 **❌ 错误用法：**
 
 ```typescript
-import type { AppService } from "./app.service";
+import type { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}  // ❌ 元数据丢失
-}
-```
-
-#### 配置要求
-
-在 `apps/gateway/tsconfig.json` 中：
-
-```json
-{
-  "compilerOptions": {
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "ES2022"
-  }
+  constructor(private readonly appService: AppService) {} // ❌ 元数据丢失
 }
 ```
 
 #### 受影响的场景
 
-| 场景 | 是否可以用 `import type` |
-|------|------------------------|
-| 构造函数注入的 Service | ❌ 不可以 |
-| 方法参数的类型 | ✅ 可以 |
-| 返回值类型 | ✅ 可以 |
-| 属性类型 | ✅ 可以 |
-| 泛型参数 | ✅ 可以 |
-
-**批量检查命令：**
-
-```bash
-# 检查所有可能导致问题的 import type
-grep -rn "import type.*Service" apps/gateway/src --include="*.ts"
-```
-
----
-
-### 3. 路径映射 (Path Mapping)
-
-#### 配置方式
-
-**基础配置 (`tsconfig.base.json`):**
-
-```json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@oksai/kernel": ["libs/shared/kernel/src/index.ts"],
-      "@oksai/config": ["libs/shared/config/src/index.ts"],
-      "@oksai/logger": ["libs/shared/logger/src/index.ts"]
-    }
-  }
-}
-```
-
-**应用配置 (`apps/gateway/tsconfig.json`):**
-
-```json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": "./",
-    "moduleResolution": "node"  // 使用 node 而非 bundler
-  }
-}
-```
-
-#### pnpm Workspace 符号链接
-
-pnpm 自动创建符号链接：
-
-```
-apps/gateway/node_modules/@oksai/
-├── config -> ../../libs/shared/config
-├── logger -> ../../libs/shared/logger
-└── kernel -> ../../libs/shared/kernel
-```
-
-**验证命令：**
-
-```bash
-ls -la apps/gateway/node_modules/@oksai/
-```
+| 场景                   | 是否可以用 `import type` |
+| ---------------------- | ------------------------ |
+| 构造函数注入的 Service | ❌ 不可以                |
+| 方法参数的类型         | ✅ 可以                  |
+| 返回值类型             | ✅ 可以                  |
+| 属性类型               | ✅ 可以                  |
 
 ---
 
@@ -383,183 +448,44 @@ ls -la apps/gateway/node_modules/@oksai/
 ### 1. 使用 `tsc` 构建的库
 
 **适用场景：**
+
 - 简单的 TypeScript 库
 - 不需要打包
 - 只需要类型声明文件
 
 **项目列表：**
 
-| 项目 | 原因 |
-|------|------|
-| `@oksai/kernel` | 纯 DDD 基础类，无复杂依赖 |
-| `@oksai/context` | 上下文管理，简单结构 |
-| `@oksai/better-auth-mikro-orm` | 简单的适配器层 |
-| `@oksai/constants` | 常量定义 |
-
-**配置示例：**
-
-```json
-// package.json
-{
-  "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:watch": "tsc -p tsconfig.build.json --watch"
-  }
-}
-
-// tsconfig.build.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "composite": false,
-    "module": "node16",
-    "moduleResolution": "node16",
-    "outDir": "./dist",
-    "rootDir": "./src"
-  }
-}
-```
-
-**输出结构：**
-
-```
-dist/
-├── index.js
-├── index.d.ts
-├── index.js.map
-├── index.d.ts.map
-└── lib/
-    ├── entity.js
-    └── entity.d.ts
-```
-
----
+| 项目                | 原因                      |
+| ------------------- | ------------------------- |
+| `@oksai/kernel`     | 纯 DDD 基础类，无复杂依赖 |
+| `@oksai/context`    | 上下文管理，简单结构      |
+| `@oksai/constants`  | 常量定义                  |
+| `@oksai/exceptions` | 异常类定义                |
+| `@oksai/types`      | 类型定义                  |
+| `@oksai/utils`      | 工具函数                  |
 
 ### 2. 使用 `tsup` 构建的库
 
 **适用场景：**
+
 - 需要多格式输出（CJS + ESM）
 - 需要打包优化
 - 有复杂的外部依赖
 
 **项目列表：**
 
-| 项目 | 原因 |
-|------|------|
-| `@oksai/logger` | 需要 CJS + ESM，外部依赖多 |
-| `@oksai/config` | 需要 CJS + ESM，环境变量解析 |
-| `@oksai/nestjs-better-auth` | 需要处理 peer dependencies |
-| `@oksai/database` | 复杂的数据库层，外部依赖多 |
-| `@oksai/oauth` | OAuth 协议实现，依赖复杂 |
-
-**配置示例：**
-
-```json
-// package.json
-{
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts"
-  }
-}
-
-// tsup.config.ts
-import { type Options } from "tsup";
-
-const config: Options = {
-  entry: ["src/index.ts"],
-  format: ["cjs", "esm"],
-  dts: true,
-  sourcemap: true,
-  clean: true,
-  external: [
-    "@nestjs/common",
-    "@nestjs/core"
-  ]
-};
-
-export default config;
-```
-
-**输出结构：**
-
-```
-dist/
-├── index.js          # CommonJS
-├── index.js.map
-├── index.mjs         # ESM
-├── index.mjs.map
-├── index.d.ts        # 类型声明
-└── index.d.mts
-```
-
-**关键配置：**
-
-```typescript
-// tsup.config.ts
-export default {
-  // ✅ 声明外部依赖，避免打包进产物
-  external: [
-    "@oksai/config",
-    "@oksai/constants",
-    "@nestjs/common"
-  ],
-  
-  // ✅ 生成类型声明
-  dts: true,
-  
-  // ✅ 生成 sourcemap
-  sourcemap: true,
-  
-  // ✅ 清理旧产物
-  clean: true
-}
-```
-
----
-
-### 3. NestJS 应用构建
-
-**配置：**
-
-```json
-// apps/gateway/project.json
-{
-  "name": "@oksai/gateway",
-  "targets": {
-    "build": {
-      "executor": "nx:run-commands",
-      "dependsOn": ["^build"],  // ⚠️ 关键：确保依赖先构建
-      "options": {
-        "command": "nest build"
-      }
-    }
-  }
-}
-```
-
-**`dependsOn` 的重要性：**
-
-```json
-"dependsOn": ["^build"]
-
-// ^ 表示所有依赖项目
-// 确保构建顺序：
-// 1. @oksai/kernel
-// 2. @oksai/context
-// 3. @oksai/config
-// 4. @oksai/logger
-// 5. @oksai/gateway  ← 最后构建
-```
-
-**验证构建顺序：**
-
-```bash
-# 查看依赖图
-pnpm nx graph --focus=@oksai/gateway
-
-# 串行构建（调试用）
-pnpm nx run-many -t build --all --parallel=false
-```
+| 项目                           | 原因                         |
+| ------------------------------ | ---------------------------- |
+| `@oksai/logger`                | 需要 CJS + ESM，外部依赖多   |
+| `@oksai/config`                | 需要 CJS + ESM，环境变量解析 |
+| `@oksai/nestjs-better-auth`    | 需要处理 peer dependencies   |
+| `@oksai/nestjs-utils`          | NestJS 工具集                |
+| `@oksai/database`              | 复杂的数据库层，外部依赖多   |
+| `@oksai/oauth`                 | OAuth 协议实现，依赖复杂     |
+| `@oksai/cache`                 | 缓存服务                     |
+| `@oksai/event-store`           | 事件存储                     |
+| `@oksai/better-auth-mikro-orm` | Better Auth 适配器           |
+| `@oksai/repository`            | 仓储层                       |
 
 ---
 
@@ -573,26 +499,13 @@ pnpm nx run-many -t build --all --parallel=false
 error TS7016: Could not find a declaration file for module '@oksai/logger'.
 ```
 
-**原因：**
-
-1. 库未构建
-2. 构建产物被清理但未重新构建
-3. TypeScript 增量编译缓存
-
 **解决方案：**
 
 ```bash
-# 方案 1: 清理所有缓存并重新构建
+# 清理所有缓存并重新构建
 find libs apps -name "*.tsbuildinfo" -delete
 pnpm nx reset
-NX_SKIP_NX_CLOUD=true pnpm build
-
-# 方案 2: 重新构建特定库
-pnpm nx build @oksai/logger --skip-nx-cache
-
-# 方案 3: 完整重建
-rm -rf libs/**/dist apps/**/dist .nx
-NX_SKIP_NX_CLOUD=true pnpm build
+pnpm build
 ```
 
 ---
@@ -631,72 +544,15 @@ find apps/gateway/src -name "*.ts" -exec grep -l "import type.*Service" {} \; | 
   xargs sed -i 's/import type { \([^}]*Service[^}]*\) }/import { \1 }/g'
 ```
 
-**预防措施：**
-
-在 CI/CD 中添加检查：
-
-```bash
-#!/bin/bash
-# scripts/check-import-type.sh
-
-ERRORS=$(grep -rn "import type.*Service" apps/gateway/src --include="*.ts" | \
-         grep -v ".spec.ts" | \
-         grep -v "// @ts-ignore")
-
-if [ ! -z "$ERRORS" ]; then
-  echo "❌ 发现使用 'import type' 导入 Service 的代码："
-  echo "$ERRORS"
-  exit 1
-fi
-
-echo "✅ 检查通过"
-```
-
 ---
 
-### 问题 3: rimraf: not found
-
-**症状：**
-
-```
-sh: 1: rimraf: not found
-ELIFECYCLE  Command failed.
-```
-
-**原因：**
-
-pnpm workspace 中，`rimraf` 在根目录的 `node_modules`，但子包脚本找不到。
-
-**解决方案：**
-
-```bash
-# 1. 安装 rimraf 到根 package.json
-pnpm add -D -w rimraf
-
-# 2. 修改所有库的 clean 脚本
-find libs apps -name "package.json" -type f -exec \
-  sed -i 's/"clean": "rimraf/"clean": "pnpm exec rimraf/g' {} \;
-```
-
-**验证：**
-
-```bash
-pnpm nx run @oksai/kernel:clean
-```
-
----
-
-### 问题 4: 构建顺序错误
+### 问题 3: 构建顺序错误
 
 **症状：**
 
 ```
 Error: Cannot find module '@oksai/logger/dist/index.js'
 ```
-
-**原因：**
-
-gateway 在依赖库构建前就开始构建。
 
 **解决方案：**
 
@@ -706,21 +562,6 @@ gateway 在依赖库构建前就开始构建。
 {
   "targets": {
     "build": {
-      "dependsOn": ["^build"]  // ← 关键
-    }
-  }
-}
-```
-
-**Nx 全局配置 (`nx.json`):**
-
-```json
-{
-  "targetDefaults": {
-    "test": {
-      "dependsOn": ["^build"]
-    },
-    "build": {
       "dependsOn": ["^build"]
     }
   }
@@ -729,29 +570,28 @@ gateway 在依赖库构建前就开始构建。
 
 ---
 
-### 问题 5: Nx Cloud 连接失败
+### 问题 4: No inputs were found in config
 
 **症状：**
 
 ```
-NX   Nx Cloud encountered some problems
-This workspace is more than three days old and is not connected.
+error TS18003: No inputs were found in config file 'tsconfig.build.json'.
 ```
+
+**原因：**
+
+`tsconfig.build.json` 缺少 `include` 字段。
 
 **解决方案：**
 
-```bash
-# 方案 1: 跳过 Nx Cloud
-export NX_SKIP_NX_CLOUD=true
+确保所有 `tsconfig.build.json` 包含：
 
-# 方案 2: 永久禁用
-# nx.json
+```json
 {
-  "neverConnectToCloud": true
+  "extends": ["@oksai/tsconfig/node-library.json", "@oksai/tsconfig/build.json"],
+  "include": ["src/**/*"],
+  ...
 }
-
-# 方案 3: 重新连接
-pnpm nx connect
 ```
 
 ---
@@ -764,30 +604,26 @@ pnpm nx connect
 
 ```typescript
 // ✅ 注入的服务必须正常导入
-import { AppService } from "./app.service";
-import { ConfigService } from "@oksai/config";
-import { LoggerService } from "@oksai/logger";
+import { AppService } from './app.service';
+import { ConfigService } from '@oksai/config';
+import { LoggerService } from '@oksai/logger';
 
 // ✅ 纯类型可以使用 import type
-import type { IUser } from "./user.interface";
-import type { ConfigOptions } from "@oksai/config";
-import type { Request, Response } from "express";
+import type { IUser } from './user.interface';
+import type { ConfigOptions } from '@oksai/config';
 
 // ✅ 类型 + 值混合导入
-import { Controller, Get, type Request } from "@nestjs/common";
+import { Controller, Get, type Request } from '@nestjs/common';
 ```
 
 #### ❌ DON'T - 避免的做法
 
 ```typescript
 // ❌ 注入的服务不要用 import type
-import type { AppService } from "./app.service";
+import type { AppService } from './app.service';
 
 // ❌ 运行时需要的值不要用 import type
-import type { APP_GUARD } from "@nestjs/core";
-
-// ❌ 类装饰器不要用 import type
-import type { Injectable } from "@nestjs/common";
+import type { APP_GUARD } from '@nestjs/core';
 ```
 
 ---
@@ -797,47 +633,31 @@ import type { Injectable } from "@nestjs/common";
 #### 标准构建流程
 
 ```bash
-# 1. 清理
+# 1. 清理缓存
 find libs apps -name "*.tsbuildinfo" -delete
-NX_SKIP_NX_CLOUD=true pnpm nx run-many -t clean --all
+pnpm nx run-many -t clean --all
 
 # 2. 重置 Nx 缓存
 pnpm nx reset
 
 # 3. 构建
-NX_SKIP_NX_CLOUD=true pnpm build
+pnpm build
 
 # 4. 验证
 pnpm test
-```
-
-#### 开发流程
-
-```bash
-# 1. 首次启动前构建所有依赖
-NX_SKIP_NX_CLOUD=true pnpm build
-
-# 2. 启动开发服务器
-pnpm dev
-
-# 3. 修改库后重新构建
-pnpm nx build @oksai/logger --skip-nx-cache
 ```
 
 ---
 
 ### 3. 新库创建清单
 
-创建新的共享库时，确保：
-
 ```markdown
-- [ ] 创建 `tsconfig.json` (extends base)
-- [ ] 创建 `tsconfig.build.json` (composite: false)
-- [ ] 在 `tsconfig.base.json` 添加路径映射
-- [ ] 在 `package.json` 添加依赖声明
+- [ ] 创建 `tsconfig.json` (extends @oksai/tsconfig/node-library.json)
+- [ ] 创建 `tsconfig.build.json` (extends node-library + build.json)
+- [ ] 在根 `tsconfig.json` 添加路径映射
+- [ ] 在根 `tsconfig.json` 添加 references
 - [ ] 选择构建工具 (tsc/tsup)
-- [ ] 配置 `project.json` (如果需要)
-- [ ] 添加到根 `nx.json` 的依赖图
+- [ ] 在根 `package.json` 添加依赖（如果被其他项目使用）
 ```
 
 **模板：**
@@ -845,94 +665,25 @@ pnpm nx build @oksai/logger --skip-nx-cache
 ```json
 // libs/shared/new-lib/tsconfig.json
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@oksai/tsconfig/node-library.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true
+    "rootDir": "./src"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }
 
 // libs/shared/new-lib/tsconfig.build.json
 {
-  "extends": "./tsconfig.json",
+  "extends": ["@oksai/tsconfig/node-library.json", "@oksai/tsconfig/build.json"],
   "compilerOptions": {
-    "composite": false,
-    "module": "node16",
-    "moduleResolution": "node16"
+    "outDir": "./dist",
+    "composite": false
   },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }
-```
-
----
-
-### 4. CI/CD 配置
-
-#### GitHub Actions 示例
-
-```yaml
-name: Build and Test
-
-on: [push, pull_request]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10.30.3
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      
-      - name: Build
-        run: NX_SKIP_NX_CLOUD=true pnpm build
-      
-      - name: Test
-        run: NX_SKIP_NX_CLOUD=true pnpm test
-      
-      - name: Lint
-        run: NX_SKIP_NX_CLOUD=true pnpm lint
-```
-
----
-
-### 5. 性能优化
-
-#### 增量构建
-
-```bash
-# 使用 Nx 增量构建
-pnpm nx build @oksai/gateway
-
-# Nx 会自动：
-# 1. 检查依赖变化
-# 2. 只重新构建受影响的项目
-# 3. 使用缓存加速
-```
-
-#### 并行构建
-
-```bash
-# 默认并行构建（推荐）
-pnpm nx run-many -t build --all
-
-# 调整并行度
-pnpm nx run-many -t build --all --parallel=4
-
-# 串行构建（调试用）
-pnpm nx run-many -t build --all --parallel=false
 ```
 
 ---
@@ -949,22 +700,16 @@ find libs -name "dist" -type d -exec ls -la {} \;
 ls -la apps/gateway/node_modules/@oksai/
 
 # 3. 检查 TypeScript 配置
-cd libs/shared/logger && pnpm tsc --showConfig
+pnpm exec tsc --showConfig -p libs/shared/logger/tsconfig.json
 
 # 4. 检查依赖图
 pnpm nx graph --focus=@oksai/gateway
 
-# 5. 检查缓存
-ls -la .nx/cache/
-
-# 6. 检查元数据
+# 5. 检查元数据
 cat apps/gateway/dist/src/app.controller.js | grep "__metadata"
 
-# 7. 验证 import type
+# 6. 验证 import type
 grep -rn "import type.*Service" apps/gateway/src --include="*.ts"
-
-# 8. 检查 package.json exports
-cat libs/shared/logger/package.json | grep -A 10 '"exports"'
 ```
 
 ---
@@ -973,57 +718,14 @@ cat libs/shared/logger/package.json | grep -A 10 '"exports"'
 
 ```bash
 # 完整清理和重建
-rm -rf libs/**/dist apps/**/dist .nx node_modules/.cache
-find . -name "*.tsbuildinfo" -delete
+find libs apps -name "*.tsbuildinfo" -delete
+pnpm nx run-many -t clean --all
 pnpm nx reset
-pnpm install
-NX_SKIP_NX_CLOUD=true pnpm build
+pnpm build
 
 # 修复依赖注入问题
 find apps/gateway/src -name "*.ts" -exec \
   sed -i 's/import type { \([^}]*Service[^}]*\) }/import { \1 }/g' {} \;
-
-# 修复 composite 问题
-find libs/shared -name "tsconfig.build.json" -exec \
-  sed -i '/"extends": "\.\/tsconfig\.json",/a\\t\t"composite": false,' {} \;
-
-# 清理 rimraf 问题
-find libs apps -name "package.json" -exec \
-  sed -i 's/"clean": "rimraf/"clean": "pnpm exec rimraf/g' {} \;
-```
-
----
-
-### 调试技巧
-
-#### 1. 查看编译后的代码
-
-```bash
-# 检查元数据是否正确
-cat apps/gateway/dist/src/app.controller.js | grep -A 5 "__metadata"
-
-# 检查导入是否被移除
-cat libs/shared/logger/dist/index.js | grep "import type"
-```
-
-#### 2. 查看依赖解析
-
-```bash
-# 查看 Node.js 模块解析
-node -e "console.log(require.resolve('@oksai/logger'))"
-
-# 查看 pnpm 符号链接
-ls -la apps/gateway/node_modules/@oksai/logger
-```
-
-#### 3. 查看 Nx 任务图
-
-```bash
-# 查看构建任务图
-pnpm nx run @oksai/gateway:build --graph
-
-# 查看项目依赖
-pnpm nx show project @oksai/gateway --web
 ```
 
 ---
@@ -1032,87 +734,21 @@ pnpm nx show project @oksai/gateway --web
 
 ### A. 项目配置速查表
 
-| 项目 | 构建工具 | composite | 特殊配置 |
-|------|---------|-----------|---------|
-| `@oksai/kernel` | tsc | ❌ false | - |
-| `@oksai/context` | tsc | ❌ false | - |
-| `@oksai/config` | tsup | N/A | external deps |
-| `@oksai/logger` | tsup | N/A | external deps |
-| `@oksai/nestjs-better-auth` | tsup | N/A | external peer deps |
-| `@oksai/database` | tsup | N/A | external MikroORM |
-| `apps/gateway` | nest build | N/A | emitDecoratorMetadata |
+| 项目                        | 构建工具   | 配置包         | 特殊配置              |
+| --------------------------- | ---------- | -------------- | --------------------- |
+| `@oksai/kernel`             | tsc        | node-library   | -                     |
+| `@oksai/context`            | tsc        | node-library   | -                     |
+| `@oksai/constants`          | tsc        | node-library   | -                     |
+| `@oksai/config`             | tsup       | node-library   | external deps         |
+| `@oksai/logger`             | tsup       | node-library   | external deps         |
+| `@oksai/nestjs-better-auth` | tsup       | node-library   | external peer deps    |
+| `@oksai/database`           | tsup       | node-library   | external MikroORM     |
+| `apps/gateway`              | nest build | nestjs         | emitDecoratorMetadata |
+| `apps/web-admin`            | vite       | tanstack-start | -                     |
 
 ---
 
-### B. 配置文件模板
-
-#### tsc 库模板
-
-```json
-// package.json
-{
-  "name": "@oksai/lib-name",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:watch": "tsc -p tsconfig.build.json --watch",
-    "typecheck": "tsc --noEmit",
-    "clean": "pnpm exec rimraf dist coverage"
-  }
-}
-
-// tsconfig.json
-{
-  "extends": "../../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true
-  }
-}
-
-// tsconfig.build.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "composite": false,
-    "module": "node16",
-    "moduleResolution": "node16",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
-  },
-  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
-}
-```
-
-#### tsup 库模板
-
-```json
-// package.json
-{
-  "name": "@oksai/lib-name",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
-    }
-  },
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "clean": "pnpm exec rimraf dist coverage"
-  }
-}
-```
-
----
-
-### C. 参考资源
+### B. 参考资源
 
 - [TypeScript 官方文档 - Project References](https://www.typescriptlang.org/docs/handbook/project-references.html)
 - [Nx 官方文档 - Build System](https://nx.dev/concepts/build-system-and-plugins)
@@ -1124,12 +760,18 @@ pnpm nx show project @oksai/gateway --web
 
 ## 变更日志
 
+### v2.0 (2026-03-07)
+
+- ✅ 删除 `tsconfig.base.json`，使用 `@oksai/tsconfig` 共享配置包
+- ✅ 统一 libs 下的 tsconfig.json 和 tsconfig.build.json 模板
+- ✅ 精简配置，移除冗余项
+- ✅ 与 Novu 配置策略对齐
+- ✅ 保留严格模式（strict: true）
+- ✅ 更新文档结构
+
 ### v1.0 (2026-03-05)
 
 - ✅ 初始版本
-- ✅ 文档化所有已知问题和解决方案
-- ✅ 添加配置模板和最佳实践
-- ✅ 提供完整的故障排除指南
 
 ---
 
@@ -1139,10 +781,3 @@ pnpm nx show project @oksai/gateway --web
 - 当遇到新的配置问题时，添加到故障排除指南
 - 定期审查和更新最佳实践
 - 保持配置模板同步更新
-
-**贡献指南：**
-
-如发现新的配置问题或有改进建议，请：
-1. 在项目中创建 Issue
-2. 提供复现步骤
-3. 提交 PR 更新本文档

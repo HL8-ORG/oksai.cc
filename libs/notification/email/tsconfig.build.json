@@ -1,5 +1,8 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": [
+    "@oksai/tsconfig/node-library.json",
+    "@oksai/tsconfig/build.json"
+  ],
   "compilerOptions": {
     "composite": false
   }

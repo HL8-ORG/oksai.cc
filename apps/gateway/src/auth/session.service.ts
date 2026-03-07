@@ -85,7 +85,7 @@ export class SessionService {
   @CacheInvalidate({
     cacheKey: (userId: string) => `session:list:${userId}`,
   })
-  async revokeSession(userId: string, sessionId: string): Promise<void> {
+  async revokeSession(_userId: string, sessionId: string): Promise<void> {
     // 使用 Better Auth API 撤销会话
     await this.apiClient.revokeSession(sessionId, sessionId);
     this.logger.log(`Session 已撤销: ${sessionId}`);

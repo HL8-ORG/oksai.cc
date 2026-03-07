@@ -1,11 +1,9 @@
 {
-	"extends": "../../../tsconfig.base.json",
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "dist", "**/*.spec.ts"],
-	"compilerOptions": {
-		"composite": true,
-		"outDir": "./dist",
-		"rootDir": "./src",
-		"emitDeclarationOnly": false
-	}
+  "extends": "@oksai/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }

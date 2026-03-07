@@ -1,13 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts"],
+  "extends": ["@oksai/tsconfig/node-library.json", "@oksai/tsconfig/build.json"],
   "compilerOptions": {
-    "composite": false,
-    "declaration": true,
-    "declarationMap": true,
     "outDir": "./dist",
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
-  }
+    "composite": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }

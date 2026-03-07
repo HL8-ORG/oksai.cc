@@ -1,38 +1,41 @@
 {
-	"name": "@oksai/context",
-	"version": "0.1.0",
-	"description": "多租户上下文管理 - 租户隔离、用户上下文、请求追踪",
-	"license": "AGPL-3.0",
-	"private": true,
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"require": "./dist/index.js"
-		}
-	},
-	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
-		"build:watch": "tsc -p tsconfig.build.json --watch",
-		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
-		"test:watch": "vitest watch",
-		"test:coverage": "vitest run --coverage",
-		"lint": "biome check --write .",
-		"lint:check": "biome check .",
-		"format": "biome format --write .",
-		"clean": "pnpm exec rimraf dist coverage"
-	},
-	"dependencies": {
-		"@nestjs/common": "catalog:",
-		"@oksai/kernel": "workspace:*"
-	},
-	"peerDependencies": {
-		"@nestjs/common": "^11.0.0"
-	},
-	"engines": {
-		"node": ">=20"
-	}
+  "name": "@oksai/context",
+  "version": "0.1.0",
+  "description": "多租户上下文管理 - 租户隔离、用户上下文、请求追踪",
+  "license": "AGPL-3.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
+  "dependencies": {
+    "@nestjs/common": "catalog:",
+    "@oksai/kernel": "workspace:*"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@oksai/tsconfig": "workspace:*"
+  }
 }

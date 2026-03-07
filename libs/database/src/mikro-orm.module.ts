@@ -1,8 +1,28 @@
 import process from "node:process";
+import { DefaultLogger, type LoggerOptions } from "@mikro-orm/core";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { Module } from "@nestjs/common";
+import { pino } from "pino";
 import * as entities from "./entities/index.js";
+
+const mikroOrmPino = pino({
+  name: "oksai",
+  level: process.env.LOG_LEVEL || "info",
+  transport:
+    process.env.NODE_ENV !== "production"
+      ? {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "SYS:standard",
+            singleLine: false,
+            errorLikeObjectKeys: ["err", "error"],
+            ignore: "pid,hostname",
+          },
+        }
+      : undefined,
+});
 
 /**
  * MikroORM 数据库模块
@@ -28,6 +48,13 @@ import * as entities from "./entities/index.js";
         user: process.env.DB_USER || "oksai",
         password: process.env.DB_PASSWORD || "oksai_dev_password",
         debug: process.env.NODE_ENV === "development",
+        loggerFactory: (options: LoggerOptions) =>
+          new DefaultLogger({
+            ...options,
+            writer: (message: string) => {
+              mikroOrmPino.info({ service: "oksai", module: "MikroORM" }, message);
+            },
+          }),
       }),
     }),
   ],

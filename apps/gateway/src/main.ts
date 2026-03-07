@@ -23,11 +23,14 @@ import { AppModule } from "./app.module";
  * 它会选择性跳过 Better Auth 路由的 body 解析。
  */
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
 
   const configService = app.get(ConfigService);
   const logger = await app.resolve(OksaiLoggerService);
   app.useLogger(logger);
+  app.flushLogs();
 
   app.setGlobalPrefix("api");
 

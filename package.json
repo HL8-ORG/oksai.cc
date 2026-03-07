@@ -29,6 +29,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
     "@biomejs/biome": "^2.4.4",
     "@mikro-orm/cli": "^6.6.8",
     "@mikro-orm/migrations": "^6.6.8",

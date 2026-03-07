@@ -253,7 +253,7 @@ export class AuthModule extends ConfigurableModuleClass implements NestModule, O
 }
 
 class AuthModuleWithoutControllers extends AuthModule {
-  configure(): void {
+  override configure(): void {
     return;
   }
 }

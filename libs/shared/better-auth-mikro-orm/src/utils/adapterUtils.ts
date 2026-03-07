@@ -406,7 +406,7 @@ export function createAdapterUtils(orm: MikroORM): AdapterUtils {
   const convertJoinToPopulate = (
     metadata: EntityMetadata,
     join: Record<string, { relation?: string; limit?: number; fields?: string[] }> | undefined,
-    options?: { advanced?: { database?: { defaultFindManyLimit?: number } } }
+    _options?: { advanced?: { database?: { defaultFindManyLimit?: number } } }
   ): string[] | undefined => {
     if (!join || Object.keys(join).length === 0) {
       return undefined;

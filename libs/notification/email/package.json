@@ -27,6 +27,7 @@
     "nodemailer": "^6.9.16"
   },
   "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
     "@types/node": "^20.19.9",
     "@types/nodemailer": "^6.4.17",
     "rimraf": "^6.1.3",

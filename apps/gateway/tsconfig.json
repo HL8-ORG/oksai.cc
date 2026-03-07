@@ -1,51 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@oksai/tsconfig/nestjs.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2022",
-    "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "declarationOnly": false,
-    "noEmit": false,
-    "types": ["@nestjs/core", "@nestjs/swagger"],
-    "stripInternal": true
+    "types": ["node", "@nestjs/core", "@nestjs/swagger", "vitest/globals"]
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    {
-      "path": "../../libs/shared/nestjs-better-auth"
-    },
-    {
-      "path": "../../libs/shared/logger"
-    },
-    {
-      "path": "../../libs/database"
-    },
-    {
-      "path": "../../libs/shared/context"
-    },
-    {
-      "path": "../../libs/shared/constants"
-    },
-    {
-      "path": "../../libs/shared/config"
-    }
+    { "path": "../../libs/shared/nestjs-better-auth" },
+    { "path": "../../libs/shared/logger" },
+    { "path": "../../libs/database" },
+    { "path": "../../libs/shared/context" },
+    { "path": "../../libs/shared/constants" },
+    { "path": "../../libs/shared/config" },
+    { "path": "../../libs/shared/nestjs-utils" },
+    { "path": "../../libs/shared/exceptions" },
+    { "path": "../../libs/cache" },
+    { "path": "../../libs/shared/better-auth-mikro-orm" }
   ]
 }

@@ -34,6 +34,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/devtools-vite": "^0.5.1",
     "@tanstack/react-devtools": "^0.9.6",

@@ -6,7 +6,8 @@
 
 import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { TwoLayerCacheService, TwoLayerCacheStats } from "../services/two-layer-cache.service";
+import type { TwoLayerCacheStats } from "../services/two-layer-cache.service";
+import { TwoLayerCacheService } from "../services/two-layer-cache.service";
 
 /**
  * 缓存监控控制器
@@ -76,7 +77,10 @@ export class CacheMonitorController {
    * }
    */
   @Get("health")
-  @ApiOperation({ summary: "获取缓存健康信息", description: "返回 L1/L2 缓存健康状态和性能建议" })
+  @ApiOperation({
+    summary: "获取缓存健康信息",
+    description: "返回 L1/L2 缓存健康状态和性能建议",
+  })
   @ApiResponse({
     status: 200,
     description: "成功",
@@ -144,7 +148,10 @@ export class CacheMonitorController {
    * Response: { "success": true, "message": "统计信息已重置" }
    */
   @Get("stats/reset")
-  @ApiOperation({ summary: "重置缓存统计", description: "清零 L1/L2 缓存统计计数器（不影响缓存数据）" })
+  @ApiOperation({
+    summary: "重置缓存统计",
+    description: "清零 L1/L2 缓存统计计数器（不影响缓存数据）",
+  })
   @ApiResponse({
     status: 200,
     description: "重置成功",

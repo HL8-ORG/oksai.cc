@@ -1,15 +1,19 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", ".output"],
+  "extends": "@oksai/tsconfig/tanstack-start.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".output"
+  ],
   "compilerOptions": {
-    "composite": true,
-    "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "strictNullChecks": true
+      "@/*": [
+        "./src/*"
+      ]
+    }
   }
 }

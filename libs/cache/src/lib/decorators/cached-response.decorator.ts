@@ -4,7 +4,6 @@
  * @module common/decorators/cached-response.decorator
  */
 
-import { Inject } from "@nestjs/common";
 import type { TwoLayerCacheService } from "../services/two-layer-cache.service";
 
 /**
@@ -63,11 +62,8 @@ export interface CachedResponseOptions<TOutput = any, TArgs extends any[] = any[
 export function CachedResponse<TOutput = any, TArgs extends any[] = any[]>(
   options: CachedResponseOptions<TOutput, TArgs>
 ) {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value as (...args: TArgs) => Promise<TOutput>;
-
-    // 保存原始方法以供后续使用
-    const originalDescriptor = descriptor.value;
 
     descriptor.value = async function (this: any, ...args: TArgs): Promise<TOutput> {
       const cacheService = this.cacheService as TwoLayerCacheService;
