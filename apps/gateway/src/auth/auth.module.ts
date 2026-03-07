@@ -4,7 +4,7 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
-import { CacheModule, CacheService, TwoLayerCacheService } from "@oksai/cache";
+import { CacheModule, TwoLayerCacheService } from "@oksai/cache";
 import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
 import { AdminController } from "./admin.controller";
 import { ApiKeyController } from "./api-key.controller";
@@ -62,10 +62,10 @@ import { WebhookService } from "./webhook.service";
     },
     {
       provide: OAuthService,
-      useFactory: (cacheService: CacheService, em: EntityManager) => {
-        return new OAuthService(cacheService, em);
+      useFactory: (em: EntityManager, cacheService: TwoLayerCacheService) => {
+        return new OAuthService(em, cacheService);
       },
-      inject: [CacheService, EntityManager],
+      inject: [EntityManager, TwoLayerCacheService],
     },
     {
       provide: SessionService,

@@ -11,6 +11,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { CacheInvalidate, TwoLayerCacheService } from "@oksai/cache";
 import {
   OAuthAccessToken,
   OAuthAuthorizationCode,
@@ -18,7 +19,6 @@ import {
   OAuthRefreshToken,
   User,
 } from "@oksai/database";
-import { CacheService } from "../common/cache.service";
 import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util";
 import { verifyCodeVerifier } from "./oauth-crypto.util";
 import { validateRedirectUri, validateRedirectUriList } from "./redirect-uri.util";
@@ -51,9 +51,12 @@ export class OAuthService {
   private readonly TOKEN_CACHE_TTL = 300000; // 5 分钟
 
   constructor(
-    private readonly cacheService: CacheService,
-    private readonly em: EntityManager
+    private readonly em: EntityManager,
+    cacheSvc: TwoLayerCacheService
   ) {
+    // 装饰器需要 this.cacheService
+    (this as any).cacheService = cacheSvc;
+
     try {
       this.encryption = createEncryptionUtil();
       this.logger.log("加密功能已启用：Token 和 Client Secret 将加密存储");
@@ -464,13 +467,14 @@ export class OAuthService {
   async validateAccessToken(accessToken: string) {
     try {
       const cacheKey = `${this.TOKEN_CACHE_PREFIX}${accessToken}`;
+      const cacheService = (this as any).cacheService as TwoLayerCacheService;
 
       // 尝试从缓存获取
-      const cachedData = this.cacheService.get<TokenCacheData>(cacheKey);
+      const cachedData = await cacheService.get<TokenCacheData>(cacheKey);
       if (cachedData) {
         // 检查缓存中的 token 是否过期
         if (cachedData.expiresAt < new Date()) {
-          this.cacheService.delete(cacheKey);
+          await cacheService.delete(cacheKey);
           return null;
         }
         this.logger.debug(`Token 缓存命中: ${accessToken.substring(0, 8)}...`);
@@ -537,7 +541,7 @@ export class OAuthService {
       const cacheTTL = Math.min(remainingTime, this.TOKEN_CACHE_TTL);
 
       if (cacheTTL > 0) {
-        this.cacheService.set(cacheKey, cacheData, cacheTTL);
+        await cacheService.set(cacheKey, cacheData, cacheTTL);
         this.logger.debug(`Token 已缓存: ${accessToken.substring(0, 8)}... (TTL: ${cacheTTL}ms)`);
       }
 
@@ -554,6 +558,9 @@ export class OAuthService {
    * @param token - Token
    * @param tokenTypeHint - Token 类型提示（access_token 或 refresh_token）
    */
+  @CacheInvalidate({
+    cacheKey: (token: string) => `oauth:token:${token}`,
+  })
   async revokeToken(token: string, tokenTypeHint?: string) {
     try {
       this.logger.log(`撤销 Token: ${token.substring(0, 8)}...`);
