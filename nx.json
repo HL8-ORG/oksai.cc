@@ -50,7 +50,7 @@
       "options": {
         "testTargetName": "test"
       },
-      "exclude": ["@oksai/web-admin"]
+      "exclude": ["@oksai/web-admin", "@oksai/testing"]
     }
   ],
   "release": {

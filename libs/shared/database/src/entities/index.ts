@@ -1,3 +1,4 @@
+export * from "./account.entity.js";
 export * from "./api-key.entity.js";
 export * from "./base.entity.js";
 export * from "./domain-event.entity.js";

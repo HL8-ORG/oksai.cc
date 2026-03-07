@@ -15,7 +15,6 @@ import type {
   VerifyEmailDto,
   VerifyTwoFactorDto,
 } from "./dto";
-import { SessionService } from "./session.service";
 
 /**
  * 认证服务响应
@@ -45,11 +44,9 @@ export interface AuthResponse {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly apiClient: BetterAuthApiClient;
-  private readonly sessionService?: SessionService;
 
-  constructor(apiClient: BetterAuthApiClient, sessionService?: SessionService) {
+  constructor(apiClient: BetterAuthApiClient) {
     this.apiClient = apiClient;
-    this.sessionService = sessionService;
   }
 
   /**
@@ -99,17 +96,6 @@ export class AuthService {
       }
 
       this.logger.log(`用户登录成功: ${dto.email}`);
-
-      // 处理并发登录控制
-      if (this.sessionService && result.session?.token && result.user?.id) {
-        const revokedCount = await this.sessionService.handleConcurrentSessions(
-          result.user.id,
-          result.session.token
-        );
-        if (revokedCount > 0) {
-          this.logger.log(`已撤销 ${revokedCount} 个其他 Session（并发登录控制）`);
-        }
-      }
 
       return {
         success: true,

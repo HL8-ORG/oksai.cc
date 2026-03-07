@@ -61,10 +61,10 @@ import {
   WebhookDeliveryResponse,
   WebhookResponse,
 } from "./auth/dto";
-import { UserController } from "./auth/user.controller";
 import { CustomThrottlerGuard } from "./common/custom-throttler.guard";
 import { ExceptionExampleController } from "./examples/exception-example.controller";
 import { HealthController } from "./health/health.controller";
+import { RootController } from "./root.controller";
 
 /**
  * 根模块
@@ -173,9 +173,9 @@ import { HealthController } from "./health/health.controller";
     }),
   ],
   controllers: [
+    RootController,
     AppController,
     HealthController,
-    UserController,
     CacheMonitorController,
     ExceptionExampleController,
   ],
