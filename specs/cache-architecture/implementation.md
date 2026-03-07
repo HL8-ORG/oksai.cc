@@ -444,7 +444,31 @@ Tests       13 passed (13)
 - ✅ 更新 SessionService 测试（mock 从 em.find 改为 apiClient）
 - ✅ 所有测试通过（20/20）
 
-### Phase 3.2: OAuthService 迁移 ⏳
+### Phase 3.2: OAuthService 迁移 ✅
+
+**服务**: `apps/gateway/src/auth/oauth.service.ts`
+
+**迁移内容**：
+- ✅ 使用 `TwoLayerCacheService` 替代 `CacheService`
+- ✅ 保留 validateAccessToken 手动缓存（有自定义过期检查逻辑）
+- ✅ 添加 `@CacheInvalidate` 装饰器到 revokeToken 方法
+- ✅ 更新 auth.module.ts 注入 TwoLayerCacheService
+
+**优势**:
+- ✅ 自动双层缓存提升性能
+- ✅ Token 撤销时自动失效缓存
+- ✅ 自动 TTL 抖动防雪崩
+
+**提交**: `feat(cache): complete Phase 3.2 OAuthService migration`
+
+**预计时间**：1-2 小时 ✅ 完成（实际 ~30 分钟）
+
+**测试通过**：
+- ✅ SessionService: 20/20
+- ✅ OAuth 缓存: 6/6
+- ✅ OAuth 性能: 6/6
+
+### Phase 3.3: 其他服务迁移 ⏳
 
 **目标**：更新 OAuthService 使用 TwoLayerCacheService
 
@@ -513,6 +537,12 @@ Tests       13 passed (13)
   - ✅ 使用 @CachedResponse 和 @CacheInvalidate 装饰器
   - ✅ 代码从 269 行减少到 241 行（-10%）
   - ✅ 自动双层缓存、TTL 抖动、in-flight request 合并
+  - ✅ 测试更新完成（20/20 通过）
+- ✅ **Phase 3.2 完成**：OAuthService 迁移
+  - ✅ 使用 TwoLayerCacheService 替代 CacheService
+  - ✅ 添加 @CacheInvalidate 装饰器到 revokeToken
+  - ✅ 保留 validateAccessToken 手动缓存（有自定义逻辑）
+  - ✅ 测试通过（32/32）
 
 **技术决策**：
 - TTL 抖动：±10% variance
@@ -524,9 +554,9 @@ Tests       13 passed (13)
 - 目录结构：符合 Nx 最佳实践（services/, controllers/, decorators/）
 
 **下一步**：
-- ⏳ 更新 SessionService 测试（mock 需要从 em.find 改为 apiClient）
-- ⏳ 开始 Phase 3.2：迁移 OAuthService
+- ⏳ Phase 3.3：迁移其他服务（AuthService, TokenBlacklistService, ApiKeyService, OrganizationService）
 - ⏳ 补充 TTLJitterService 测试
+- ⏳ 性能测试和文档编写
 
 ---
 
