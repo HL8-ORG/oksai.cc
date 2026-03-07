@@ -39,7 +39,7 @@
 | 项目                      | 配置类型     | 状态 |
 | ------------------------- | ------------ | ---- |
 | `libs/database`           | node-library | ✅   |
-| `libs/cache`              | node-library | ✅   |
+| `libs/shared/cache`       | node-library | ✅   |
 | `libs/oauth`              | node-library | ✅   |
 | `libs/notification/email` | node-library | ✅   |
 | `libs/shared/exceptions`  | node-library | ✅   |

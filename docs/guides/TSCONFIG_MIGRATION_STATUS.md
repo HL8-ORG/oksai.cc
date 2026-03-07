@@ -36,7 +36,7 @@
 - [ ] `libs/shared/better-auth-mikro-orm` - Better Auth 适配器
 - [ ] `libs/shared/nestjs-better-auth` - NestJS Better Auth
 - [ ] `libs/shared/nestjs-utils` - NestJS 工具
-- [ ] `libs/cache` - 缓存模块
+- [ ] `libs/shared/cache` - 缓存模块
 - [ ] `libs/oauth` - OAuth 模块
 
 #### 应用
@@ -157,7 +157,7 @@ pnpm build
 12. `libs/shared/better-auth-mikro-orm` - Better Auth 适配器
 13. `libs/shared/nestjs-better-auth` - NestJS Better Auth
 14. `libs/shared/nestjs-utils` - NestJS 工具
-15. `libs/cache` - 缓存模块
+15. `libs/shared/cache` - 缓存模块
 16. `libs/notification/email` - 邮件通知
 17. `libs/oauth` - OAuth 模块
 

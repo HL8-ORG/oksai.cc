@@ -269,7 +269,7 @@ pnpm install
 - [ ] `libs/shared/better-auth-mikro-orm`
 - [ ] `libs/shared/nestjs-better-auth`
 - [ ] `libs/shared/nestjs-utils`
-- [ ] `libs/cache`
+- [ ] `libs/shared/cache`
 
 ### 8.2 Node.js 库（使用 tsc）
 

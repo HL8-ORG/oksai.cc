@@ -15,7 +15,7 @@
 ## 📁 目录结构（符合 Nx 最佳实践）
 
 ```
-libs/cache/src/
+libs/shared/cache/src/
 ├── index.ts                                      # 主导出
 └── lib/
     ├── services/                                 # 所有服务文件
@@ -56,15 +56,15 @@ libs/cache/src/
 
 | 组件                      | 文件位置                                                      | 状态 | 测试覆盖率 |
 | :------------------------ | :------------------------------------------------------------ | :--: | :--------: |
-| CacheService              | `libs/cache/src/lib/services/cache.service.ts`                |  ✅  |  ✅ 100%   |
-| RedisCacheService         | `libs/cache/src/lib/services/redis-cache.service.ts`          |  ✅  |  ✅ 100%   |
-| RedisCacheEnhancedService | `libs/cache/src/lib/services/redis-cache-enhanced.service.ts` |  ✅  |   ✅ 85%   |
-| TTLJitterService          | `libs/cache/src/lib/services/ttl-jitter.service.ts`           |  ✅  |  ✅ 100%   |
-| TwoLayerCacheService      | `libs/cache/src/lib/services/two-layer-cache.service.ts`      |  ✅  |   ✅ 90%   |
-| @CachedResponse           | `libs/cache/src/lib/decorators/cached-response.decorator.ts`  |  ✅  |  ✅ 100%   |
-| @CacheInvalidate          | `libs/cache/src/lib/decorators/cache-invalidate.decorator.ts` |  ✅  |  ✅ 100%   |
-| CacheMonitorController    | `libs/cache/src/lib/controllers/cache-monitor.controller.ts`  |  ✅  |  ✅ 100%   |
-| CacheModule               | `libs/cache/src/lib/services/cache.module.ts`                 |  ✅  |     -      |
+| CacheService              | `libs/shared/cache/src/lib/services/cache.service.ts`                |  ✅  |  ✅ 100%   |
+| RedisCacheService         | `libs/shared/cache/src/lib/services/redis-cache.service.ts`          |  ✅  |  ✅ 100%   |
+| RedisCacheEnhancedService | `libs/shared/cache/src/lib/services/redis-cache-enhanced.service.ts` |  ✅  |   ✅ 85%   |
+| TTLJitterService          | `libs/shared/cache/src/lib/services/ttl-jitter.service.ts`           |  ✅  |  ✅ 100%   |
+| TwoLayerCacheService      | `libs/shared/cache/src/lib/services/two-layer-cache.service.ts`      |  ✅  |   ✅ 90%   |
+| @CachedResponse           | `libs/shared/cache/src/lib/decorators/cached-response.decorator.ts`  |  ✅  |  ✅ 100%   |
+| @CacheInvalidate          | `libs/shared/cache/src/lib/decorators/cache-invalidate.decorator.ts` |  ✅  |  ✅ 100%   |
+| CacheMonitorController    | `libs/shared/cache/src/lib/controllers/cache-monitor.controller.ts`  |  ✅  |  ✅ 100%   |
+| CacheModule               | `libs/shared/cache/src/lib/services/cache.module.ts`                 |  ✅  |     -      |
 
 ### 统计信息
 
@@ -72,7 +72,7 @@ libs/cache/src/
 - **平均覆盖率**: 90%+
 - **代码行数**: ~2000 行生产代码 + ~1500 行测试代码
 - **依赖**: lru-cache, ioredis, @nestjs/common
-- **库位置**: `libs/cache/`（独立库 `@oksai/cache`）
+- **库位置**: `libs/shared/cache/`（独立库 `@oksai/cache`）
 
 ---
 
@@ -242,8 +242,8 @@ Tests       14 passed (14)
 
 **文件**：
 
-- `libs/cache/src/lib/services/ttl-jitter.service.ts`
-- `libs/cache/src/lib/services/ttl-jitter.service.spec.ts`
+- `libs/shared/cache/src/lib/services/ttl-jitter.service.ts`
+- `libs/shared/cache/src/lib/services/ttl-jitter.service.spec.ts`
 
 **测试结果**：
 
@@ -454,10 +454,10 @@ Tests       13 passed (13)
 
 **完成内容**：
 
-- ✅ 使用 Nx 生成库：`libs/cache`
-- ✅ 迁移所有缓存相关代码到 libs/cache/src/lib/services/
-- ✅ 迁移装饰器到 libs/cache/src/lib/decorators/
-- ✅ 迁移控制器到 libs/cache/src/lib/controllers/
+- ✅ 使用 Nx 生成库：`libs/shared/cache`
+- ✅ 迁移所有缓存相关代码到 libs/shared/cache/src/lib/services/
+- ✅ 迁移装饰器到 libs/shared/cache/src/lib/decorators/
+- ✅ 迁移控制器到 libs/shared/cache/src/lib/controllers/
 - ✅ 更新导入路径：`@oksai/cache`
 - ✅ TypeScript 配置与其他 libs 对齐
 - ✅ 删除 apps/gateway/src/common 中的旧缓存代码
@@ -637,10 +637,10 @@ Tests       13 passed (13)
 - ✅ 更新 `CacheModule` 提供完整依赖注入
 - ✅ 创建迁移计划文档
 - ✅ **Phase 3.0 完成**：迁移到独立库 `@oksai/cache`
-  - ✅ 创建 libs/cache 库，符合 Nx 最佳实践
-  - ✅ 迁移所有服务到 libs/cache/src/lib/services/
-  - ✅ 迁移装饰器到 libs/cache/src/lib/decorators/
-  - ✅ 迁移控制器到 libs/cache/src/lib/controllers/
+  - ✅ 创建 libs/shared/cache 库，符合 Nx 最佳实践
+  - ✅ 迁移所有服务到 libs/shared/cache/src/lib/services/
+  - ✅ 迁移装饰器到 libs/shared/cache/src/lib/decorators/
+  - ✅ 迁移控制器到 libs/shared/cache/src/lib/controllers/
   - ✅ 所有测试通过（88/88）
   - ✅ 删除 apps/gateway/src/common 中的旧缓存代码
 - ✅ **Phase 3.1 完成**：SessionService 迁移到装饰器模式

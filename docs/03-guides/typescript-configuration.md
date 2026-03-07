@@ -240,7 +240,7 @@ libs/tsconfig/
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
       "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
       "@oksai/nestjs-utils": ["libs/shared/nestjs-utils/src/index.ts"],
-      "@oksai/cache": ["libs/cache/src/index.ts"]
+      "@oksai/cache": ["libs/shared/cache/src/index.ts"]
     }
   },
   "references": [

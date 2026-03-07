@@ -32,7 +32,7 @@
    - 效果：所有文件都不会自动转换为 `import type`
 
 2. **修复受影响的文件**
-   - 文件：`libs/cache/src/lib/controllers/cache-monitor.controller.ts`
+   - 文件：`libs/shared/cache/src/lib/controllers/cache-monitor.controller.ts`
    - 修复前：`import type { TwoLayerCacheService, ... }`
    - 修复后：
      ```typescript

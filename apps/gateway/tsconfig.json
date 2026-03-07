@@ -1,6 +1,7 @@
 {
   "extends": "@oksai/tsconfig/nestjs.json",
   "compilerOptions": {
+    "composite": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "types": ["node", "@nestjs/core", "@nestjs/swagger", "vitest/globals"]
@@ -16,7 +17,7 @@
     { "path": "../../libs/shared/config" },
     { "path": "../../libs/shared/nestjs-utils" },
     { "path": "../../libs/shared/exceptions" },
-    { "path": "../../libs/cache" },
+    { "path": "../../libs/shared/cache" },
     { "path": "../../libs/shared/better-auth-mikro-orm" }
   ]
 }

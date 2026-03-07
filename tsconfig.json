@@ -15,15 +15,12 @@
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
       "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
       "@oksai/nestjs-utils": ["libs/shared/nestjs-utils/src/index.ts"],
-      "@oksai/cache": ["libs/cache/src/index.ts"]
+      "@oksai/cache": ["libs/shared/cache/src/index.ts"]
     }
   },
   "references": [
     {
       "path": "./apps/gateway"
-    },
-    {
-      "path": "./apps/web-admin"
     },
     {
       "path": "./libs/database"
@@ -77,7 +74,7 @@
       "path": "./libs/shared/nestjs-utils"
     },
     {
-      "path": "./libs/cache"
+      "path": "./libs/shared/cache"
     }
   ],
   "exclude": ["node_modules", "dist", "apps"]

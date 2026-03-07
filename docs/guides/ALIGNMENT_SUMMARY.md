@@ -105,7 +105,7 @@
 
 **修复文件**：
 
-- ✅ `libs/cache/src/lib/decorators/cached-response.decorator.ts`
+- ✅ `libs/shared/cache/src/lib/decorators/cached-response.decorator.ts`
   - 移除未使用的 `Inject` 导入
   - 使用下划线前缀标记未使用参数：`_target`, `_propertyKey`
 

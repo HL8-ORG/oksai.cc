@@ -2,7 +2,7 @@
 
 ## 概述
 
-将缓存架构从 `apps/gateway/src/common` 迁移到独立库 `libs/cache`，并应用装饰器模式简化服务代码。
+将缓存架构从 `apps/gateway/src/common` 迁移到独立库 `libs/shared/cache`，并应用装饰器模式简化服务代码。
 
 ## 迁移阶段
 
@@ -21,21 +21,21 @@
 **迁移内容**：
 | 组件 | 当前位置 | 迁移后位置 |
 |:---|:---|:---|
-| CacheService | `apps/gateway/src/common/cache.service.ts` | `libs/cache/src/lib/cache.service.ts` |
-| RedisCacheService | `apps/gateway/src/common/redis-cache.service.ts` | `libs/cache/src/lib/redis-cache.service.ts` |
-| RedisCacheEnhancedService | `apps/gateway/src/common/redis-cache-enhanced.service.ts` | `libs/cache/src/lib/redis-cache-enhanced.service.ts` |
-| TTLJitterService | `apps/gateway/src/common/ttl-jitter.service.ts` | `libs/cache/src/lib/ttl-jitter.service.ts` |
-| TwoLayerCacheService | `apps/gateway/src/common/two-layer-cache.service.ts` | `libs/cache/src/lib/two-layer-cache.service.ts` |
-| @CachedResponse | `apps/gateway/src/common/decorators/cached-response.decorator.ts` | `libs/cache/src/lib/decorators/cached-response.decorator.ts` |
-| @CacheInvalidate | `apps/gateway/src/common/decorators/cache-invalidate.decorator.ts` | `libs/cache/src/lib/decorators/cache-invalidate.decorator.ts` |
-| CacheModule | `apps/gateway/src/common/cache.module.ts` | `libs/cache/src/lib/cache.module.ts` |
-| CacheMonitorController | `apps/gateway/src/common/cache-monitor.controller.ts` | `libs/cache/src/lib/controllers/cache-monitor.controller.ts` |
-| 测试文件 | `apps/gateway/src/common/*.spec.ts` | `libs/cache/src/lib/**/*.spec.ts` |
+| CacheService | `apps/gateway/src/common/cache.service.ts` | `libs/shared/cache/src/lib/cache.service.ts` |
+| RedisCacheService | `apps/gateway/src/common/redis-cache.service.ts` | `libs/shared/cache/src/lib/redis-cache.service.ts` |
+| RedisCacheEnhancedService | `apps/gateway/src/common/redis-cache-enhanced.service.ts` | `libs/shared/cache/src/lib/redis-cache-enhanced.service.ts` |
+| TTLJitterService | `apps/gateway/src/common/ttl-jitter.service.ts` | `libs/shared/cache/src/lib/ttl-jitter.service.ts` |
+| TwoLayerCacheService | `apps/gateway/src/common/two-layer-cache.service.ts` | `libs/shared/cache/src/lib/two-layer-cache.service.ts` |
+| @CachedResponse | `apps/gateway/src/common/decorators/cached-response.decorator.ts` | `libs/shared/cache/src/lib/decorators/cached-response.decorator.ts` |
+| @CacheInvalidate | `apps/gateway/src/common/decorators/cache-invalidate.decorator.ts` | `libs/shared/cache/src/lib/decorators/cache-invalidate.decorator.ts` |
+| CacheModule | `apps/gateway/src/common/cache.module.ts` | `libs/shared/cache/src/lib/cache.module.ts` |
+| CacheMonitorController | `apps/gateway/src/common/cache-monitor.controller.ts` | `libs/shared/cache/src/lib/controllers/cache-monitor.controller.ts` |
+| 测试文件 | `apps/gateway/src/common/*.spec.ts` | `libs/shared/cache/src/lib/**/*.spec.ts` |
 
 **迁移步骤**：
 1. ⏳ 使用 Nx 生成库
    ```bash
-   nx g @nx/node:library cache --directory=libs/cache --importPath=@oksai/cache --no-interactive
+   nx g @nx/node:library cache --directory=libs/shared/cache --importPath=@oksai/cache --no-interactive
    ```
 
 2. ⏳ 迁移核心服务
@@ -54,8 +54,8 @@
    - 迁移 CacheMonitorController + 测试
 
 5. ⏳ 更新导出
-   - 更新 `libs/cache/src/index.ts`
-   - 更新 `libs/cache/src/lib/cache.module.ts`
+   - 更新 `libs/shared/cache/src/index.ts`
+   - 更新 `libs/shared/cache/src/lib/cache.module.ts`
 
 6. ⏳ 更新 gateway 依赖
    - 更新 `apps/gateway/package.json`
