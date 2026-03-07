@@ -6,8 +6,8 @@
  */
 
 import process from "node:process";
+import { CacheService } from "@oksai/cache";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CacheService } from "../common/cache.service";
 
 describe("OAuth Token 验证性能", () => {
   let cacheService: CacheService;

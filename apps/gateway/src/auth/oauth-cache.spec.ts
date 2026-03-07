@@ -7,8 +7,8 @@
  * 2. 缓存存储和获取
  */
 
+import { CacheService } from "@oksai/cache";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CacheService } from "../common/cache.service";
 import type { TokenCacheData } from "./oauth.service";
 
 describe("OAuth Token 缓存", () => {

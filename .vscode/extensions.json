@@ -3,15 +3,15 @@
     "biomejs.biome",
     "nrwl.angular-console",
     "DeepScan.vscode-deepscan",
-		"seatonjiang.gitmoji-vscode",
-		"dbaeumer.vscode-eslint",
-		"jondot.vscode-hygen",
-		"esbenp.prettier-vscode",
-		"firsttris.vscode-jest-runner",
-		"jebbs.plantuml",
-		"vscode-icons-team.vscode-icons",
-		"kuochunchang.goose-uml-vscode",
-		"tomoki1207.pdf",
-		"aaronkwhite.pm-toolkit"
-	]
+    "seatonjiang.gitmoji-vscode",
+    "dbaeumer.vscode-eslint",
+    "jondot.vscode-hygen",
+    "esbenp.prettier-vscode",
+    "firsttris.vscode-jest-runner",
+    "jebbs.plantuml",
+    "vscode-icons-team.vscode-icons",
+    "kuochunchang.goose-uml-vscode",
+    "tomoki1207.pdf",
+    "aaronkwhite.pm-toolkit"
+  ]
 }
