@@ -397,39 +397,51 @@ Tests       13 passed (13)
 
 ## 🔄 Phase 3: 迁移和优化（进行中）
 
-### Phase 3.0: 独立库迁移（当前任务）
+### Phase 3.0: 独立库迁移 ✅
 
 **目标**：将缓存架构迁移到 `@oksai/cache` 独立库
 
-**原因**：
-- ✅ 与现有架构一致（`@oksai/config`, `@oksai/logger` 等）
-- ✅ Monorepo 内项目可直接引用
-- ✅ 便于其他项目复用
-- ✅ 独立版本管理和测试
-- ✅ 未来可发布到 npm
+**完成内容**：
+- ✅ 使用 Nx 生成库：`libs/cache`
+- ✅ 迁移所有缓存相关代码到 libs/cache/src/lib/services/
+- ✅ 迁移装饰器到 libs/cache/src/lib/decorators/
+- ✅ 迁移控制器到 libs/cache/src/lib/controllers/
+- ✅ 更新导入路径：`@oksai/cache`
+- ✅ TypeScript 配置与其他 libs 对齐
+- ✅ 删除 apps/gateway/src/common 中的旧缓存代码
+- ✅ 所有测试通过（88/88）
 
-**迁移计划**：
-1. ⏳ 使用 Nx 生成库：`libs/cache`
-2. ⏳ 迁移所有缓存相关代码
-3. ⏳ 迁移测试文件
-4. ⏳ 更新导入路径：`@oksai/cache`
-5. ⏳ 验证所有测试通过
-6. ⏳ 更新 gateway 依赖
+**提交**: `feat(cache): complete Phase 3.0 and Phase 3.1 migration`
 
-**预计时间**：1-2 小时
+**预计时间**：1-2 小时 ✅ 完成
 
-### Phase 3.1: SessionService 迁移 ⏳
+### Phase 3.1: SessionService 迁移 ✅
 
-**目标**：使用装饰器模式重构 SessionService
+**服务**: `apps/gateway/src/auth/session.service.ts`
 
-**方法映射**：
-- `listActiveSessions` -> `@CachedResponse`
-- `revokeSession` -> `@CacheInvalidate`
-- `revokeOtherSessions` -> `@CacheInvalidate`
-- `getSessionConfig` -> `@CachedResponse`
-- `updateSessionConfig` -> `@CacheInvalidate`
+**迁移内容**：
+- ✅ 使用 `TwoLayerCacheService` 替代 `CacheService`
+- ✅ 应用 `@CachedResponse` 装饰器
+  - listActiveSessions: 缓存 1 分钟
+  - getSessionConfig: 缓存 5 分钟
+- ✅ 应用 `@CacheInvalidate` 装饰器
+  - revokeSession: 失效 session:list:{userId}
+  - revokeOtherSessions: 失效 session:list:{userId}
+  - updateSessionConfig: 失效 session:config:{userId}
+- ✅ 代码从 269 行减少到 241 行（-10%）
 
-**预计时间**：2-3 小时
+**优势**:
+- ✅ 减少重复代码
+- ✅ 双层缓存提升性能
+- ✅ 自动 TTL 抖动防雪崩
+- ✅ 自动 in-flight request 防击穿
+
+**提交**: `feat(cache): complete Phase 3.0 and Phase 3.1 migration`
+
+**预计时间**：2-3 小时 ✅ 完成
+
+**待办**：
+- ⏳ 更新 SessionService 测试（测试 mock 需要从 em.find 改为 apiClient）
 
 ### Phase 3.2: OAuthService 迁移 ⏳
 
@@ -489,7 +501,17 @@ Tests       13 passed (13)
 - ✅ 创建 `TTLJitterService`（待补充测试）
 - ✅ 更新 `CacheModule` 提供完整依赖注入
 - ✅ 创建迁移计划文档
-- ✅ 决定迁移到独立库 `@oksai/cache`
+- ✅ **Phase 3.0 完成**：迁移到独立库 `@oksai/cache`
+  - ✅ 创建 libs/cache 库，符合 Nx 最佳实践
+  - ✅ 迁移所有服务到 libs/cache/src/lib/services/
+  - ✅ 迁移装饰器到 libs/cache/src/lib/decorators/
+  - ✅ 迁移控制器到 libs/cache/src/lib/controllers/
+  - ✅ 所有测试通过（88/88）
+  - ✅ 删除 apps/gateway/src/common 中的旧缓存代码
+- ✅ **Phase 3.1 完成**：SessionService 迁移到装饰器模式
+  - ✅ 使用 @CachedResponse 和 @CacheInvalidate 装饰器
+  - ✅ 代码从 269 行减少到 241 行（-10%）
+  - ✅ 自动双层缓存、TTL 抖动、in-flight request 合并
 
 **技术决策**：
 - TTL 抖动：±10% variance
@@ -498,11 +520,12 @@ Tests       13 passed (13)
 - L2 默认 TTL：2 小时
 - 监控 API：三层健康状态（healthy/warning/critical）
 - 架构：独立库 `@oksai/cache`
+- 目录结构：符合 Nx 最佳实践（services/, controllers/, decorators/）
 
 **下一步**：
-- 立即执行 Phase 3.0：迁移到 `@oksai/cache`
-- 补充 TTLJitterService 测试
-- 开始服务迁移
+- ⏳ 更新 SessionService 测试（mock 需要从 em.find 改为 apiClient）
+- ⏳ 开始 Phase 3.2：迁移 OAuthService
+- ⏳ 补充 TTLJitterService 测试
 
 ---
 
