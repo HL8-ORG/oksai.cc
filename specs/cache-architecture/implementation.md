@@ -2,7 +2,13 @@
 
 ## 状态
 
-🟢 **Phase 3.0 完成** - 独立库迁移并符合 Nx 最佳实践 ✅ 
+🟢 **Phase 3.0+ 完成** - 独立库迁移 + TTLJitterService 测试完成 ✅
+
+**最新成就**（2026-03-07）：
+
+- ✅ TTLJitterService 测试完成（8/8 通过，100% 覆盖率）
+- ✅ 修复抖动算法（从 ±5% 修正为 ±10%）
+- ✅ 总测试数：96/96 通过
 
 ---
 
@@ -35,6 +41,7 @@ libs/cache/src/
 ```
 
 **组织原则**（符合 Nx 最佳实践）：
+
 - ✅ **中等复杂度库**（11 个核心文件）按功能模块组织
 - ✅ **services/** - 所有服务文件集中管理
 - ✅ **controllers/** - 控制器独立目录
@@ -47,21 +54,21 @@ libs/cache/src/
 
 ### 已完成组件
 
-| 组件 | 文件位置 | 状态 | 测试覆盖率 |
-|:---|:---|:---:|:---:|
-| CacheService | `libs/cache/src/lib/services/cache.service.ts` | ✅ | ✅ 100% |
-| RedisCacheService | `libs/cache/src/lib/services/redis-cache.service.ts` | ✅ | ✅ 100% |
-| RedisCacheEnhancedService | `libs/cache/src/lib/services/redis-cache-enhanced.service.ts` | ✅ | ✅ 85% |
-| TTLJitterService | `libs/cache/src/lib/services/ttl-jitter.service.ts` | ✅ | ❌ 0% |
-| TwoLayerCacheService | `libs/cache/src/lib/services/two-layer-cache.service.ts` | ✅ | ✅ 90% |
-| @CachedResponse | `libs/cache/src/lib/decorators/cached-response.decorator.ts` | ✅ | ✅ 100% |
-| @CacheInvalidate | `libs/cache/src/lib/decorators/cache-invalidate.decorator.ts` | ✅ | ✅ 100% |
-| CacheMonitorController | `libs/cache/src/lib/controllers/cache-monitor.controller.ts` | ✅ | ✅ 100% |
-| CacheModule | `libs/cache/src/lib/services/cache.module.ts` | ✅ | - |
+| 组件                      | 文件位置                                                      | 状态 | 测试覆盖率 |
+| :------------------------ | :------------------------------------------------------------ | :--: | :--------: |
+| CacheService              | `libs/cache/src/lib/services/cache.service.ts`                |  ✅  |  ✅ 100%   |
+| RedisCacheService         | `libs/cache/src/lib/services/redis-cache.service.ts`          |  ✅  |  ✅ 100%   |
+| RedisCacheEnhancedService | `libs/cache/src/lib/services/redis-cache-enhanced.service.ts` |  ✅  |   ✅ 85%   |
+| TTLJitterService          | `libs/cache/src/lib/services/ttl-jitter.service.ts`           |  ✅  |  ✅ 100%   |
+| TwoLayerCacheService      | `libs/cache/src/lib/services/two-layer-cache.service.ts`      |  ✅  |   ✅ 90%   |
+| @CachedResponse           | `libs/cache/src/lib/decorators/cached-response.decorator.ts`  |  ✅  |  ✅ 100%   |
+| @CacheInvalidate          | `libs/cache/src/lib/decorators/cache-invalidate.decorator.ts` |  ✅  |  ✅ 100%   |
+| CacheMonitorController    | `libs/cache/src/lib/controllers/cache-monitor.controller.ts`  |  ✅  |  ✅ 100%   |
+| CacheModule               | `libs/cache/src/lib/services/cache.module.ts`                 |  ✅  |     -      |
 
 ### 统计信息
 
-- **总测试**: 88/88 通过 ✅
+- **总测试**: 96/96 通过 ✅
 - **平均覆盖率**: 90%+
 - **代码行数**: ~2000 行生产代码 + ~1500 行测试代码
 - **依赖**: lru-cache, ioredis, @nestjs/common
@@ -71,19 +78,19 @@ libs/cache/src/
 
 ## BDD 场景进度
 
-| 场景 | 状态 | 测试 |
-|:---|:---:|:---:|
-| 双层缓存读取 - L1 命中 | ✅ | ✅ |
-| 双层缓存读取 - L2 命中 | ✅ | ✅ |
-| 双层缓存读取 - 双层 miss | ✅ | ✅ |
-| 缓存雪崩保护（TTL 抖动） | ✅ | ✅ |
-| 缓存击穿保护（in-flight） | ✅ | ✅ |
-| 缓存穿透保护（空值缓存） | ✅ | ✅ |
-| Redis 故障降级 | ✅ | ✅ |
-| 装饰器缓存 | ✅ | ✅ |
-| 监控 API - 统计信息 | ✅ | ✅ |
-| 监控 API - 健康检查 | ✅ | ✅ |
-| 监控 API - 统计重置 | ✅ | ✅ |
+| 场景                      | 状态 | 测试 |
+| :------------------------ | :--: | :--: |
+| 双层缓存读取 - L1 命中    |  ✅  |  ✅  |
+| 双层缓存读取 - L2 命中    |  ✅  |  ✅  |
+| 双层缓存读取 - 双层 miss  |  ✅  |  ✅  |
+| 缓存雪崩保护（TTL 抖动）  |  ✅  |  ✅  |
+| 缓存击穿保护（in-flight） |  ✅  |  ✅  |
+| 缓存穿透保护（空值缓存）  |  ✅  |  ✅  |
+| Redis 故障降级            |  ✅  |  ✅  |
+| 装饰器缓存                |  ✅  |  ✅  |
+| 监控 API - 统计信息       |  ✅  |  ✅  |
+| 监控 API - 健康检查       |  ✅  |  ✅  |
+| 监控 API - 统计重置       |  ✅  |  ✅  |
 
 ---
 
@@ -91,40 +98,40 @@ libs/cache/src/
 
 ### Phase 1: 核心基础设施 ✅
 
-| 组件 | Red | Green | Refactor | 覆盖率 |
-|:---|:---:|:---:|:---:|:---:|
-| CacheService | ✅ | ✅ | ✅ | 100% |
-| RedisCacheService | ✅ | ✅ | ✅ | 100% |
-| RedisCacheEnhancedService | ✅ | ✅ | ✅ | 85% |
-| TTLJitterService | ⏳ | ⏳ | ⏳ | 0% |
-| TwoLayerCacheService | ✅ | ✅ | ✅ | 90% |
+| 组件                      | Red | Green | Refactor | 覆盖率 |
+| :------------------------ | :-: | :---: | :------: | :----: |
+| CacheService              | ✅  |  ✅   |    ✅    |  100%  |
+| RedisCacheService         | ✅  |  ✅   |    ✅    |  100%  |
+| RedisCacheEnhancedService | ✅  |  ✅   |    ✅    |  85%   |
+| TTLJitterService          | ✅  |  ✅   |    ✅    |  100%  |
+| TwoLayerCacheService      | ✅  |  ✅   |    ✅    |  90%   |
 
 ### Phase 2: 装饰器和 API ✅
 
-| 组件 | Red | Green | Refactor | 覆盖率 |
-|:---|:---:|:---:|:---:|:---:|
-| @CachedResponse 装饰器 | ✅ | ✅ | ✅ | 100% |
-| @CacheInvalidate 装饰器 | ✅ | ✅ | ✅ | 100% |
-| CacheMonitorController | ✅ | ✅ | ✅ | 100% |
+| 组件                    | Red | Green | Refactor | 覆盖率 |
+| :---------------------- | :-: | :---: | :------: | :----: |
+| @CachedResponse 装饰器  | ✅  |  ✅   |    ✅    |  100%  |
+| @CacheInvalidate 装饰器 | ✅  |  ✅   |    ✅    |  100%  |
+| CacheMonitorController  | ✅  |  ✅   |    ✅    |  100%  |
 
 ### Phase 3: 迁移和优化 🔄
 
-| 任务 | 状态 | 进度 |
-|:---|:---:|:---:|
-| 独立库迁移 (@oksai/cache) | 🔄 | 0% |
-| SessionService 迁移 | ⏳ | 0% |
-| OAuthService 迁移 | ⏳ | 0% |
-| 其他服务迁移 | ⏳ | 0% |
+| 任务                      | 状态 | 进度 |
+| :------------------------ | :--: | :--: |
+| 独立库迁移 (@oksai/cache) |  🔄  |  0%  |
+| SessionService 迁移       |  ⏳  |  0%  |
+| OAuthService 迁移         |  ⏳  |  0%  |
+| 其他服务迁移              |  ⏳  |  0%  |
 
 ---
 
 ## 测试覆盖率
 
-| 层级 | 目标 | 实际 | 状态 |
-|:---|:---:|:---:|:---:|
-| 基础设施层 | >85% | 90% | ✅ |
-| 应用层 | >90% | 100% | ✅ |
-| 总体 | >85% | 92% | ✅ |
+| 层级       | 目标 | 实际 | 状态 |
+| :--------- | :--: | :--: | :--: |
+| 基础设施层 | >85% | 90%  |  ✅  |
+| 应用层     | >90% | 100% |  ✅  |
+| 总体       | >85% | 92%  |  ✅  |
 
 ---
 
@@ -135,16 +142,19 @@ libs/cache/src/
 #### 1.1 CacheService (基础 LRU 缓存)
 
 **实现内容**：
+
 - 基于 lru-cache 的内存缓存
 - 支持 TTL、LRU 淘汰策略
 - 统计功能（命中率、大小）
 - 单元测试覆盖率 100%
 
 **文件**：
+
 - `apps/gateway/src/common/cache.service.ts`
 - `apps/gateway/src/common/cache.service.spec.ts`
 
 **测试结果**：
+
 ```bash
 ✓ get / set
   ✓ 应该成功设置和获取缓存
@@ -168,17 +178,20 @@ libs/cache/src/
 #### 1.2 RedisCacheService (Redis 缓存 + 内存降级)
 
 **实现内容**：
+
 - Redis 缓存实现（基于 ioredis）
 - 内存缓存降级（Redis 不可用时）
 - 单元测试覆盖率 100%
 
 **文件**：
+
 - `apps/gateway/src/common/redis-cache.service.ts`
 - `apps/gateway/src/common/redis-cache.spec.ts`
 
 #### 1.3 RedisCacheEnhancedService (增强版 Redis 缓存)
 
 **实现内容**：
+
 - ✅ SCAN 命令替代 KEYS（生产环境安全）
 - ✅ Pipeline 批量操作优化
 - ✅ Lua 脚本原子操作
@@ -186,10 +199,12 @@ libs/cache/src/
 - ✅ 单元测试覆盖率 85%（14/14 测试通过）
 
 **文件**：
+
 - `apps/gateway/src/common/redis-cache-enhanced.service.ts`
 - `apps/gateway/src/common/redis-cache-enhanced.service.spec.ts`
 
 **测试结果**：
+
 ```bash
 ✓ SCAN 命令
   ✓ 应该使用 SCAN 替代 KEYS 命令删除前缀缓存
@@ -219,20 +234,45 @@ Tests       14 passed (14)
 #### 1.4 TTLJitterService (TTL 抖动服务)
 
 **实现内容**：
+
 - ✅ 创建 `TTLJitterService` 实现 ±10% TTL 抖动
 - ✅ 防止缓存雪崩
-- ❌ 单元测试待补充
+- ✅ 单元测试完成（8/8 通过）
+- ✅ 100% 测试覆盖率
 
 **文件**：
-- `apps/gateway/src/common/ttl-jitter.service.ts`
 
-**待办**：
-- [ ] 补充单元测试
-- [ ] 测试边界情况（0、负数）
+- `libs/cache/src/lib/services/ttl-jitter.service.ts`
+- `libs/cache/src/lib/services/ttl-jitter.service.spec.ts`
+
+**测试结果**：
+
+```bash
+✓ addJitter
+  ✓ 应该为 TTL 添加 ±10% 的随机抖动
+  ✓ 应该正确处理 0 TTL
+  ✓ 应该正确处理负数 TTL
+  ✓ 应该正确处理极小 TTL
+  ✓ 应该正确处理极大 TTL
+  ✓ 应该产生分散的 TTL 值（防止雪崩）
+  ✓ 应该确保抖动后的 TTL 不为负数
+  ✓ 应该保持 TTL 的数量级（不改变数量级）
+
+Test Files  1 passed (1)
+Tests       8 passed (8)
+Coverage    100%
+```
+
+**关键修复**：
+
+- 修复抖动算法：从 ±5% 修正为 ±10%
+- 原算法：`ttl - variance/2 + (0 to variance)` = `ttl - 5% to ttl + 5%`
+- 新算法：`ttl + (variance * 2 * random() - variance)` = `ttl - 10% to ttl + 10%`
 
 #### 1.5 TwoLayerCacheService (双层缓存服务)
 
 **实现内容**：
+
 - ✅ L1 -> L2 -> DB 三层读取逻辑
 - ✅ L1 + L2 双层写入逻辑
 - ✅ L2 命中时自动回填 L1
@@ -244,10 +284,12 @@ Tests       14 passed (14)
 - ✅ 单元测试覆盖率 90%（16/16 测试通过）
 
 **文件**：
+
 - `apps/gateway/src/common/two-layer-cache.service.ts`
 - `apps/gateway/src/common/two-layer-cache.service.spec.ts`
 
 **测试结果**：
+
 ```bash
 ✓ 双层读取逻辑
   ✓ 应该优先从 L1 读取
@@ -284,6 +326,7 @@ Tests       16 passed (16)
 #### 2.1 @CachedResponse 装饰器
 
 **实现内容**：
+
 - ✅ 方法结果缓存装饰器
 - ✅ 支持缓存键构建器
 - ✅ 支持 TTL 自定义配置
@@ -292,10 +335,12 @@ Tests       16 passed (16)
 - ✅ 10/10 测试全部通过
 
 **文件**：
+
 - `apps/gateway/src/common/decorators/cached-response.decorator.ts`
 - `apps/gateway/src/common/decorators/cached-response.decorator.spec.ts`
 
 **测试结果**：
+
 ```bash
 ✓ @CachedResponse Decorator
   ✓ 应该缓存方法结果
@@ -320,6 +365,7 @@ Tests       10 passed (10)
 #### 2.2 @CacheInvalidate 装饰器
 
 **实现内容**：
+
 - ✅ 方法缓存失效装饰器
 - ✅ 支持单个缓存键失效
 - ✅ 支持多个缓存键批量失效
@@ -329,10 +375,12 @@ Tests       10 passed (10)
 - ✅ 14/14 测试全部通过
 
 **文件**：
+
 - `apps/gateway/src/common/decorators/cache-invalidate.decorator.ts`
 - `apps/gateway/src/common/decorators/cache-invalidate.decorator.spec.ts`
 
 **测试结果**：
+
 ```bash
 ✓ @CacheInvalidate Decorator
   ✓ 基本功能
@@ -359,6 +407,7 @@ Tests       14 passed (14)
 #### 2.3 CacheMonitorController (监控 API)
 
 **实现内容**：
+
 - ✅ `/monitor/cache/stats` API（L1/L2 分层统计）
 - ✅ `/monitor/cache/health` API（L1/L2 健康检查）
 - ✅ `/monitor/cache/stats/reset` API（重置统计）
@@ -366,10 +415,12 @@ Tests       14 passed (14)
 - ✅ 单元测试覆盖率 100%（13/13 测试通过）
 
 **文件**：
+
 - `apps/gateway/src/common/cache-monitor.controller.ts`
 - `apps/gateway/src/common/cache-monitor.controller.spec.ts`
 
 **测试结果**：
+
 ```bash
 ✓ getStats
   ✓ 应该返回 L1/L2 缓存统计信息
@@ -402,6 +453,7 @@ Tests       13 passed (13)
 **目标**：将缓存架构迁移到 `@oksai/cache` 独立库
 
 **完成内容**：
+
 - ✅ 使用 Nx 生成库：`libs/cache`
 - ✅ 迁移所有缓存相关代码到 libs/cache/src/lib/services/
 - ✅ 迁移装饰器到 libs/cache/src/lib/decorators/
@@ -420,6 +472,7 @@ Tests       13 passed (13)
 **服务**: `apps/gateway/src/auth/session.service.ts`
 
 **迁移内容**：
+
 - ✅ 使用 `TwoLayerCacheService` 替代 `CacheService`
 - ✅ 应用 `@CachedResponse` 装饰器
   - listActiveSessions: 缓存 1 分钟
@@ -431,6 +484,7 @@ Tests       13 passed (13)
 - ✅ 代码从 269 行减少到 241 行（-10%）
 
 **优势**:
+
 - ✅ 减少重复代码
 - ✅ 双层缓存提升性能
 - ✅ 自动 TTL 抖动防雪崩
@@ -441,6 +495,7 @@ Tests       13 passed (13)
 **预计时间**：2-3 小时 ✅ 完成
 
 **测试更新** ✅：
+
 - ✅ 更新 SessionService 测试（mock 从 em.find 改为 apiClient）
 - ✅ 所有测试通过（20/20）
 
@@ -449,12 +504,14 @@ Tests       13 passed (13)
 **服务**: `apps/gateway/src/auth/oauth.service.ts`
 
 **迁移内容**：
+
 - ✅ 使用 `TwoLayerCacheService` 替代 `CacheService`
 - ✅ 保留 validateAccessToken 手动缓存（有自定义过期检查逻辑）
 - ✅ 添加 `@CacheInvalidate` 装饰器到 revokeToken 方法
 - ✅ 更新 auth.module.ts 注入 TwoLayerCacheService
 
 **优势**:
+
 - ✅ 自动双层缓存提升性能
 - ✅ Token 撤销时自动失效缓存
 - ✅ 自动 TTL 抖动防雪崩
@@ -464,6 +521,7 @@ Tests       13 passed (13)
 **预计时间**：1-2 小时 ✅ 完成（实际 ~30 分钟）
 
 **测试通过**：
+
 - ✅ SessionService: 20/20
 - ✅ OAuth 缓存: 6/6
 - ✅ OAuth 性能: 6/6
@@ -473,6 +531,7 @@ Tests       13 passed (13)
 **目标**：更新 OAuthService 使用 TwoLayerCacheService
 
 **方法映射**：
+
 - `validateAccessToken` -> 保留手动缓存（有自定义逻辑）
 - `revokeToken` -> `@CacheInvalidate`
 
@@ -483,21 +542,27 @@ Tests       13 passed (13)
 **评估结果**：经分析，Phase 3.3 列出的服务不需要迁移缓存架构
 
 #### 1. TokenBlacklistService (135 行)
+
 **评估**：❌ 不适合使用缓存
+
 - **原因**：
   - 主要功能是撤销 Token，需要实时访问数据库
   - `isTokenRevoked` 需要查询最新状态，缓存会导致安全风险
   - 撤销操作必须立即生效，不应延迟
 
 #### 2. ApiKeyService (24 行)
+
 **评估**：❌ 已废弃，不需要迁移
+
 - **原因**：
   - 服务已标记为 `@deprecated`
   - 功能已由 Better Auth API Key 插件替代
   - 后续将删除
 
 #### 3. OrganizationService (347 行)
+
 **评估**：⏳ 可选优化（暂不迁移）
+
 - **原因**：
   - 主要调用 Better Auth API，缓存收益有限
   - 组织信息变更频率高，缓存管理复杂
@@ -517,6 +582,7 @@ Tests       13 passed (13)
 ### 🎉 Phase 3 完全完成！
 
 **成就解锁**：
+
 - ✅ Phase 3.0: 独立库迁移（88/88 测试通过）
 - ✅ Phase 3.1: SessionService 迁移（20/20 测试通过）
 - ✅ Phase 3.2: OAuthService 迁移（32/32 测试通过）
@@ -524,15 +590,17 @@ Tests       13 passed (13)
 - ✅ 所有缓存迁移工作完成
 
 **总计**：
+
 - ✅ 140/140 测试通过
 - ✅ 代码质量提升（装饰器模式、自动缓存）
 - ✅ 架构优化（独立库、双层缓存）
 
 ### 后续优化任务
 
-1. **补充 TTLJitterService 测试**（30 分钟）
-   - 添加单元测试
-   - 达到 100% 覆盖率
+1. ~~**补充 TTLJitterService 测试**（30 分钟）~~ ✅ 已完成
+   - ✅ 添加单元测试
+   - ✅ 达到 100% 覆盖率
+   - ✅ 修复抖动算法（从 ±5% 修正为 ±10%）
 
 2. **性能测试**（1-2 小时）
    - 缓存命中率基准测试
@@ -559,6 +627,7 @@ Tests       13 passed (13)
 ### 2026-03-07 (最新)
 
 **完成内容**：
+
 - ✅ Phase 1 和 Phase 2 全部完成（99/99 测试通过）
 - ✅ 创建 `TTLJitterService`（待补充测试）
 - ✅ 更新 `CacheModule` 提供完整依赖注入
@@ -580,8 +649,14 @@ Tests       13 passed (13)
   - ✅ 添加 @CacheInvalidate 装饰器到 revokeToken
   - ✅ 保留 validateAccessToken 手动缓存（有自定义逻辑）
   - ✅ 测试通过（32/32）
+- ✅ **TTLJitterService 测试完成**（2026-03-07 最新）
+  - ✅ 补充完整单元测试（8/8 通过）
+  - ✅ 修复抖动算法（从 ±5% 修正为 ±10%）
+  - ✅ 达到 100% 测试覆盖率
+  - ✅ 总测试数：96/96 通过
 
 **技术决策**：
+
 - TTL 抖动：±10% variance
 - 空值缓存 TTL：60 秒
 - L1 默认 TTL：30 秒
@@ -591,32 +666,33 @@ Tests       13 passed (13)
 - 目录结构：符合 Nx 最佳实践（services/, controllers/, decorators/）
 
 **下一步**：
-- ⏳ Phase 3.3：迁移其他服务（AuthService, TokenBlacklistService, ApiKeyService, OrganizationService）
-- ⏳ 补充 TTLJitterService 测试
+
+- ✅ TTLJitterService 测试完成（100% 覆盖率）
 - ⏳ 性能测试和文档编写
+- ⏳ 长期优化（Redis Cluster、Feature Flag 等）
 
 ---
 
 ## 技术债务追踪
 
-| 债务项 | 优先级 | 状态 | 备注 |
-|:---|:---:|:---:|:---|
-| TTLJitterService 缺少测试 | P1 | ⏳ | 需要补充单元测试 |
-| 移除旧版 CacheService | P2 | ⏳ | 等待独立库迁移完成后保留或移除 |
-| 移除旧版 RedisCacheService | P2 | ⏳ | 等待独立库迁移完成后保留或移除 |
-| 性能对比测试 | P1 | ⏳ | Phase 3 完成后执行 |
+| 债务项                        | 优先级 |  状态  | 备注                           |
+| :---------------------------- | :----: | :----: | :----------------------------- |
+| ~~TTLJitterService 缺少测试~~ | ~~P1~~ | ~~⏳~~ | ~~需要补充单元测试~~ ✅ 已完成 |
+| 移除旧版 CacheService         |   P2   |   ⏳   | 等待独立库迁移完成后保留或移除 |
+| 移除旧版 RedisCacheService    |   P2   |   ⏳   | 等待独立库迁移完成后保留或移除 |
+| 性能对比测试                  |   P1   |   ⏳   | Phase 3 完成后执行             |
 
 ---
 
 ## 风险管理
 
-| 风险 | 影响 | 概率 | 缓解措施 | 状态 |
-|:---|:---:|:---:|:---|:---:|
-| Redis 连接不稳定 | 高 | 中 | 自动降级到 L1、重连机制 | ✅ 已缓解 |
-| TTL 抖动导致数据不一致 | 中 | 低 | 接受短暂不一致、主动失效机制 | ✅ 已缓解 |
-| L1 缓存内存占用过高 | 中 | 中 | 限制 L1 大小、监控内存使用 | ⏳ 监控中 |
-| In-flight request 内存泄漏 | 高 | 低 | finally 清理、超时自动清理 | ✅ 已缓解 |
-| 独立库迁移影响现有功能 | 高 | 低 | 完整测试验证、渐进式迁移 | 🔄 进行中 |
+| 风险                       | 影响 | 概率 | 缓解措施                     |   状态    |
+| :------------------------- | :--: | :--: | :--------------------------- | :-------: |
+| Redis 连接不稳定           |  高  |  中  | 自动降级到 L1、重连机制      | ✅ 已缓解 |
+| TTL 抖动导致数据不一致     |  中  |  低  | 接受短暂不一致、主动失效机制 | ✅ 已缓解 |
+| L1 缓存内存占用过高        |  中  |  中  | 限制 L1 大小、监控内存使用   | ⏳ 监控中 |
+| In-flight request 内存泄漏 |  高  |  低  | finally 清理、超时自动清理   | ✅ 已缓解 |
+| 独立库迁移影响现有功能     |  高  |  低  | 完整测试验证、渐进式迁移     | 🔄 进行中 |
 
 ---
 
@@ -624,13 +700,13 @@ Tests       13 passed (13)
 
 ### 当前性能
 
-| 指标 | 目标 | 当前 | 状态 |
-|:---|:---:|:---:|:---:|
-| 测试通过率 | 100% | 100% | ✅ |
-| 代码覆盖率 | >85% | 92% | ✅ |
-| L1 命中率 | >80% | -% | ⏳ 待生产验证 |
-| L2 命中率 | >90% | -% | ⏳ 待生产验证 |
-| 总体命中率 | >95% | -% | ⏳ 待生产验证 |
+| 指标       | 目标 | 当前 |     状态      |
+| :--------- | :--: | :--: | :-----------: |
+| 测试通过率 | 100% | 100% |      ✅       |
+| 代码覆盖率 | >85% | 92%  |      ✅       |
+| L1 命中率  | >80% |  -%  | ⏳ 待生产验证 |
+| L2 命中率  | >90% |  -%  | ⏳ 待生产验证 |
+| 总体命中率 | >95% |  -%  | ⏳ 待生产验证 |
 
 ### 基准测试
 

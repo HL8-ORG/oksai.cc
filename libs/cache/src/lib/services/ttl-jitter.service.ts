@@ -46,8 +46,8 @@ export class TTLJitterService {
     }
 
     const variance = this.VARIANCE * ttl;
-    const jitter = variance * Math.random();
-    const ttlWithJitter = Math.floor(ttl - variance / 2 + jitter);
+    const jitter = variance * 2 * Math.random() - variance;
+    const ttlWithJitter = Math.floor(ttl + jitter);
 
     return Math.max(0, ttlWithJitter);
   }
