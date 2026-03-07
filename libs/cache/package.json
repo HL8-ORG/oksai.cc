@@ -1,0 +1,49 @@
+{
+  "name": "@oksai/cache",
+  "version": "0.1.0",
+  "description": "企业级缓存库 - 双层缓存（L1 LRU + L2 Redis）、装饰器模式、监控 API",
+  "license": "AGPL-3.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
+  "dependencies": {
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/swagger": "catalog:",
+    "ioredis": "catalog:",
+    "lru-cache": "catalog:",
+    "reflect-metadata": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/core": "^10.0.0 || ^11.0.0",
+    "ioredis": "^5.0.0",
+    "lru-cache": "^11.0.0",
+    "reflect-metadata": "^0.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

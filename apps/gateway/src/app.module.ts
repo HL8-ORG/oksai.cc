@@ -4,6 +4,7 @@ import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ApiExtraModels } from "@nestjs/swagger";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { CacheModule, CacheMonitorController } from "@oksai/cache";
 import { ConfigModule, ConfigService } from "@oksai/config";
 import { MikroOrmDatabaseModule } from "@oksai/database";
 import { GlobalExceptionFilter } from "@oksai/exceptions";
@@ -61,8 +62,6 @@ import {
   WebhookResponse,
 } from "./auth/dto";
 import { UserController } from "./auth/user.controller";
-import { CacheModule } from "./common/cache.module";
-import { CacheMonitorController } from "./common/cache-monitor.controller";
 import { CustomThrottlerGuard } from "./common/custom-throttler.guard";
 import { ExceptionExampleController } from "./examples/exception-example.controller";
 import { HealthController } from "./health/health.controller";

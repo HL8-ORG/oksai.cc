@@ -7,6 +7,7 @@ export default defineConfig({
     include: [
       "libs/auth/**/*.spec.ts",
       "libs/auth/**/*.integration.spec.ts",
+      "libs/cache/**/*.spec.ts",
       "libs/database/**/*.spec.ts",
       "libs/shared/**/*.spec.ts",
       "apps/gateway/**/*.spec.ts",

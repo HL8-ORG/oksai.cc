@@ -3,8 +3,8 @@
  */
 
 import { NotFoundException } from "@nestjs/common";
+import type { TwoLayerCacheService } from "@oksai/cache";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CacheService } from "../common/cache.service";
 import { SessionService } from "./session.service";
 
 // Mock EntityManager
@@ -17,14 +17,23 @@ const mockEm = {
   create: vi.fn(),
 } as any;
 
+// Mock BetterAuthApiClient
+const mockApiClient = {
+  listActiveSessions: vi.fn(),
+  revokeSession: vi.fn(),
+  revokeAllSessions: vi.fn(),
+  getSessionConfig: vi.fn(),
+  updateSessionConfig: vi.fn(),
+} as any;
+
 describe("SessionService", () => {
   let sessionService: SessionService;
-  let mockCacheService: CacheService;
+  let mockCacheService: TwoLayerCacheService;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // 创建 CacheService mock
+    // 创建 TwoLayerCacheService mock
     mockCacheService = {
       get: vi.fn(),
       set: vi.fn(),
@@ -38,7 +47,7 @@ describe("SessionService", () => {
       getOrSet: vi.fn(),
     } as any;
 
-    sessionService = new SessionService(mockCacheService, mockEm);
+    sessionService = new SessionService(mockEm, mockApiClient, mockCacheService);
   });
 
   describe("listActiveSessions", () => {

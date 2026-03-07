@@ -4,9 +4,8 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { Module } from "@nestjs/common";
+import { CacheModule, CacheService, TwoLayerCacheService } from "@oksai/cache";
 import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
-import { CacheModule } from "../common/cache.module";
-import { CacheService } from "../common/cache.service";
 import { AdminController } from "./admin.controller";
 import { ApiKeyController } from "./api-key.controller";
 import { AuthService } from "./auth.service";
@@ -70,14 +69,18 @@ import { WebhookService } from "./webhook.service";
     },
     {
       provide: SessionService,
-      useFactory: (cacheService: CacheService, em: EntityManager, betterAuthService: BetterAuthService) => {
+      useFactory: (
+        em: EntityManager,
+        betterAuthService: BetterAuthService,
+        cacheService: TwoLayerCacheService
+      ) => {
         // 创建 BetterAuthApiClient 实例
         const { BetterAuthApiClient } = require("@oksai/nestjs-better-auth");
         const apiClient = new BetterAuthApiClient(betterAuthService.api);
 
-        return new SessionService(cacheService, em, apiClient);
+        return new SessionService(em, apiClient, cacheService);
       },
-      inject: [CacheService, EntityManager, BetterAuthService],
+      inject: [EntityManager, BetterAuthService, TwoLayerCacheService],
     },
     TokenBlacklistService,
     WebhookService,

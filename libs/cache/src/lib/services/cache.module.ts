@@ -8,6 +8,9 @@ import process from "node:process";
 import { Global, Module } from "@nestjs/common";
 import { CacheService } from "./cache.service";
 import { RedisCacheService } from "./redis-cache.service";
+import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service";
+import { TTLJitterService } from "./ttl-jitter.service";
+import { TwoLayerCacheService } from "./two-layer-cache.service";
 
 /**
  * 缓存模块配置选项
@@ -47,8 +50,20 @@ export interface CacheModuleOptions {
  */
 @Global()
 @Module({
-  providers: [CacheService, RedisCacheService],
-  exports: [CacheService, RedisCacheService],
+  providers: [
+    CacheService,
+    RedisCacheService,
+    TTLJitterService,
+    RedisCacheEnhancedService,
+    TwoLayerCacheService,
+  ],
+  exports: [
+    CacheService,
+    RedisCacheService,
+    TTLJitterService,
+    RedisCacheEnhancedService,
+    TwoLayerCacheService,
+  ],
 })
 export class CacheModule {
   /**
@@ -64,6 +79,7 @@ export class CacheModule {
     return {
       module: CacheModule,
       providers: [
+        TTLJitterService,
         {
           provide: CacheService,
           useFactory: () => {
@@ -85,8 +101,40 @@ export class CacheModule {
             });
           },
         },
+        {
+          provide: RedisCacheEnhancedService,
+          useFactory: () => {
+            return new RedisCacheEnhancedService({
+              max: options.max ?? 10000,
+              ttl: options.ttl ?? 60000,
+              enableStats: options.enableStats ?? true,
+              redisUrl: redisEnabled ? redisUrl : undefined,
+            });
+          },
+        },
+        {
+          provide: TwoLayerCacheService,
+          useFactory: (
+            l1Cache: CacheService,
+            l2Cache: RedisCacheEnhancedService,
+            ttlJitterService: TTLJitterService
+          ) => {
+            return new TwoLayerCacheService(l1Cache, l2Cache, ttlJitterService, {
+              l1TTL: options.ttl ?? 30000,
+              l2TTL: 7200000, // 2 小时
+              enableStats: options.enableStats ?? true,
+            });
+          },
+          inject: [CacheService, RedisCacheEnhancedService, TTLJitterService],
+        },
       ],
-      exports: [CacheService, RedisCacheService],
+      exports: [
+        CacheService,
+        RedisCacheService,
+        TTLJitterService,
+        RedisCacheEnhancedService,
+        TwoLayerCacheService,
+      ],
     };
   }
 }

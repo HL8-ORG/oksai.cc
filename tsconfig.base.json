@@ -23,7 +23,9 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@oksai/better-auth-mikro-orm": ["libs/shared/better-auth-mikro-orm/src/index.ts"],
+      "@oksai/better-auth-mikro-orm": [
+        "libs/shared/better-auth-mikro-orm/src/index.ts"
+      ],
       "@oksai/config": ["libs/shared/config/src/index.ts"],
       "@oksai/constants": ["libs/shared/constants/src/index.ts"],
       "@oksai/context": ["libs/shared/context/src/index.ts"],
@@ -31,7 +33,8 @@
       "@oksai/email": ["libs/notification/email/src/index.ts"],
       "@oksai/event-store": ["libs/shared/event-store/src/index.ts"],
       "@oksai/exceptions": ["libs/shared/exceptions/src/index.ts"],
-      "@oksai/nestjs-utils": ["libs/shared/nestjs-utils/src/index.ts"]
+      "@oksai/nestjs-utils": ["libs/shared/nestjs-utils/src/index.ts"],
+      "@oksai/cache": ["libs/cache/src/index.ts"]
     }
   }
 }

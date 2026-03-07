@@ -4,9 +4,9 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger } from "@nestjs/common";
+import { CachedResponse, CacheInvalidate, TwoLayerCacheService } from "@oksai/cache";
 import { Session } from "@oksai/database";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
-import { CacheService } from "../common/cache.service";
 import type { SessionConfigResponse, SessionInfo, SessionListResponse, UpdateSessionConfigDto } from "./dto";
 
 /**
@@ -14,7 +14,7 @@ import type { SessionConfigResponse, SessionInfo, SessionListResponse, UpdateSes
  *
  * @description
  * 提供 Session 查询、管理、配置功能
- * - 集成 LRU Cache 提升查询性能
+ * - 使用装饰器模式自动管理缓存
  * - Session 配置缓存：5 分钟
  * - Session 信息缓存：1 分钟
  */
@@ -22,20 +22,14 @@ import type { SessionConfigResponse, SessionInfo, SessionListResponse, UpdateSes
 export class SessionService {
   private readonly logger = new Logger(SessionService.name);
 
-  /** Session 配置缓存前缀 */
-  private static readonly CACHE_PREFIX_CONFIG = "session:config:";
-  /** Session 列表缓存前缀 */
-  private static readonly CACHE_PREFIX_LIST = "session:list:";
-  /** Session 配置缓存 TTL：5 分钟 */
-  private static readonly CACHE_TTL_CONFIG = 300000;
-  /** Session 列表缓存 TTL：1 分钟 */
-  private static readonly CACHE_TTL_LIST = 60000;
-
   constructor(
-    private readonly cacheService: CacheService,
     private readonly em: EntityManager,
-    private readonly apiClient: BetterAuthApiClient
-  ) {}
+    private readonly apiClient: BetterAuthApiClient,
+    cacheSvc: TwoLayerCacheService
+  ) {
+    // 装饰器需要 this.cacheService
+    (this as any).cacheService = cacheSvc;
+  }
 
   /**
    * 获取用户的所有活跃 Session
@@ -43,59 +37,43 @@ export class SessionService {
    * @param userId - 用户 ID
    * @param currentSessionToken - 当前 Session Token（可选，用于标记当前 Session）
    */
+  @CachedResponse({
+    cacheKey: (userId: string) => `session:list:${userId}`,
+    ttl: 60000, // 1 分钟
+  })
   async listActiveSessions(userId: string, currentSessionToken?: string): Promise<SessionListResponse> {
-    try {
-      const cacheKey = `${SessionService.CACHE_PREFIX_LIST}${userId}`;
+    // 使用 Better Auth API 获取活跃会话
+    const result = await this.apiClient.listActiveSessions(userId, currentSessionToken);
 
-      // 尝试从缓存获取
-      const cachedResponse = this.cacheService.get<SessionListResponse>(cacheKey);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+    // 转换为我们的格式
+    const sessionList: SessionInfo[] =
+      result.sessions?.map(
+        (session: {
+          id: string;
+          userId: string;
+          createdAt: Date;
+          expiresAt: Date;
+          ipAddress?: string;
+          userAgent?: string;
+          isCurrent?: boolean;
+        }) => ({
+          id: session.id,
+          userId: session.userId,
+          createdAt: session.createdAt,
+          expiresAt: session.expiresAt,
+          ipAddress: session.ipAddress,
+          userAgent: session.userAgent,
+          isCurrent: session.isCurrent || false,
+        })
+      ) || [];
 
-      // 使用 Better Auth API 获取活跃会话
-      const result = await this.apiClient.listActiveSessions(userId, currentSessionToken);
-
-      // 转换为我们的格式
-      const sessionList: SessionInfo[] =
-        result.sessions?.map(
-          (session: {
-            id: string;
-            userId: string;
-            createdAt: Date;
-            expiresAt: Date;
-            ipAddress?: string;
-            userAgent?: string;
-            isCurrent?: boolean;
-          }) => ({
-            id: session.id,
-            userId: session.userId,
-            createdAt: session.createdAt,
-            expiresAt: session.expiresAt,
-            ipAddress: session.ipAddress,
-            userAgent: session.userAgent,
-            isCurrent: session.isCurrent || false,
-          })
-        ) || [];
-
-      const response: SessionListResponse = {
-        success: true,
-        message: "获取活跃 Session 列表成功",
-        sessions: sessionList,
-        currentSessionId:
-          result.currentSessionId || currentSessionToken
-            ? sessionList.find((s) => s.isCurrent)?.id
-            : undefined,
-      };
-
-      // 写入缓存
-      this.cacheService.set(cacheKey, response, SessionService.CACHE_TTL_LIST);
-
-      return response;
-    } catch (error) {
-      this.logger.error(`获取 Session 列表失败: ${userId}`, error);
-      throw error;
-    }
+    return {
+      success: true,
+      message: "获取活跃 Session 列表成功",
+      sessions: sessionList,
+      currentSessionId:
+        result.currentSessionId || currentSessionToken ? sessionList.find((s) => s.isCurrent)?.id : undefined,
+    };
   }
 
   /**
@@ -104,19 +82,13 @@ export class SessionService {
    * @param userId - 用户 ID
    * @param sessionId - 要撤销的 Session ID
    */
+  @CacheInvalidate({
+    cacheKey: (userId: string) => `session:list:${userId}`,
+  })
   async revokeSession(userId: string, sessionId: string): Promise<void> {
-    try {
-      // 使用 Better Auth API 撤销会话
-      await this.apiClient.revokeSession(sessionId, sessionId); // 这里 sessionId 作为 token 使用
-
-      // 清除 Session 列表缓存
-      this.cacheService.delete(`${SessionService.CACHE_PREFIX_LIST}${userId}`);
-
-      this.logger.log(`Session 已撤销: ${sessionId}`);
-    } catch (error) {
-      this.logger.error(`撤销 Session 失败: ${sessionId}`, error);
-      throw error;
-    }
+    // 使用 Better Auth API 撤销会话
+    await this.apiClient.revokeSession(sessionId, sessionId);
+    this.logger.log(`Session 已撤销: ${sessionId}`);
   }
 
   /**
@@ -124,23 +96,18 @@ export class SessionService {
    *
    * @param userId - 用户 ID
    * @param currentSessionToken - 当前 Session Token
+   * @returns 撤销的 Session 数量
    */
+  @CacheInvalidate({
+    cacheKey: (userId: string) => `session:list:${userId}`,
+  })
   async revokeOtherSessions(userId: string, currentSessionToken: string): Promise<number> {
-    try {
-      // 使用 Better Auth API 撤销所有其他会话
-      const result = await this.apiClient.revokeAllSessions(userId, currentSessionToken);
+    // 使用 Better Auth API 撤销所有其他会话
+    const result = await this.apiClient.revokeAllSessions(userId, currentSessionToken);
 
-      const deletedCount = result.deletedCount || 0;
-
-      // 清除 Session 列表缓存
-      this.cacheService.delete(`${SessionService.CACHE_PREFIX_LIST}${userId}`);
-
-      this.logger.log(`已撤销 ${deletedCount} 个其他 Session`);
-      return deletedCount;
-    } catch (error) {
-      this.logger.error(`撤销其他 Session 失败: ${userId}`, error);
-      throw error;
-    }
+    const deletedCount = result.deletedCount || 0;
+    this.logger.log(`已撤销 ${deletedCount} 个其他 Session`);
+    return deletedCount;
   }
 
   /**
@@ -148,42 +115,28 @@ export class SessionService {
    *
    * @param userId - 用户 ID
    */
+  @CachedResponse({
+    cacheKey: (userId: string) => `session:config:${userId}`,
+    ttl: 300000, // 5 分钟
+  })
   async getSessionConfig(userId: string): Promise<SessionConfigResponse> {
-    try {
-      const cacheKey = `${SessionService.CACHE_PREFIX_CONFIG}${userId}`;
+    // 使用 Better Auth API 获取会话配置
+    const result = await this.apiClient.getSessionConfig(userId);
 
-      // 尝试从缓存获取
-      const cachedConfig = this.cacheService.get<SessionConfigResponse>(cacheKey);
-      if (cachedConfig) {
-        return cachedConfig;
-      }
+    // 转换为我们的格式
+    const sessionTimeout = result.sessionTimeout || 604800; // 默认 7 天
+    const sessionTimeoutDays = Math.round((sessionTimeout / 86400) * 10) / 10;
+    const allowConcurrentSessions = result.allowConcurrentSessions ?? true;
+    const maxConcurrentSessions = result.maxConcurrentSessions ?? 5; // 默认 5 个会话
 
-      // 使用 Better Auth API 获取会话配置
-      const result = await this.apiClient.getSessionConfig(userId);
-
-      // 转换为我们的格式
-      const sessionTimeout = result.sessionTimeout || 604800; // 默认 7 天
-      const sessionTimeoutDays = Math.round((sessionTimeout / 86400) * 10) / 10;
-      const allowConcurrentSessions = result.allowConcurrentSessions ?? true;
-      const maxConcurrentSessions = result.maxConcurrentSessions ?? 5; // 默认 5 个会话
-
-      const response: SessionConfigResponse = {
-        success: true,
-        message: "获取 Session 配置成功",
-        sessionTimeout,
-        sessionTimeoutDays,
-        allowConcurrentSessions,
-        maxConcurrentSessions,
-      };
-
-      // 写入缓存
-      this.cacheService.set(cacheKey, response, SessionService.CACHE_TTL_CONFIG);
-
-      return response;
-    } catch (error) {
-      this.logger.error(`获取 Session 配置失败: ${userId}`, error);
-      throw error;
-    }
+    return {
+      success: true,
+      message: "获取 Session 配置成功",
+      sessionTimeout,
+      sessionTimeoutDays,
+      allowConcurrentSessions,
+      maxConcurrentSessions,
+    };
   }
 
   /**
@@ -192,24 +145,40 @@ export class SessionService {
    * @param userId - 用户 ID
    * @param dto - 更新配置 DTO
    */
+  @CacheInvalidate({
+    cacheKey: (userId: string) => `session:config:${userId}`,
+  })
   async updateSessionConfig(userId: string, dto: UpdateSessionConfigDto): Promise<SessionConfigResponse> {
-    try {
-      this.logger.log(`更新 Session 配置: ${userId}`, dto);
+    this.logger.log(`更新 Session 配置: ${userId}`, dto);
 
-      // 使用 Better Auth API 更新会话配置
-      await this.apiClient.updateSessionConfig(dto);
+    // 使用 Better Auth API 更新会话配置
+    await this.apiClient.updateSessionConfig(dto);
 
-      // 获取更新后的完整配置
-      const config = await this.getSessionConfig(userId);
+    // 获取更新后的完整配置
+    // 注意：由于有 @CacheInvalidate，这里会清除缓存
+    // 下次调用 getSessionConfig 会从 API 获取最新数据
+    return await this.getSessionConfigAfterUpdate(userId);
+  }
 
-      // 清除配置缓存
-      this.cacheService.delete(`${SessionService.CACHE_PREFIX_CONFIG}${userId}`);
+  /**
+   * 更新后获取配置（内部方法，不缓存）
+   */
+  private async getSessionConfigAfterUpdate(userId: string): Promise<SessionConfigResponse> {
+    const result = await this.apiClient.getSessionConfig(userId);
 
-      return config;
-    } catch (error) {
-      this.logger.error(`更新 Session 配置失败: ${userId}`, error);
-      throw error;
-    }
+    const sessionTimeout = result.sessionTimeout || 604800;
+    const sessionTimeoutDays = Math.round((sessionTimeout / 86400) * 10) / 10;
+    const allowConcurrentSessions = result.allowConcurrentSessions ?? true;
+    const maxConcurrentSessions = result.maxConcurrentSessions ?? 5;
+
+    return {
+      success: true,
+      message: "获取 Session 配置成功",
+      sessionTimeout,
+      sessionTimeoutDays,
+      allowConcurrentSessions,
+      maxConcurrentSessions,
+    };
   }
 
   /**
