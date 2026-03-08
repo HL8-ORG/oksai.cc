@@ -1,3 +1,4 @@
+import process from "node:process";
 import { Inject, Injectable, type LoggerService, Optional, Scope } from "@nestjs/common";
 import { DEFAULT_LOG_LEVEL } from "@oksai/constants";
 import { type AsyncLocalStorageProvider, TenantContextService } from "@oksai/context";
@@ -11,6 +12,8 @@ import { serializeError } from "./logger.serializer.js";
  */
 type PinoHttpConfig =
   NonNullable<Params["pinoHttp"]> extends infer T ? (T extends { stream?: unknown } ? T : never) : never;
+
+type PinoTimestampConfig = NonNullable<Parameters<typeof pino>[0]>["timestamp"];
 
 /**
  * OksaiLogger 配置选项
@@ -116,6 +119,7 @@ export class OksaiLoggerService implements LoggerService {
    * @private
    */
   private readonly enableContext: boolean;
+  private readonly timestamp: PinoTimestampConfig;
 
   constructor(
     @Optional() @Inject(PARAMS_PROVIDER_TOKEN) params?: Params,
@@ -125,31 +129,57 @@ export class OksaiLoggerService implements LoggerService {
     const pinoHttp = params?.pinoHttp as PinoHttpConfig | undefined;
     this.serviceName = (pinoHttp as { name?: string } | undefined)?.name ?? "oksai";
     this.enableContext = true;
+    this.timestamp =
+      (pinoHttp as { timestamp?: PinoTimestampConfig } | undefined)?.timestamp ?? pino.stdTimeFunctions.isoTime;
+    const isProduction = process.env.NODE_ENV === "production";
+    const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "true" : !isProduction;
+    const prettyTransport = shouldPrettyLog
+      ? {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "SYS:standard",
+            singleLine: false,
+            errorLikeObjectKeys: ["err", "error"],
+            ignore: "pid,hostname",
+          },
+        }
+      : null;
 
     // 初始化 Pino 日志器
-    if (pinoHttp && "stream" in pinoHttp && pinoHttp.stream) {
-      // 使用已配置的 Pino 实例（带 stream）
-      this.logger = pino(
-        {
-          level: (pinoHttp as { level?: string }).level ?? DEFAULT_LOG_LEVEL,
-        },
-        pinoHttp.stream as unknown as NodeJS.WritableStream
-      );
+    if (prettyTransport) {
+      this.logger = pino({
+        level: (pinoHttp as { level?: string } | undefined)?.level ?? DEFAULT_LOG_LEVEL,
+        name: this.serviceName,
+        timestamp: this.timestamp,
+        transport: prettyTransport,
+      });
     } else if (pinoHttp && "transport" in pinoHttp && pinoHttp.transport) {
       // 使用 transport 配置（pino-pretty 等）
       this.logger = pino({
         level: (pinoHttp as { level?: string }).level ?? DEFAULT_LOG_LEVEL,
         name: this.serviceName,
+        timestamp: this.timestamp,
         transport: pinoHttp.transport as {
           target: string;
           options?: Record<string, unknown>;
         },
       });
+    } else if (pinoHttp && "stream" in pinoHttp && pinoHttp.stream) {
+      // 使用已配置的 Pino 实例（带 stream）
+      this.logger = pino(
+        {
+          level: (pinoHttp as { level?: string }).level ?? DEFAULT_LOG_LEVEL,
+          timestamp: this.timestamp,
+        },
+        pinoHttp.stream as unknown as NodeJS.WritableStream
+      );
     } else {
       // 创建独立的 Pino 实例
       this.logger = pino({
         level: (pinoHttp as { level?: string } | undefined)?.level ?? DEFAULT_LOG_LEVEL,
         name: this.serviceName,
+        timestamp: this.timestamp,
       });
     }
 
@@ -176,6 +206,7 @@ export class OksaiLoggerService implements LoggerService {
       this.tenantContextService;
     (childLogger as unknown as { serviceName: string }).serviceName = this.serviceName;
     (childLogger as unknown as { enableContext: boolean }).enableContext = this.enableContext;
+    (childLogger as unknown as { timestamp: PinoTimestampConfig }).timestamp = this.timestamp;
     return childLogger;
   }
 

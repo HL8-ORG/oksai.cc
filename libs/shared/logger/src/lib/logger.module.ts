@@ -2,6 +2,7 @@ import { type DynamicModule, Module, type OnModuleDestroy, type Provider } from 
 import { DEFAULT_LOG_LEVEL } from "@oksai/constants";
 import { AsyncLocalStorageProvider, TenantContextService } from "@oksai/context";
 import { LoggerModule as NestPinoLoggerModule, type Params } from "nestjs-pino";
+import { pino } from "pino";
 import {
   computeLogLevel,
   getRequestIdFromReq,
@@ -117,10 +118,9 @@ function buildPinoParams(options: LoggerModuleOptions, tenantContextService?: Te
   const enableContext = options.enableContext !== false;
 
   const prettyOptions = options.prettyOptions ?? {};
-  const prettyTarget = pretty ? resolveOptionalDependency("pino-pretty") : null;
-  const transport = prettyTarget
+  const transport = pretty
     ? {
-        target: prettyTarget,
+        target: "pino-pretty",
         options: {
           colorize: prettyOptions.colorize !== false,
           translateTime: prettyOptions.timeFormat ?? "SYS:standard",
@@ -159,6 +159,7 @@ function buildPinoParams(options: LoggerModuleOptions, tenantContextService?: Te
     pinoHttp: {
       name: serviceName,
       level,
+      timestamp: pino.stdTimeFunctions.isoTime,
       autoLogging: true,
       quietReqLogger: true,
       redact,

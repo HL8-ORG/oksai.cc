@@ -6,22 +6,25 @@ import { Module } from "@nestjs/common";
 import { pino } from "pino";
 import * as entities from "./entities/index.js";
 
+const isProduction = process.env.NODE_ENV === "production";
+const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "true" : !isProduction;
+
 const mikroOrmPino = pino({
   name: "oksai",
   level: process.env.LOG_LEVEL || "info",
-  transport:
-    process.env.NODE_ENV !== "production"
-      ? {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "SYS:standard",
-            singleLine: false,
-            errorLikeObjectKeys: ["err", "error"],
-            ignore: "pid,hostname",
-          },
-        }
-      : undefined,
+  timestamp: pino.stdTimeFunctions.isoTime,
+  transport: shouldPrettyLog
+    ? {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "SYS:standard",
+          singleLine: false,
+          errorLikeObjectKeys: ["err", "error"],
+          ignore: "pid,hostname",
+        },
+      }
+    : undefined,
 });
 
 /**
@@ -47,7 +50,7 @@ const mikroOrmPino = pino({
         port: Number(process.env.DB_PORT) || 5432,
         user: process.env.DB_USER || "oksai",
         password: process.env.DB_PASSWORD || "oksai_dev_password",
-        debug: process.env.NODE_ENV === "development",
+        debug: !isProduction,
         loggerFactory: (options: LoggerOptions) =>
           new DefaultLogger({
             ...options,

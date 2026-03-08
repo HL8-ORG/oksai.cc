@@ -188,7 +188,7 @@ pnpm dev:web      # Start web-admin (TanStack Start)
 
 ## 四、Code Style Guidelines
 
-### Import Organization
+### Import Organization (ESM)
 
 Biome automatically organizes imports in this order:
 
@@ -196,13 +196,44 @@ Biome automatically organizes imports in this order:
 2. External packages (`@nestjs/common`, `react`, etc.)
 3. Internal workspace packages (`@oksai/**`)
 4. Path aliases (`~/**`)
-5. Relative imports (`./`, `../`)
+5. Relative imports with `.js` extension (`./module.js`, `../utils/index.js`)
 
-**Rules:**
+**ESM Rules:**
 
-- Always use `node:` protocol for Node.js builtins
-- Use `import type` for type-only imports
-- Group imports logically with blank lines between groups
+- ✅ Always use `node:` protocol for Node.js builtins
+- ✅ Use `import type` for type-only imports
+- ✅ Include `.js` extension for all local imports
+- ✅ Group imports logically with blank lines between groups
+
+**ESM Import Examples:**
+
+```typescript
+// ✅ 正确的 ESM 导入示例
+import { fileURLToPath } from 'node:url'; // Node.js 内置模块
+import { join, dirname } from 'node:path'; // Node.js 内置模块
+import { Controller, Get } from '@nestjs/common'; // 第三方包
+import { ConfigService } from '@oksai/config'; // Workspace 包
+import type { User } from '~/types/user.js'; // 别名路径 + type
+import { AuthService } from './auth.service.js'; // 相对路径 + .js
+import { UserModule } from '../user/index.js'; // 父级路径 + index.js
+```
+
+**CommonJS 到 ESM 迁移要点:**
+
+```typescript
+// ❌ CommonJS 方式
+import { AppModule } from './app.module';
+const crypto = require('node:crypto');
+const __dirname = __dirname;
+
+// ✅ ESM 方式
+import { AppModule } from './app.module.js';
+import { pbkdf2Sync } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+```
 
 ### Formatting (Biome)
 
@@ -318,7 +349,8 @@ try {
 ```
 libs/tsconfig/
 ├── base.json              # 基础配置（最严格）
-├── nestjs.json            # NestJS 应用配置
+├── nestjs-esm.json        # NestJS ESM 应用配置（推荐）
+├── nestjs.json            # NestJS CommonJS 配置（已废弃）
 ├── node-library.json      # Node.js 库配置
 ├── react-library.json     # React 库配置
 ├── tanstack-start.json    # TanStack Start 应用配置
@@ -353,13 +385,15 @@ libs/shared/tsconfig/
 
 ```json
 {
-  "extends": "@oksai/tsconfig/nestjs.json",
+  "extends": "@oksai/tsconfig/nestjs-esm.json",
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "./"
   }
 }
 ```
+
+**说明**：项目已完成 ESM 迁移（2026-03-08），使用 `nestjs-esm.json` 配置。
 
 **构建配置**：
 
@@ -388,14 +422,21 @@ libs/shared/tsconfig/
 
 #### 关键配置说明
 
-| 配置项                  | base    | nestjs   | node-library | react-library |
-| ----------------------- | ------- | -------- | ------------ | ------------- |
-| `strict`                | ✅ true | ✅ true  | ✅ true      | ✅ true       |
-| `module`                | -       | CommonJS | ESNext       | ESNext        |
-| `moduleResolution`      | node    | Node     | Bundler      | Bundler       |
-| `composite`             | false   | -        | true         | -             |
-| `emitDecoratorMetadata` | true    | true     | -            | -             |
-| `noUnusedLocals`        | true    | true     | true         | true          |
+| 配置项                  | base    | nestjs-esm | node-library | react-library |
+| ----------------------- | ------- | ---------- | ------------ | ------------- |
+| `strict`                | ✅ true | ✅ true    | ✅ true      | ✅ true       |
+| `module`                | ES2022  | ES2022     | ESNext       | ESNext        |
+| `moduleResolution`      | Bundler | Bundler    | Bundler      | Bundler       |
+| `composite`             | false   | -          | true         | -             |
+| `emitDecoratorMetadata` | true    | true       | -            | -             |
+| `noUnusedLocals`        | true    | true       | true         | true          |
+
+**⚠️ ESM 迁移说明**（2026-03-08 完成）：
+
+- ✅ 项目已从 CommonJS 迁移到 ESM
+- ✅ NestJS 应用使用 `nestjs-esm.json` 配置
+- ✅ 所有模块使用 ES2022 + Bundler 模式
+- 📚 迁移详情：`docs/migration/ESM-MIGRATION-SUMMARY.md`
 
 #### Nx 构建优化
 
@@ -527,7 +568,46 @@ pnpm build
 pnpm nx build @oksai/gateway
 ```
 
-### 5.3 依赖注入元数据问题排查
+### 5.3 ESM Import 规范
+
+**⚠️ 关键规则**: ESM 模式下，本地导入必须包含 `.js` 后缀
+
+```typescript
+// ❌ 错误 - ESM 规范要求文件扩展名
+import { AppModule } from './app.module';
+import { AuthService } from './auth/service';
+
+// ✅ 正确 - 包含 .js 后缀
+import { AppModule } from './app.module.js';
+import { AuthService } from './auth/service/index.js';
+```
+
+**规则说明**：
+
+| 导入类型         | 必须包含 .js | 示例               |
+| ---------------- | ------------ | ------------------ |
+| 相对路径导入     | ✅ 是        | `./module.js`      |
+| 目录导入         | ✅ 是        | `./utils/index.js` |
+| Node.js 内置模块 | ❌ 否        | `node:path`        |
+| 第三方包         | ❌ 否        | `@nestjs/common`   |
+| Workspace 包     | ❌ 否        | `@oksai/config`    |
+
+**快速修复命令**：
+
+```bash
+# 查找缺少 .js 后缀的导入
+grep -rn 'from "\./[^"]*[^.js]"' apps/gateway/src --include="*.ts"
+
+# 批量添加 .js 后缀
+sed -i 's/from "\(\.\/[^"]*\)"/from "\1.js"/g' **/*.ts
+```
+
+**参考工具**：
+
+- 自动化脚本：`scripts/esm/add-js-extensions.ts`
+- 迁移文档：`docs/migration/ESM-MIGRATION-SUMMARY.md`
+
+### 5.4 依赖注入元数据问题排查
 
 **症状：**
 
@@ -666,3 +746,142 @@ pnpm dev
 ## 六、Spec 优先开发
 
 详细流程参见 `specs/README.md`。每个功能包含：`design.md`、`implementation.md`、`decisions.md`、`prompts.md`、`future-work.md`、`docs/`。
+
+## 七、ESM 迁移最佳实践
+
+### 7.0 迁移概述
+
+**迁移状态**: ✅ 完成（2026-03-08）  
+**迁移版本**: v2.0.0-esm  
+**详细文档**: `docs/migration/ESM-MIGRATION-SUMMARY.md`
+
+项目已从 CommonJS 成功迁移到 ESM，为 NestJS 12 做好准备。
+
+### 7.1 Import 路径规范
+
+**核心规则**: 所有本地导入必须包含 `.js` 后缀
+
+```typescript
+// ✅ 正确
+import { AppModule } from "./app.module.js";
+import { AuthService } from "./auth.service.js";
+import { UserDto } from "./dto/index.js";
+
+// ❌ 错误
+import { AppModule } from "./app.module";
+import { AuthService } from "./auth.service";
+import { UserDto } from "./dto";
+```
+
+**自动化工具**: `scripts/esm/add-js-extensions.ts`
+
+### 7.2 __dirname 替换方案
+
+ESM 模式下不存在 `__dirname` 全局变量，需要手动创建：
+
+```typescript
+// ✅ ESM 标准方式
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const configPath = join(__dirname, "../config");
+```
+
+**自动化工具**: `scripts/esm/transform-dirname.ts`
+
+### 7.3 require() 替换
+
+ESM 不支持 `require()`，必须使用静态 `import`：
+
+```typescript
+// ❌ CommonJS
+const crypto = require("node:crypto");
+const { BetterAuthApiClient } = require("@oksai/nestjs-better-auth");
+
+// ✅ ESM
+import { pbkdf2Sync } from "node:crypto";
+import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
+```
+
+### 7.4 reflect-metadata 加载顺序
+
+**关键**: `reflect-metadata` 必须在所有其他 import 之前加载
+
+```typescript
+// main.ts - 必须在第一行
+import "reflect-metadata";
+// 其他 import...
+```
+
+### 7.5 测试 Mock 注意事项
+
+ESM 模式下，Mock API 的参数格式可能与 CommonJS 不同：
+
+```typescript
+// 检查实际实现
+await this.apiClient.enableTwoFactor({ password }, token);
+
+// 更新测试 Mock
+mockAuthAPI.enableTwoFactor.mockResolvedValue(result);
+expect(mockAuthAPI.enableTwoFactor).toHaveBeenCalledWith(
+  { password: dto.password },
+  token
+);
+```
+
+### 7.6 故障排查
+
+#### 问题 1: Cannot find module
+
+**症状**: `Error: Cannot find module './app.module'`
+
+**原因**: Import 路径缺少 `.js` 后缀
+
+**解决**: 添加 `.js` 后缀或运行自动化脚本
+
+#### 问题 2: __dirname is not defined
+
+**症状**: `ReferenceError: __dirname is not defined`
+
+**原因**: ESM 模式下不存在 `__dirname`
+
+**解决**: 使用 `fileURLToPath(import.meta.url)` 创建
+
+#### 问题 3: 依赖注入失败
+
+**症状**: `Nest can't resolve dependencies`
+
+**原因**: `reflect-metadata` 未正确加载
+
+**解决**: 
+1. 确保 `reflect-metadata` 在文件顶部
+2. 检查 `tsconfig.json` 的 `emitDecoratorMetadata: true`
+3. 不要对注入的 Service 使用 `import type`
+
+### 7.7 迁移检查清单
+
+新文件或迁移时的检查项：
+
+- [ ] Import 路径包含 `.js` 后缀
+- [ ] 目录导入使用 `index.js`
+- [ ] `__dirname` 使用 ESM 方式
+- [ ] 无 `require()` 调用
+- [ ] `reflect-metadata` 在顶部
+- [ ] 注入的 Service 不使用 `import type`
+- [ ] 测试通过
+
+### 7.8 相关文档
+
+- **迁移总结**: `docs/migration/ESM-MIGRATION-SUMMARY.md`
+- **迁移清单**: `docs/migration/esm-migration-checklist.md`
+- **快速参考**: `docs/migration/ESM-MIGRATION-QUICK-REFERENCE.md`
+- **测试结果**: `docs/migration/esm-phase2-test-results.md`
+
+---
+
+**文档版本**: v2.0  
+**最后更新**: 2026-03-08  
+**维护者**: oksai.cc 团队

@@ -66,6 +66,9 @@ import { ExceptionExampleController } from "./examples/exception-example.control
 import { HealthController } from "./health/health.controller.js";
 import { RootController } from "./root.controller.js";
 
+const isProduction = process.env.NODE_ENV === "production";
+const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "true" : !isProduction;
+
 /**
  * 根模块
  *
@@ -136,7 +139,7 @@ import { RootController } from "./root.controller.js";
 
     LoggerModule.forRoot({
       isGlobal: true,
-      pretty: process.env.NODE_ENV !== "production",
+      pretty: shouldPrettyLog,
       level: process.env.LOG_LEVEL || "info",
     }),
 
