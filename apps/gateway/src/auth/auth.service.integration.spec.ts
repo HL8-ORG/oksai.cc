@@ -181,7 +181,7 @@ describe("AuthService (Integration)", () => {
       const result = await service.forgotPassword(forgotPasswordDto);
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe("密码重置邮件已发送，请查收");
+      expect(result.message).toBe("如果该邮箱已注册，您将收到密码重置邮件");
       expect(mockAuthAPI.forgotPassword).toHaveBeenCalledWith({
         email: forgotPasswordDto.email,
       });
