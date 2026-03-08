@@ -36,6 +36,17 @@ async function bootstrap() {
     exclude: ["/"],
   });
 
+  // Better Auth 健康检查端点
+  // 处理 GET /api/auth 请求，返回服务状态
+  app.getHttpAdapter().get("/auth", (req, res) => {
+    res.json({
+      status: "ok",
+      service: "better-auth",
+      version: "1.0.0",
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   // 启用 CORS，允许前端跨域访问
   app.enableCors({
     origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
