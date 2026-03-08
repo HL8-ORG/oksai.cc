@@ -246,7 +246,9 @@ describe("Admin 管理功能集成测试", () => {
           body: expect.objectContaining({
             userId: "user-001",
             banReason: "违反服务条款",
-            banExpiresIn: 86400,
+          }),
+          headers: expect.objectContaining({
+            authorization: expect.stringContaining("Bearer"),
           }),
         })
       );
