@@ -24,6 +24,13 @@ export class OAuthAccessToken extends BaseEntity {
   @Property({ nullable: true })
   revokedAt?: Date;
 
+  /**
+   * 租户 ID（多租户隔离）
+   */
+  @Property({ nullable: true })
+  @Index()
+  tenantId?: string;
+
   @BeforeCreate()
   beforeCreate() {
     if (new Date() > this.expiresAt) {

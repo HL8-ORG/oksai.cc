@@ -31,6 +31,13 @@ export class Webhook extends BaseEntity {
   @Index()
   organizationId?: string;
 
+  /**
+   * 租户 ID（多租户隔离）
+   */
+  @Property({ nullable: true })
+  @Index()
+  tenantId?: string;
+
   @Property({ nullable: true })
   description?: string;
 

@@ -13,8 +13,12 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { CheckQuota } from "../tenant/decorators/check-quota.decorator.js";
+import { QuotaGuard } from "../tenant/guards/quota.guard.js";
+import { TenantGuard } from "../tenant/tenant.guard.js";
 import {
   CreateOrganizationDto,
   InviteMemberDto,
@@ -32,6 +36,8 @@ import { OrganizationService } from "./organization.service.js";
  * 提供组织管理、成员管理接口
  *
  * 所有接口需要用户认证（通过 Bearer Token）
+ * 所有操作受租户隔离保护（TenantGuard）
+ * 创建组织和邀请成员受配额限制（QuotaGuard）
  */
 @ApiTags("组织管理")
 @ApiHeader({
@@ -40,6 +46,7 @@ import { OrganizationService } from "./organization.service.js";
   required: true,
 })
 @Controller("organizations")
+@UseGuards(TenantGuard) // 所有接口都受租户隔离保护
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 
@@ -48,6 +55,7 @@ export class OrganizationController {
    *
    * @description
    * 创建新组织，创建者自动成为 owner
+   * 受配额限制：检查租户的组织配额
    *
    * @example
    * POST /api/organizations
@@ -56,7 +64,12 @@ export class OrganizationController {
    * Response: { success: true, organization: { id, name, ... } }
    */
   @Post()
-  @ApiOperation({ summary: "创建组织", description: "创建新组织，创建者自动成为 owner" })
+  @UseGuards(QuotaGuard) // 检查配额
+  @CheckQuota("organizations") // 检查组织配额
+  @ApiOperation({
+    summary: "创建组织",
+    description: "创建新组织，创建者自动成为 owner",
+  })
   @ApiBody({ type: CreateOrganizationDto })
   @ApiResponse({
     status: 201,
@@ -65,6 +78,7 @@ export class OrganizationController {
   })
   @ApiResponse({ status: 400, description: "参数错误" })
   @ApiResponse({ status: 401, description: "未认证" })
+  @ApiResponse({ status: 403, description: "配额超限或权限不足" })
   async createOrganization(
     @Headers("authorization") _authorization: string,
     @Body() dto: CreateOrganizationDto
@@ -98,7 +112,10 @@ export class OrganizationController {
    * Response: { success: true, organization: { id, name, ... } }
    */
   @Get(":id")
-  @ApiOperation({ summary: "获取组织详情", description: "获取指定组织的详细信息" })
+  @ApiOperation({
+    summary: "获取组织详情",
+    description: "获取指定组织的详细信息",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiResponse({
     status: 200,
@@ -140,7 +157,10 @@ export class OrganizationController {
    * Response: { success: true, organizations: [...] }
    */
   @Get()
-  @ApiOperation({ summary: "获取组织列表", description: "获取当前用户所属的所有组织" })
+  @ApiOperation({
+    summary: "获取组织列表",
+    description: "获取当前用户所属的所有组织",
+  })
   @ApiResponse({
     status: 200,
     description: "成功",
@@ -182,7 +202,10 @@ export class OrganizationController {
    * Response: { success: true, organization: { id, name, ... } }
    */
   @Put(":id")
-  @ApiOperation({ summary: "更新组织", description: "更新组织信息（需要 owner 权限）" })
+  @ApiOperation({
+    summary: "更新组织",
+    description: "更新组织信息（需要 owner 权限）",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiBody({ type: UpdateOrganizationDto })
   @ApiResponse({
@@ -216,47 +239,11 @@ export class OrganizationController {
   }
 
   /**
-   * 删除组织
-   *
-   * @description
-   * 删除组织（需要 owner 权限）
-   *
-   * @example
-   * DELETE /api/organizations/:id
-   * Header: Authorization: Bearer <token>
-   * Response: { success: true, message: "组织已删除" }
-   */
-  @Delete(":id")
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "删除组织", description: "删除组织（需要 owner 权限）" })
-  @ApiParam({ name: "id", description: "组织 ID", type: "string" })
-  @ApiResponse({
-    status: 200,
-    description: "删除成功",
-    schema: { example: { success: true, message: "组织已删除" } },
-  })
-  @ApiResponse({ status: 404, description: "组织不存在" })
-  @ApiResponse({ status: 403, description: "无权限（需要 owner）" })
-  @ApiResponse({ status: 401, description: "未认证" })
-  async deleteOrganization(
-    @Headers("authorization") _authorization: string,
-    @Param("id") organizationId: string
-  ): Promise<{ success: boolean; message: string }> {
-    // TODO: 从 token 中提取 userId
-    const userId = "temp-user-id";
-    await this.organizationService.deleteOrganization(organizationId, userId);
-
-    return {
-      success: true,
-      message: "组织已删除",
-    };
-  }
-
-  /**
    * 邀请成员
    *
    * @description
    * 邀请新成员加入组织（需要 owner 或 admin 权限）
+   * 受配额限制：检查租户的成员配额
    *
    * @example
    * POST /api/organizations/:id/invite
@@ -265,8 +252,13 @@ export class OrganizationController {
    * Response: { success: true, message: "邀请已发送" }
    */
   @Post(":id/invite")
+  @UseGuards(QuotaGuard) // 检查配额
+  @CheckQuota("members") // 检查成员配额
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "邀请成员", description: "邀请新成员加入组织（需要 owner 或 admin 权限）" })
+  @ApiOperation({
+    summary: "邀请成员",
+    description: "邀请新成员加入组织（需要 owner 或 admin 权限）",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiBody({ type: InviteMemberDto })
   @ApiResponse({
@@ -275,7 +267,7 @@ export class OrganizationController {
     schema: { example: { success: true, message: "邀请已发送" } },
   })
   @ApiResponse({ status: 404, description: "组织不存在" })
-  @ApiResponse({ status: 403, description: "无权限（需要 owner 或 admin）" })
+  @ApiResponse({ status: 403, description: "无权限或配额超限" })
   @ApiResponse({ status: 401, description: "未认证" })
   async inviteMember(
     @Headers("authorization") _authorization: string,
@@ -304,7 +296,10 @@ export class OrganizationController {
    * Response: { success: true, members: [...] }
    */
   @Get(":id/members")
-  @ApiOperation({ summary: "获取成员列表", description: "获取指定组织的所有成员" })
+  @ApiOperation({
+    summary: "获取成员列表",
+    description: "获取指定组织的所有成员",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiResponse({
     status: 200,
@@ -355,7 +350,10 @@ export class OrganizationController {
    */
   @Delete(":id/members/:memberId")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "移除成员", description: "从组织中移除成员（需要 owner 或 admin 权限）" })
+  @ApiOperation({
+    summary: "移除成员",
+    description: "从组织中移除成员（需要 owner 或 admin 权限）",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiParam({ name: "memberId", description: "成员 ID", type: "string" })
   @ApiResponse({
@@ -395,7 +393,10 @@ export class OrganizationController {
    */
   @Put(":id/members/:memberId/role")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "更新成员角色", description: "更新成员在组织中的角色（需要 owner 权限）" })
+  @ApiOperation({
+    summary: "更新成员角色",
+    description: "更新成员在组织中的角色（需要 owner 权限）",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiParam({ name: "memberId", description: "成员 ID", type: "string" })
   @ApiBody({ type: UpdateMemberRoleDto })
@@ -436,7 +437,10 @@ export class OrganizationController {
    */
   @Post(":id/set-active")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "设置活动组织", description: "设置用户当前活动的组织（用于多租户场景）" })
+  @ApiOperation({
+    summary: "设置活动组织",
+    description: "设置用户当前活动的组织（用于多租户场景）",
+  })
   @ApiParam({ name: "id", description: "组织 ID", type: "string" })
   @ApiResponse({
     status: 200,

@@ -5,7 +5,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { Webhook, WebhookDelivery } from "@oksai/database";
+import { Webhook, WebhookDelivery } from "@oksai/iam-infrastructure";
 import type {
   CreateWebhookDto,
   UpdateWebhookDto,

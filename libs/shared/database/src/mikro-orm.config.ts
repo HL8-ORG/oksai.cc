@@ -1,6 +1,7 @@
 import process from "node:process";
 import { defineConfig } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import { TenantFilter } from "./filters/tenant.filter.js";
 
 export default defineConfig({
   entities: ["./dist/entities/**/*.js"],
@@ -16,5 +17,8 @@ export default defineConfig({
     path: "./dist/migrations",
     pathTs: "./src/migrations",
     glob: "!(*.d).{js,ts}",
+  },
+  filters: {
+    tenant: TenantFilter,
   },
 });

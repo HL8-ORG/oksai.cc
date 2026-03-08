@@ -30,7 +30,6 @@
     "lsof-kill": "for port in 3000 3001 3002 3003 3004 4201 1340; do lsof -ti :$port | xargs -r kill -9 2>/dev/null && echo \"端口 $port 已清理\" || true; done"
   },
   "devDependencies": {
-    "@oksai/tsconfig": "workspace:*",
     "@biomejs/biome": "^2.4.4",
     "@mikro-orm/cli": "^6.6.8",
     "@mikro-orm/migrations": "^6.6.8",
@@ -40,6 +39,7 @@
     "@nx/vitest": "22.5.1",
     "@nx/web": "22.5.1",
     "@nx/webpack": "^22.5.3",
+    "@oksai/tsconfig": "workspace:*",
     "@swc-node/register": "catalog:",
     "@swc/core": "catalog:",
     "@swc/helpers": "catalog:",
@@ -73,5 +73,7 @@
       }
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "@mikro-orm/nestjs": "catalog:"
+  }
 }

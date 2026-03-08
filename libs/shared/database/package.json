@@ -14,15 +14,17 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --external @oksai/kernel --external ts-morph --external @ts-morph/common --external @mikro-orm/reflection",
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
     "clean": "pnpm exec rimraf dist coverage"
   },
   "dependencies": {
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/nestjs": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@nestjs/common": "catalog:",
+    "@oksai/context": "workspace:*",
     "@oksai/kernel": "workspace:*",
     "pino": "catalog:",
     "postgres": "catalog:"

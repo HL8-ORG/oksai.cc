@@ -18,7 +18,7 @@ import {
   OAuthClient,
   OAuthRefreshToken,
   User,
-} from "@oksai/database";
+} from "@oksai/iam-infrastructure";
 import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util.js";
 import { verifyCodeVerifier } from "./oauth-crypto.util.js";
 import { validateRedirectUri, validateRedirectUriList } from "./redirect-uri.util.js";

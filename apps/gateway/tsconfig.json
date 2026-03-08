@@ -9,7 +9,10 @@
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../libs/shared/nestjs-better-auth" },
+    { "path": "../../libs/iam/nestjs-better-auth" },
+    { "path": "../../libs/iam/better-auth-mikro-orm" },
+    { "path": "../../libs/iam/domain" },
+    { "path": "../../libs/iam/infrastructure" },
     { "path": "../../libs/shared/logger" },
     { "path": "../../libs/shared/database" },
     { "path": "../../libs/shared/context" },
@@ -17,7 +20,6 @@
     { "path": "../../libs/shared/config" },
     { "path": "../../libs/shared/nestjs-utils" },
     { "path": "../../libs/shared/exceptions" },
-    { "path": "../../libs/shared/cache" },
-    { "path": "../../libs/shared/better-auth-mikro-orm" }
+    { "path": "../../libs/shared/cache" }
   ]
 }

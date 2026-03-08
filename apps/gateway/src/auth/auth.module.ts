@@ -18,7 +18,9 @@
  */
 
 import { Module } from "@nestjs/common";
+import { TenantContextService } from "@oksai/context";
 import { BetterAuthApiClient, AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
+import { TenantModule } from "../tenant/tenant.module.js";
 import { AdminController } from "./admin.controller.js";
 import { ApiKeyController } from "./api-key.controller.js";
 import { AuthService } from "./auth.service.js";
@@ -29,7 +31,10 @@ import { WebhookController } from "./webhook.controller.js";
 import { WebhookService } from "./webhook.service.js";
 
 @Module({
-  imports: [],
+  imports: [
+    // 导入 TenantModule 以使用 TenantService, QuotaGuard, TenantContextService
+    TenantModule,
+  ],
   controllers: [
     // Better Auth 插件包装器
     AdminController,
@@ -57,12 +62,12 @@ import { WebhookService } from "./webhook.service.js";
     },
     {
       provide: OrganizationService,
-      useFactory: (betterAuthService: BetterAuthService) => {
+      useFactory: (betterAuthService: BetterAuthService, tenantContext: TenantContextService) => {
         const apiClient = new BetterAuthApiClient(betterAuthService.api as any);
 
-        return new OrganizationService(apiClient);
+        return new OrganizationService(apiClient, tenantContext);
       },
-      inject: [BetterAuthService],
+      inject: [BetterAuthService, TenantContextService],
     },
     // OAuthService, // ⚠️ 暂时禁用：依赖缓存服务
     TokenBlacklistService,

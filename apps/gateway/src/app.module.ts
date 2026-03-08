@@ -1,13 +1,14 @@
 import process from "node:process";
 import { MikroORM } from "@mikro-orm/core";
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ApiExtraModels } from "@nestjs/swagger";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { CacheModule, CacheMonitorController } from "@oksai/cache";
 import { ConfigModule, ConfigService } from "@oksai/config";
-import { MikroOrmDatabaseModule } from "@oksai/database";
+import { MikroOrmDatabaseModule } from "@oksai/iam-infrastructure";
 import { GlobalExceptionFilter } from "@oksai/exceptions";
+import { Account, ApiKey, DomainEventEntity, Session, Tenant, User } from "@oksai/iam-infrastructure";
 import { LoggerModule } from "@oksai/logger";
 import { AuthModule } from "@oksai/nestjs-better-auth";
 import { AppController } from "./app.controller.js";
@@ -65,6 +66,8 @@ import { CustomThrottlerGuard } from "./common/custom-throttler.guard.js";
 import { ExceptionExampleController } from "./examples/exception-example.controller.js";
 import { HealthController } from "./health/health.controller.js";
 import { RootController } from "./root.controller.js";
+import { TenantMiddleware } from "./tenant/tenant.middleware.js";
+import { TenantModule } from "./tenant/tenant.module.js";
 
 const isProduction = process.env.NODE_ENV === "production";
 const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "true" : !isProduction;
@@ -79,9 +82,14 @@ const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "tru
  * - ThrottlerModule: API 限流保护
  * - AuthModule: Better Auth 认证集成
  * - AuthFeatureModule: 认证功能模块（注册/登录/邮箱验证等）
+ * - TenantMiddleware: 租户识别与上下文注入
  *
  * 注意：AuthModule 默认注册全局 AuthGuard
  * 所有路由默认需要认证，使用 @AllowAnonymous() 或 @OptionalAuth() 开放访问
+ *
+ * 租户隔离：
+ * - TenantMiddleware 自动识别租户（JWT/Header/子域名）
+ * - TenantFilter 自动过滤数据（MikroORM）
  */
 @ApiExtraModels(
   AdminImpersonateResponse,
@@ -150,7 +158,17 @@ const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "tru
       },
     ]),
 
-    MikroOrmDatabaseModule,
+    /**
+     * MikroORM 数据库模块
+     *
+     * 配置数据库连接并注册实体：
+     * - OAuth 实体（来自 @oksai/database）
+     * - Webhook 实体（来自 @oksai/database）
+     * - IAM 实体（通过 extraEntities 注入）
+     */
+    MikroOrmDatabaseModule.forRoot({
+      extraEntities: [Tenant, User, Session, Account, ApiKey, DomainEventEntity],
+    }),
 
     AuthModule.forRootAsync({
       imports: [ConfigModule],
@@ -174,6 +192,8 @@ const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "tru
       ttl: 60000,
       enableStats: true,
     }),
+
+    TenantModule,
   ],
   controllers: [
     RootController,
@@ -195,4 +215,25 @@ const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "tru
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  /**
+   * 配置中间件
+   *
+   * 租户识别中间件配置：
+   * - 应用到所有路由
+   * - 排除公开路由（健康检查、认证接口等）
+   */
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      .exclude(
+        "health",
+        "auth/(.*)",
+        "api/health",
+        "api/auth/login",
+        "api/auth/register",
+        "api/auth/callback"
+      )
+      .forRoutes("*");
+  }
+}

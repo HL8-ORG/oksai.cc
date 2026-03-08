@@ -47,6 +47,13 @@ export class OAuthClient extends BaseEntity {
   @Index()
   createdBy?: string;
 
+  /**
+   * 租户 ID（多租户隔离）
+   */
+  @Property({ nullable: true })
+  @Index()
+  tenantId?: string;
+
   private _domainEvents: any[] = [];
 
   get aggregateId(): UniqueEntityID {

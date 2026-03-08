@@ -45,6 +45,13 @@ export class WebhookDelivery extends BaseEntity {
   @Property({ nullable: true })
   deliveredAt?: Date;
 
+  /**
+   * 租户 ID（多租户隔离）
+   */
+  @Property({ nullable: true })
+  @Index()
+  tenantId?: string;
+
   constructor(webhook: Webhook, eventType: WebhookEventType, payload: Record<string, unknown>) {
     super();
     this.webhook = webhook;

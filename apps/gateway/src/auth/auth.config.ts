@@ -2,11 +2,11 @@
  * Better Auth 配置工厂
  *
  * @description
- * 初始化 Better Auth 认证服务，使用 MikroORM 适配器
- * - 邮箱/密码登录
+ * 初始化 Better Auth 认证服务， * - 邮箱/密码登录
  * - OAuth 社交登录（GitHub、Google）
  * - 双因素认证 (2FA/TOTP)
  * - 会话管理
+ * - 组织管理（多租户支持）
  * - 安全策略（CORS、CSRF、Rate Limiting）
  *
  * 环境变量（通过 ConfigService 读取）：
@@ -23,8 +23,8 @@
 
 import { apiKey } from "@better-auth/api-key";
 import { MikroORM } from "@mikro-orm/core";
-import { mikroOrmAdapter } from "@oksai/better-auth-mikro-orm";
 import type { ConfigService } from "@oksai/config";
+import { mikroOrmAdapter } from "@oksai/better-auth-mikro-orm";
 import { betterAuth } from "better-auth";
 import { admin, organization, twoFactor } from "better-auth/plugins";
 
@@ -125,6 +125,9 @@ export function createAuth(orm: MikroORM, configService: ConfigService): any {
       organization({
         allowUserToCreateOrganization: true,
         maximumMembers: 100,
+        // 注意：tenantId 将存储在 organization 的 metadata 中
+        // Better Auth organization 插件不支持自定义 schema 扩展
+        // 租户关联通过 OrganizationService 在创建时处理
       }),
 
       twoFactor({

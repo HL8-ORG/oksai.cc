@@ -4,7 +4,7 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger } from "@nestjs/common";
-import { OAuthAccessToken, OAuthRefreshToken } from "@oksai/database";
+import { OAuthAccessToken, OAuthRefreshToken } from "@oksai/iam-infrastructure";
 
 @Injectable()
 export class TokenBlacklistService {

@@ -19,6 +19,14 @@
         "cwd": "apps/gateway",
         "command": "nest start --watch"
       }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{projectRoot}/coverage"],
+      "options": {
+        "config": "vitest.config.ts",
+        "passWithNoTests": true
+      }
     }
   },
   "tags": ["type:app", "scope:backend"]

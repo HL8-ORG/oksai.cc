@@ -3,6 +3,7 @@
  */
 
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { TenantContextService } from "@oksai/context";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 
 /**
@@ -10,11 +11,15 @@ import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
  *
  * @description
  * 提供组织管理、成员管理功能
+ * 自动注入租户 ID，确保组织属于正确的租户
  */
 @Injectable()
 export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
-  constructor(private readonly apiClient: BetterAuthApiClient) {
+  constructor(
+    private readonly apiClient: BetterAuthApiClient,
+    private readonly tenantContext: TenantContextService
+  ) {
     this.logger = new Logger(OrganizationService.name);
   }
 
@@ -23,14 +28,30 @@ export class OrganizationService {
    *
    * @param userId - 用户 ID（创建者自动成为 owner）
    * @param data - 组织数据
+   * @description 自动注入租户 ID，确保组织属于正确的租户
    */
   async createOrganization(userId: string, data: { name: string; slug?: string; logo?: string }) {
     try {
-      this.logger.log(`创建组织: ${data.name} by ${userId}`);
+      // 获取当前租户 ID
+      const tenantId = this.tenantContext.tenantId;
 
-      const result = await this.apiClient.createOrganization(data, userId);
+      if (!tenantId) {
+        this.logger.error("无法获取租户 ID，请确保 TenantMiddleware 已正确配置");
+        throw new BadRequestException("无法获取租户信息");
+      }
 
-      this.logger.log(`组织创建成功: ${result.id}`);
+      this.logger.log(`创建组织: ${data.name} by ${userId} for tenant ${tenantId}`);
+
+      // 调用 Better Auth API 创建组织（包含 tenantId）
+      const result = await this.apiClient.createOrganization(
+        {
+          ...data,
+          tenantId, // 自动注入租户 ID
+        },
+        userId
+      );
+
+      this.logger.log(`组织创建成功: ${result.id}, tenant: ${tenantId}`);
       return result;
     } catch (error) {
       this.logger.error(`创建组织失败: ${data.name}`, error);

@@ -4,7 +4,7 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { User } from "@oksai/database";
+import { User } from "@oksai/iam-infrastructure";
 import type {
   ImpersonateUserDto,
   ImpersonationSession,
