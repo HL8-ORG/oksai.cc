@@ -17,7 +17,7 @@ describe("AuthService (Integration)", () => {
       signUpEmail: vi.fn(),
       signInEmail: vi.fn(),
       verifyEmail: vi.fn(),
-      requestPasswordReset: vi.fn(),
+      forgotPassword: vi.fn(),
       resetPassword: vi.fn(),
       getSession: vi.fn(),
       signOut: vi.fn(),
@@ -176,7 +176,7 @@ describe("AuthService (Integration)", () => {
     };
 
     it("应该成功发送重置邮件", async () => {
-      mockAuthAPI.requestPasswordReset.mockResolvedValue({});
+      mockAuthAPI.forgotPassword.mockResolvedValue({});
 
       const result = await service.forgotPassword(forgotPasswordDto);
 
@@ -188,7 +188,7 @@ describe("AuthService (Integration)", () => {
     });
 
     it("即使邮箱不存在也应该返回成功（安全考虑）", async () => {
-      mockAuthAPI.requestPasswordReset.mockRejectedValue(new Error("用户不存在"));
+      mockAuthAPI.forgotPassword.mockRejectedValue(new Error("用户不存在"));
 
       const result = await service.forgotPassword(forgotPasswordDto);
 
