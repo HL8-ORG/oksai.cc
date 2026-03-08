@@ -6,11 +6,11 @@
 
 import process from "node:process";
 import { Global, Module } from "@nestjs/common";
-import { CacheService } from "./cache.service";
-import { RedisCacheService } from "./redis-cache.service";
-import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service";
-import { TTLJitterService } from "./ttl-jitter.service";
-import { TwoLayerCacheService } from "./two-layer-cache.service";
+import { CacheService } from "./cache.service.js";
+import { RedisCacheService } from "./redis-cache.service.js";
+import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service.js";
+import { TTLJitterService } from "./ttl-jitter.service.js";
+import { TwoLayerCacheService } from "./two-layer-cache.service.js";
 
 /**
  * 缓存模块配置选项

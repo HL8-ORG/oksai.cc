@@ -721,8 +721,8 @@ export {
  * 使用示例（伪代码）
  *
  * ```typescript
- * import { orm } from "./orm";
- * import { User, Organization, OrganizationMember } from "./entities";
+ * import { orm } from "./orm.js";
+ * import { User, Organization, OrganizationMember } from "./entities.js";
  *
  * async function example() {
  *   const em = orm.em.fork();

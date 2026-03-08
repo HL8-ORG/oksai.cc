@@ -10,7 +10,7 @@ import {
   serializeRequest,
   serializeResponse,
 } from "./logger.serializer";
-import { OksaiLoggerService } from "./oksai-logger.service";
+import { OksaiLoggerService } from "./oksai-logger.service.js";
 
 /**
  * Logger 模块配置选项

@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { SkipBodyParsingMiddlewareFastify } from "./middlewares-fastify";
+import { SkipBodyParsingMiddlewareFastify } from "./middlewares-fastify.js";
 
 describe("SkipBodyParsingMiddlewareFastify", () => {
   it("应该创建中间件函数", () => {

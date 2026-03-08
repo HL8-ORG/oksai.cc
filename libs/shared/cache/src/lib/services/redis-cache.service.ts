@@ -6,7 +6,7 @@
 
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit, Optional } from "@nestjs/common";
 import Redis from "ioredis";
-import type { CacheOptions, CacheStats } from "./cache.service";
+import type { CacheOptions, CacheStats } from "./cache.service.js";
 
 /**
  * Redis 缓存服务

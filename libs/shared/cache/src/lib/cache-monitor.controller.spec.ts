@@ -5,8 +5,8 @@
  */
 
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
-import { CacheMonitorController } from "./controllers/cache-monitor.controller";
-import type { TwoLayerCacheStats } from "./services/two-layer-cache.service";
+import { CacheMonitorController } from "./controllers/cache-monitor.controller.js";
+import type { TwoLayerCacheStats } from "./services/two-layer-cache.service.js";
 
 describe("CacheMonitorController", () => {
   let controller: CacheMonitorController;

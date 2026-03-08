@@ -119,7 +119,7 @@ export function createAdvancedAuth(
 /**
  * 使用示例
  */
-// import { auth } from './auth.config.example';
+// import { auth } from './auth.config.example.js';
 //
 // @Module({
 //   imports: [AuthModule.forRoot({ auth })],

@@ -3,8 +3,8 @@ import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@
 import { Reflector } from "@nestjs/core";
 import type { getSession } from "better-auth/api";
 import { fromNodeHeaders } from "better-auth/node";
-import { type AuthModuleOptions, MODULE_OPTIONS_TOKEN } from "./auth-module-definition";
-import { getRequestFromContext } from "./utils";
+import { type AuthModuleOptions, MODULE_OPTIONS_TOKEN } from "./auth-module-definition.js";
+import { getRequestFromContext } from "./utils.js";
 
 /**
  * Lazy-load GraphQLError to make graphql an optional dependency

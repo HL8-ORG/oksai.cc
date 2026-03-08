@@ -9,7 +9,7 @@ import { MikroORM } from "@mikro-orm/core";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { mikroOrmAdapter } from "@oksai/better-auth-mikro-orm";
 import { betterAuth } from "better-auth";
-import { Organization, User } from "./entities";
+import { Organization, User } from "./entities.js";
 
 // ============================================
 // 1. 初始化 MikroORM 和 Better Auth

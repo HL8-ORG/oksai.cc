@@ -5,11 +5,11 @@
  * 整合所有 Better Auth 插件的类型定义，提供完整的 API 类型支持
  */
 
-import type { AdminAPI } from "./admin.types";
-import type { ApiKeyAPI } from "./api-key.types";
-import type { BaseAuthAPI } from "./auth.types";
-import type { ImpersonationAPI } from "./impersonation.types";
-import type { SessionAPI } from "./session.types";
+import type { AdminAPI } from "./admin.types.js";
+import type { ApiKeyAPI } from "./api-key.types.js";
+import type { BaseAuthAPI } from "./auth.types.js";
+import type { ImpersonationAPI } from "./impersonation.types.js";
+import type { SessionAPI } from "./session.types.js";
 
 /**
  * 完整的 Better Auth API 类型

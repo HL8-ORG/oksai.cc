@@ -6,7 +6,7 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { RedisCacheService } from "./redis-cache.service";
+import { RedisCacheService } from "./redis-cache.service.js";
 
 describe("Redis 缓存服务", () => {
   let cacheService: RedisCacheService;

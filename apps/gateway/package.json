@@ -1,13 +1,14 @@
 {
   "name": "@oksai/gateway",
   "version": "0.0.1",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node --experimental-specifier-resolution=node dist/main.js",
     "lint": "biome check --write .",
     "lint:check": "biome check .",
     "test": "vitest run",

@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./dto";
-import { SessionController } from "./session.controller";
+import type { SessionConfigResponse, SessionListResponse, UpdateSessionConfigDto } from "./dto/index.js";
+import { SessionController } from "./session.controller.js";
 
 describe("SessionController", () => {
   let controller: SessionController;

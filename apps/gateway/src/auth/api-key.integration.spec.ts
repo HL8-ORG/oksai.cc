@@ -9,7 +9,7 @@ import { UnauthorizedException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiKeyGuard, type ApiKeyPayload } from "./api-key.guard";
+import { ApiKeyGuard, type ApiKeyPayload } from "./api-key.guard.js";
 
 // 类型检查辅助函数
 function ensureApiClientExists(): typeof BetterAuthApiClient {

@@ -1,5 +1,5 @@
 {
-  "extends": ["@oksai/tsconfig/nestjs.json", "@oksai/tsconfig/build.json"],
+  "extends": ["@oksai/tsconfig/nestjs-esm.json", "@oksai/tsconfig/build.json"],
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "./",

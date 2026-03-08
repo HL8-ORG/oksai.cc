@@ -28,7 +28,7 @@
  * }
  * ```
  */
-import type { UniqueEntityID } from "./unique-entity-id.vo";
+import type { UniqueEntityID } from "./unique-entity-id.vo.js";
 
 /**
  * 领域事件构造参数

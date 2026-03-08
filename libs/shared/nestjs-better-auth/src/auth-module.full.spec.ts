@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
-import { AuthModule } from "./auth-module";
-import { AuthService } from "./auth-service";
-import type { AuthHookContext } from "./decorators";
-import { AfterHook, BeforeHook, Hook } from "./decorators";
+import { AuthModule } from "./auth-module.js";
+import { AuthService } from "./auth-service.js";
+import type { AuthHookContext } from "./decorators.js";
+import { AfterHook, BeforeHook, Hook } from "./decorators.js";
 
 describe("AuthModule 完整测试", () => {
   let module: TestingModule;

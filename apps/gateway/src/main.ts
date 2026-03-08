@@ -1,12 +1,16 @@
-import "tsconfig-paths/register";
-import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import "tsconfig-paths/register.js";
+import { dirname, join } from "node:path";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { ConfigService } from "@oksai/config";
 import { OksaiLoggerService } from "@oksai/logger";
 import { setupSwagger } from "@oksai/nestjs-utils";
-import { AppModule } from "./app.module";
+import { AppModule } from "./app.module.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * 应用启动入口
@@ -38,7 +42,7 @@ async function bootstrap() {
 
   // Better Auth 健康检查端点
   // 处理 GET /api/auth 请求，返回服务状态
-  app.getHttpAdapter().get("/auth", (req, res) => {
+  app.getHttpAdapter().get("/auth", (req: any, res: any) => {
     res.json({
       status: "ok",
       service: "better-auth",

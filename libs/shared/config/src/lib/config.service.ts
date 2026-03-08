@@ -20,7 +20,7 @@ import {
   type EnvUrlOptions,
   env,
 } from "./config-env";
-import { ConfigSchemaError, type NamespaceConfig, validateConfig } from "./config-schema";
+import { ConfigSchemaError, type NamespaceConfig, validateConfig } from "./config-schema.js";
 
 /**
  * @description 配置服务选项

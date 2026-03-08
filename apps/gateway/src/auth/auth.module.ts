@@ -18,17 +18,15 @@
  */
 
 import { Module } from "@nestjs/common";
-import { AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
-import { AdminController } from "./admin.controller";
-import { ApiKeyController } from "./api-key.controller";
-import { AuthService } from "./auth.service";
-// import { OAuthService } from "./oauth.service";
-// import { OAuthClientController } from "./oauth-client.controller";
-import { OrganizationController } from "./organization.controller";
-import { OrganizationService } from "./organization.service";
-import { TokenBlacklistService } from "./token-blacklist.service";
-import { WebhookController } from "./webhook.controller";
-import { WebhookService } from "./webhook.service";
+import { BetterAuthApiClient, AuthService as BetterAuthService } from "@oksai/nestjs-better-auth";
+import { AdminController } from "./admin.controller.js";
+import { ApiKeyController } from "./api-key.controller.js";
+import { AuthService } from "./auth.service.js";
+import { OrganizationController } from "./organization.controller.js";
+import { OrganizationService } from "./organization.service.js";
+import { TokenBlacklistService } from "./token-blacklist.service.js";
+import { WebhookController } from "./webhook.controller.js";
+import { WebhookService } from "./webhook.service.js";
 
 @Module({
   imports: [],
@@ -60,8 +58,7 @@ import { WebhookService } from "./webhook.service";
     {
       provide: OrganizationService,
       useFactory: (betterAuthService: BetterAuthService) => {
-        const { BetterAuthApiClient } = require("@oksai/nestjs-better-auth");
-        const apiClient = new BetterAuthApiClient(betterAuthService.api);
+        const apiClient = new BetterAuthApiClient(betterAuthService.api as any);
 
         return new OrganizationService(apiClient);
       },

@@ -2,7 +2,7 @@ import type { ExecutionContext } from "@nestjs/common";
 import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { vi } from "vitest";
-import { AuthGuard, type UserSession } from "./auth-guard";
+import { AuthGuard, type UserSession } from "./auth-guard.js";
 
 // 创建完整 mock session 的辅助函数
 function createMockSession(

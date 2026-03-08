@@ -4,7 +4,7 @@
 
 import type { TwoLayerCacheService } from "@oksai/cache";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SessionService } from "./session.service";
+import { SessionService } from "./session.service.js";
 
 // Mock EntityManager
 const mockEm = {

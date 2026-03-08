@@ -8,17 +8,17 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as R2faVerifyRouteImport } from './routes/2fa-verify'
-import { Route as R2faSetupRouteImport } from './routes/2fa-setup'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthCallbackProviderRouteImport } from './routes/auth/callback/$provider'
+import { Route as rootRouteImport } from './routes/__root.js'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email.js'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password.js'
+import { Route as RegisterRouteImport } from './routes/register.js'
+import { Route as LoginRouteImport } from './routes/login.js'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password.js'
+import { Route as DashboardRouteImport } from './routes/dashboard.js'
+import { Route as R2faVerifyRouteImport } from './routes/2fa-verify.js'
+import { Route as R2faSetupRouteImport } from './routes/2fa-setup.js'
+import { Route as IndexRouteImport } from './routes/index.js'
+import { Route as AuthCallbackProviderRouteImport } from './routes/auth/callback/$provider.js'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -251,7 +251,7 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from './router.tsx'
+import type { getRouter } from './router.tsx.js'
 import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {

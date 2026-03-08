@@ -3,8 +3,8 @@
  *
  * 测试实体的标识符比较能力
  */
-import { Entity } from "../lib/entity";
-import { UniqueEntityID } from "../lib/unique-entity-id.vo";
+import { Entity } from "../lib/entity.js";
+import { UniqueEntityID } from "../lib/unique-entity-id.vo.js";
 
 /**
  * 测试用实体 - 用户

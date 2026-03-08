@@ -5,7 +5,7 @@
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AuthService } from "./auth.service";
+import { AuthService } from "./auth.service.js";
 
 describe("AuthService (Integration)", () => {
   let service: AuthService;

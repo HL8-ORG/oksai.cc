@@ -13,13 +13,13 @@ import type {
   WebhookEventType,
   WebhookPayload,
   WebhookResponse,
-} from "./dto";
+} from "./dto/index.js";
 import {
   WEBHOOK_EVENT_TYPE_HEADER,
   WEBHOOK_ID_HEADER,
   WEBHOOK_SIGNATURE_HEADER,
   WEBHOOK_TIMESTAMP_HEADER,
-} from "./dto";
+} from "./dto/index.js";
 
 @Injectable()
 export class WebhookService {

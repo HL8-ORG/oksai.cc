@@ -6,7 +6,7 @@
  * 适用于 Token、Client Secret 等敏感数据的加密存储
  */
 
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from "node:crypto";
 import process from "node:process";
 import type { ConfigService } from "@oksai/config";
 
@@ -93,8 +93,7 @@ export class EncryptionUtil {
    */
   hash(data: string): string {
     const salt = randomBytes(16);
-    const crypto = require("node:crypto");
-    const hash = crypto.pbkdf2Sync(data, salt, 100000, 64, "sha512");
+    const hash = pbkdf2Sync(data, salt, 100000, 64, "sha512");
     return `${salt.toString("hex")}:${hash.toString("hex")}`;
   }
 
@@ -108,8 +107,7 @@ export class EncryptionUtil {
   verifyHash(data: string, hashedData: string): boolean {
     const [saltHex, hashHex] = hashedData.split(":");
     const salt = Buffer.from(saltHex, "hex");
-    const crypto = require("node:crypto");
-    const hash = crypto.pbkdf2Sync(data, salt, 100000, 64, "sha512");
+    const hash = pbkdf2Sync(data, salt, 100000, 64, "sha512");
     return hash.toString("hex") === hashHex;
   }
 }

@@ -1,7 +1,7 @@
-import { ApplicationException } from "./application.exception";
-import { BaseException } from "./base.exception";
-import { DomainException } from "./domain.exception";
-import { InfrastructureException } from "./infrastructure.exception";
+import { ApplicationException } from "./application.exception.js";
+import { BaseException } from "./base.exception.js";
+import { DomainException } from "./domain.exception.js";
+import { InfrastructureException } from "./infrastructure.exception.js";
 
 /**
  * 异常类型守卫

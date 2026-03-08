@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { DomainEvent } from "../src/types";
+import type { DomainEvent } from "../src/types.js";
 
 describe("Event Store Types", () => {
   describe("DomainEvent", () => {

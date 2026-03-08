@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { vi } from "vitest";
-import { SkipBodyParsingMiddleware } from "./middlewares";
+import { SkipBodyParsingMiddleware } from "./middlewares.js";
 
 // Mock express module
 vi.mock("express", () => ({

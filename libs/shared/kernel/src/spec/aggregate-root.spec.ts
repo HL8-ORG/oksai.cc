@@ -3,9 +3,9 @@
  *
  * 测试聚合根的领域事件管理能力
  */
-import { AggregateRoot } from "../lib/aggregate-root.aggregate";
-import { DomainEvent } from "../lib/domain-event";
-import { UniqueEntityID } from "../lib/unique-entity-id.vo";
+import { AggregateRoot } from "../lib/aggregate-root.aggregate.js";
+import { DomainEvent } from "../lib/domain-event.js";
+import { UniqueEntityID } from "../lib/unique-entity-id.vo.js";
 
 /**
  * 测试用领域事件

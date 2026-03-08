@@ -12,7 +12,7 @@ import {
 import { createAuthMiddleware } from "better-auth/api";
 import { toNodeHandler } from "better-auth/node";
 import type { Request, Response } from "express";
-import { AuthGuard } from "./auth-guard";
+import { AuthGuard } from "./auth-guard.js";
 import {
   type ASYNC_OPTIONS_TYPE,
   type AuthModuleOptions,
@@ -20,11 +20,11 @@ import {
   MODULE_OPTIONS_TOKEN,
   type OPTIONS_TYPE,
 } from "./auth-module-definition";
-import { AuthService } from "./auth-service";
-import type { AuthHookContext } from "./decorators";
-import { SkipBodyParsingMiddleware } from "./middlewares";
-import { SkipBodyParsingMiddlewareFastify } from "./middlewares-fastify";
-import { AFTER_HOOK_KEY, BEFORE_HOOK_KEY, HOOK_KEY } from "./symbols";
+import { AuthService } from "./auth-service.js";
+import type { AuthHookContext } from "./decorators.js";
+import { SkipBodyParsingMiddleware } from "./middlewares.js";
+import { SkipBodyParsingMiddlewareFastify } from "./middlewares-fastify.js";
+import { AFTER_HOOK_KEY, BEFORE_HOOK_KEY, HOOK_KEY } from "./symbols.js";
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: "before" as const },

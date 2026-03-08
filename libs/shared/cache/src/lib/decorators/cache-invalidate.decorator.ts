@@ -5,7 +5,7 @@
  */
 
 import { Inject } from "@nestjs/common";
-import type { TwoLayerCacheService } from "../services/two-layer-cache.service";
+import type { TwoLayerCacheService } from "../services/two-layer-cache.service.js";
 
 /**
  * @CacheInvalidate 装饰器选项

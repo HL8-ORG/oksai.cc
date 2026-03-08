@@ -14,7 +14,7 @@ import type {
   SignUpDto,
   VerifyEmailDto,
   VerifyTwoFactorDto,
-} from "./dto";
+} from "./dto/index.js";
 
 /**
  * 认证服务响应
@@ -379,8 +379,8 @@ export class AuthService {
    */
   async impersonateUser(
     adminUserId: string,
-    dto: import("./dto/impersonation.dto").ImpersonateUserDto
-  ): Promise<import("./dto/impersonation.dto").ImpersonationUserResponse> {
+    dto: import("./dto/impersonation.dto.js").ImpersonateUserDto
+  ): Promise<import("./dto/impersonation.dto.js").ImpersonationUserResponse> {
     try {
       this.logger.log(`管理员 ${adminUserId} 开始模拟用户 ${dto.email}`);
 

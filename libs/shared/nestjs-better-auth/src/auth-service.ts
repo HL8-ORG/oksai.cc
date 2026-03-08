@@ -1,6 +1,6 @@
 import { Inject } from "@nestjs/common";
 import type { Auth } from "better-auth";
-import { type AuthModuleOptions, MODULE_OPTIONS_TOKEN } from "./auth-module-definition";
+import { type AuthModuleOptions, MODULE_OPTIONS_TOKEN } from "./auth-module-definition.js";
 
 /**
  * NestJS service that provides access to the Better Auth instance

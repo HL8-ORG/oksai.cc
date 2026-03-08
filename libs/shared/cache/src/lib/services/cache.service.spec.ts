@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CacheService } from "./cache.service";
+import { CacheService } from "./cache.service.js";
 
 describe("CacheService", () => {
   let cacheService: CacheService;

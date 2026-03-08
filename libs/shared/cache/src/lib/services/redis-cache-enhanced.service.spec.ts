@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service";
+import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service.js";
 
 describe("RedisCacheEnhancedService", () => {
   let cacheService: RedisCacheEnhancedService;

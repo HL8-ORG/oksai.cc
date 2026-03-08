@@ -12,7 +12,7 @@
 import process from "node:process";
 import type { Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
-import type { EmailConfig, EmailOptions, EmailResult, TemplateData } from "./types";
+import type { EmailConfig, EmailOptions, EmailResult, TemplateData } from "./types.js";
 
 /**
  * 邮件服务类

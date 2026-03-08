@@ -1,5 +1,5 @@
-import { BaseException } from "./base.exception";
-import type { ExceptionCode } from "./codes";
+import { BaseException } from "./base.exception.js";
+import type { ExceptionCode } from "./codes.js";
 
 /**
  * 应用异常

@@ -1,8 +1,8 @@
 import { APP_GUARD } from "@nestjs/core";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
-import { AuthModule } from "./auth-module";
-import { AuthService } from "./auth-service";
+import { AuthModule } from "./auth-module.js";
+import { AuthService } from "./auth-service.js";
 
 describe("AuthModule 集成测试", () => {
   let module: TestingModule;

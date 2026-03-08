@@ -5,8 +5,8 @@
 import { type ExecutionContext, HttpException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CustomThrottlerGuard } from "./custom-throttler.guard";
-import type { RateLimitConfig } from "./rate-limit.decorator";
+import { CustomThrottlerGuard } from "./custom-throttler.guard.js";
+import type { RateLimitConfig } from "./rate-limit.decorator.js";
 
 interface MockRequest {
   headers: Record<string, string | string[] | undefined>;

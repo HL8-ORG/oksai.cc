@@ -5,9 +5,9 @@
  */
 
 import { Injectable, Logger } from "@nestjs/common";
-import type { CacheStats } from "./cache.service";
-import { CacheService } from "./cache.service";
-import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service";
+import type { CacheStats } from "./cache.service.js";
+import { CacheService } from "./cache.service.js";
+import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service.js";
 
 /**
  * 双层缓存配置选项

@@ -1,7 +1,7 @@
 import type { ExecutionContext } from "@nestjs/common";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-let getRequestFromContext: typeof import("./utils").getRequestFromContext;
+let getRequestFromContext: typeof import("./utils.js").getRequestFromContext;
 
 beforeEach(async () => {
   globalThis.__TEST_GQL_EXECUTION_CONTEXT__ = {
@@ -11,7 +11,7 @@ beforeEach(async () => {
       }),
     }),
   };
-  getRequestFromContext = (await import("./utils")).getRequestFromContext;
+  getRequestFromContext = (await import("./utils.js")).getRequestFromContext;
 });
 
 afterEach(() => {

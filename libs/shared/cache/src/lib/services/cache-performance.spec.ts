@@ -11,10 +11,10 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { CacheService } from "./cache.service";
-import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service";
-import { TTLJitterService } from "./ttl-jitter.service";
-import { TwoLayerCacheService } from "./two-layer-cache.service";
+import { CacheService } from "./cache.service.js";
+import { RedisCacheEnhancedService } from "./redis-cache-enhanced.service.js";
+import { TTLJitterService } from "./ttl-jitter.service.js";
+import { TwoLayerCacheService } from "./two-layer-cache.service.js";
 
 describe("缓存性能测试", () => {
   let l1Cache: CacheService;

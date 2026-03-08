@@ -3,7 +3,7 @@
  *
  * 测试 Result 模式的成功/失败状态处理能力
  */
-import { Result } from "../lib/result";
+import { Result } from "../lib/result.js";
 
 describe("Result", () => {
   describe("ok", () => {

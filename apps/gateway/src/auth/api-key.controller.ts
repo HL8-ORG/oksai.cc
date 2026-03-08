@@ -15,8 +15,8 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
-import { auth } from "./auth";
-import { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto } from "./dto";
+import { auth } from "./auth.js";
+import { ApiKeyListResponse, ApiKeyResponse, CreateApiKeyDto } from "./dto/index.js";
 
 /**
  * API Key 管理控制器

@@ -6,8 +6,8 @@
 
 import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { TwoLayerCacheStats } from "../services/two-layer-cache.service";
-import { TwoLayerCacheService } from "../services/two-layer-cache.service";
+import type { TwoLayerCacheStats } from "../services/two-layer-cache.service.js";
+import { TwoLayerCacheService } from "../services/two-layer-cache.service.js";
 
 /**
  * 缓存监控控制器
