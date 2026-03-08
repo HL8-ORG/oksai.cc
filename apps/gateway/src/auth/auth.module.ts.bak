@@ -1,0 +1,86 @@
+/**
+ * 认证模块
+ *
+ * @description
+ * 使用 Better Auth 插件生态提供认证功能：
+ * - Admin 插件：用户管理、角色权限
+ * - API Key 插件：API Key 管理
+ * - Organization 插件：组织/团队管理
+ * - 2FA 插件：双因素认证
+ * - 原生 OAuth：社交登录（GitHub、Google）
+ * - 原生会话管理：会话 CRUD
+ *
+ * 已移除的重复功能：
+ * - SessionController（Better Auth 原生支持）
+ * - UserController（Better Auth 原生支持）
+ * - OAuthController（Better Auth 原生支持）
+ * - OAuthV2Controller（Better Auth 提供 OAuth 2.1 Provider 插件）
+ */
+
+import { Module } from "@nestjs/common";
+import { CacheModule, CacheModule } from "@oksai/cache";
+import {
+  AuthService as BetterAuthService,
+  AuthService as BetterAuthService,
+} from "@oksai/nestjs-better-auth";
+import { AdminController, AdminController } from "./admin.controller";
+import { ApiKeyController, ApiKeyController } from "./api-key.controller";
+import { AuthService, AuthService } from "./auth.service";
+import { OAuthService, OAuthService } from "./oauth.service";
+import { OAuthClientController, OAuthClientController } from "./oauth-client.controller";
+import { OrganizationController, OrganizationController } from "./organization.controller";
+import { OrganizationService, OrganizationService } from "./organization.service";
+import { TokenBlacklistService, TokenBlacklistService } from "./token-blacklist.service";
+import { WebhookController, WebhookController } from "./webhook.controller";
+import { WebhookService, WebhookService } from "./webhook.service";
+
+@Module({
+  imports: [CacheModule],
+  controllers: [
+    // Better Auth 插件包装器
+    AdminController, // Better Auth Admin 插件
+    ApiKeyController, // Better Auth API Key 插件
+    OrganizationController, // Better Auth Organization 插件
+
+    // 业务特定的控制器
+    OAuthClientController, // OAuth 客户端管理（业务特定）
+    WebhookController, // 自定义 Webhook 功能（业务特定）
+
+    // 已禁用的重复控制器：
+    // AuthController,        // Better Auth 原生 API
+    // SessionController,     // Better Auth 原生支持
+    // UserController,        // Better Auth 原生支持
+    // OAuthController,       // Better Auth 原生支持
+    // OAuthV2Controller,     // Better Auth 提供 OAuth 2.1 Provider 插件
+  ],
+  providers: [
+    {
+      provide: AuthService,
+      useFactory: (betterAuthService: BetterAuthService) => {
+        return new AuthService(betterAuthService.api as any);
+      },
+      inject: [BetterAuthService],
+    },
+    {
+      provide: OrganizationService,
+      useFactory: (betterAuthService: BetterAuthService) => {
+        const { BetterAuthApiClient } = require("@oksai/nestjs-better-auth");
+        const apiClient = new BetterAuthApiClient(betterAuthService.api);
+
+        return new OrganizationService(apiClient);
+      },
+      inject: [BetterAuthService],
+    },
+    OAuthService, // OAuth 客户端管理（业务特定）
+    TokenBlacklistService,
+    WebhookService,
+  ],
+  exports: [
+    AuthService,
+    OrganizationService,
+    OAuthService, // OAuth 客户端管理（业务特定）
+    WebhookService,
+    TokenBlacklistService,
+  ],
+})
+export class AuthFeatureModule {}

@@ -1,12 +1,21 @@
-# {功能名称} 测试计划
+# 认证前端测试策略
+
+## 测试目标
+
+为认证前端功能编写完整的测试覆盖，确保：
+
+- ✅ 核心认证流程稳定可靠
+- ✅ 用户体验符合预期
+- ✅ 错误处理正确
+- ✅ 代码重构时快速发现问题
 
 ## 测试策略
 
-遵循前端测试金字塔：组件测试 60% | E2E 测试 30% | 视觉测试 10%
+遵循前端测试金字塔：**组件测试 60% | E2E 测试 30% | 视觉测试 10%**
 
 ---
 
-## 组件测试（60%）
+## Phase 1: 组件测试（60%）
 
 ### 测试工具
 
@@ -16,429 +25,312 @@
 - **用户交互**：@testing-library/user-event
 - **可访问性**：jest-axe
 
-### 页面组件测试
+### 1.1 Hooks 测试
 
-| 页面    | 测试文件                 | 测试用例         | 状态 |
-| :------ | :----------------------- | :--------------- | :--: |
-| {Page1} | `routes/{page}.test.tsx` | 渲染、路由、权限 |  ⏳  |
-| {Page2} | `routes/{page}.test.tsx` | 渲染、路由、权限 |  ⏳  |
+| Hook           | 测试文件                | 优先级 | 状态 |
+| :------------- | :---------------------- | :----: | :--- |
+| useSignIn      | `hooks/useAuth.spec.ts` |   高   | ⏳   |
+| useSignUp      | `hooks/useAuth.spec.ts` |   高   | ⏳   |
+| useSignOut     | `hooks/useAuth.spec.ts` |   高   | ⏳   |
+| useAuthSession | `hooks/useAuth.spec.ts` |   高   | ⏳   |
 
-### 业务组件测试
-
-| 组件         | 测试文件                          | 测试用例          | 状态 |
-| :----------- | :-------------------------------- | :---------------- | :--: |
-| {Component1} | `components/{component}.test.tsx` | Props、状态、事件 |  ⏳  |
-| {Component2} | `components/{component}.test.tsx` | Props、状态、事件 |  ⏳  |
-
-### 测试模式
-
-完整示例参考 `examples/component-test.md`，包含：
-
-- ✅ 基础渲染测试（加载、错误、空状态）
-- ✅ 用户交互测试（点击、输入、表单提交）
-- ✅ 可访问性测试（jest-axe）
-- ✅ Hook 集成测试
-- ✅ Mock 最佳实践
-
-关键模式：
+**测试用例**：
 
 ```typescript
-// 测试结构
-describe('{Component}', () => {
-  describe('Rendering', () => {
-    /* 渲染测试 */
-  });
-  describe('User Interactions', () => {
-    /* 交互测试 */
-  });
-  describe('Accessibility', () => {
-    /* 可访问性测试 */
-  });
-});
-
-// 测试命名
-it('should {behavior} when {condition}', () => {
-  /* ... */
+describe('useSignIn', () => {
+  it('should sign in successfully with valid credentials', async () => {});
+  it('should show error for invalid credentials', async () => {});
+  it('should invalidate session cache on success', async () => {});
+  it('should show toast on success', async () => {});
+  it('should show toast on error', async () => {});
+  it('should handle 2FA redirect', async () => {});
 });
 ```
 
-### Mock 策略
+### 1.2 表单组件测试
 
-| 依赖      | Mock 方式                           | 说明           |
-| :-------- | :---------------------------------- | :------------- |
-| API Hooks | `vi.mock('@/hooks/useResource')`    | Mock 数据返回  |
-| Router    | `vi.mock('@tanstack/react-router')` | Mock 路由导航  |
-| Context   | `<MockProvider>`                    | 提供测试上下文 |
-| 外部库    | `vi.mock('library-name')`           | Mock 第三方库  |
+| 组件               | 测试文件                          | 优先级 | 状态 |
+| :----------------- | :-------------------------------- | :----: | :--- |
+| LoginPage          | `routes/login.spec.tsx`           |   高   | ⏳   |
+| RegisterPage       | `routes/register.spec.tsx`        |   高   | ⏳   |
+| ForgotPasswordPage | `routes/forgot-password.spec.tsx` |   中   | ⏳   |
+| ResetPasswordPage  | `routes/reset-password.spec.tsx`  |   中   | ⏳   |
+| TwoFactorSetup     | `routes/2fa-setup.spec.tsx`       |   中   | ⏳   |
+| TwoFactorVerify    | `routes/2fa-verify.spec.tsx`      |   中   | ⏳   |
 
-**原则**：
-
-- Mock 外部依赖，不 Mock 实现细节
-- Mock 应该简单、可预测
-- 使用 `beforeEach` 清理 Mock
-
-#### 表单测试
+**测试用例**：
 
 ```typescript
-// {form}.test.tsx
-describe('{Form}Component', () => {
-  const mockSubmit = vi.fn();
-
-  it('should submit form with valid data', async () => {
-    const user = userEvent.setup();
-    render(<{Form}Component onSubmit={mockSubmit} />);
-
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    await waitFor(() => {
-      expect(mockSubmit).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
-      });
-    });
-  });
-
-  it('should show validation errors', async () => {
-    const user = userEvent.setup();
-    render(<{Form}Component onSubmit={mockSubmit} />);
-
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
-    expect(mockSubmit).not.toHaveBeenCalled();
-  });
+describe('LoginPage', () => {
+  it('should render correctly', () => {});
+  it('should validate email format', async () => {});
+  it('should require password', async () => {});
+  it('should submit with valid data', async () => {});
+  it('should show error message', async () => {});
+  it('should disable submit button when loading', async () => {});
+  it('should navigate to dashboard on success', async () => {});
+  it('should be accessible', async () => {});
 });
 ```
 
-### Mock 策略
+### 1.3 认证状态测试
 
-| 依赖      | Mock 方式                           | 说明           |
-| :-------- | :---------------------------------- | :------------- |
-| API Hooks | `vi.mock('@/hooks/useResource')`    | Mock 数据返回  |
-| Router    | `vi.mock('@tanstack/react-router')` | Mock 路由导航  |
-| Context   | `<MockProvider>`                    | 提供测试上下文 |
-| 外部库    | `vi.mock('library-name')`           | Mock 第三方库  |
-
-#### Mock 示例
-
-```typescript
-// hooks/__mocks__/use{Resource}.ts
-export const use{Resource} = vi.fn(() => ({
-  data: mockData,
-  isLoading: false,
-  error: null,
-}));
-
-// 测试中使用
-vi.mock('@/hooks/use{Resource}', () => ({
-  use{Resource}: () => ({
-    data: mockData,
-    isLoading: false,
-    error: null,
-  }),
-}));
-```
+| 组件         | 测试文件                                 | 优先级 | 状态 |
+| :----------- | :--------------------------------------- | :----: | :--- |
+| AuthProvider | `components/auth/auth-provider.spec.tsx` |   高   | ⏳   |
+| OAuthButtons | `components/auth/oauth-buttons.spec.tsx` |   中   | ⏳   |
 
 ---
 
-## E2E 测试（30%）
+## Phase 2: E2E 测试（30%）
 
 ### 测试工具
 
 - **测试框架**：Playwright
-- **浏览器**：Chromium / Firefox / WebKit
+- **浏览器**：Chromium
 - **断言库**：Playwright（内置 expect）
 
-### 关键用户流程测试
+### 2.1 登录流程测试
 
-| 流程    | 测试文件                | 测试场景     | 状态 |
-| :------ | :---------------------- | :----------- | :--: |
-| {流程1} | `e2e/{feature}.spec.ts` | 完整用户流程 |  ⏳  |
-| {流程2} | `e2e/{feature}.spec.ts` | 表单提交流程 |  ⏳  |
+**测试文件**: `e2e/auth-login.spec.ts`
 
-### E2E 测试模式
+| 测试场景               | 状态 |
+| :--------------------- | :--: |
+| 邮箱密码登录成功       |  ⏳  |
+| 登录失败（错误密码）   |  ⏳  |
+| 登录失败（用户不存在） |  ⏳  |
+| 登录失败（邮箱未验证） |  ⏳  |
+| 2FA 登录流程           |  ⏳  |
+| OAuth 登录流程         |  ⏳  |
+| 记住我功能             |  ⏳  |
 
-使用 Playwright 进行端到端测试。关键场景：
-
-- ✅ 关键用户流程（登录、注册、核心操作）
-- ✅ 多页面导航
-- ✅ 表单提交和验证
-- ✅ 错误处理
-
-关键模式：
+**测试示例**：
 
 ```typescript
-// e2e/{feature}.spec.ts
-test('should complete user flow', async ({ page }) => {
-  // 等待页面加载
-  await expect(page.locator('h1')).toContainText('{Feature}');
+test('should login with valid credentials', async ({ page }) => {
+  await page.goto('/login');
+  await page.fill('[name="email"]', 'test@example.com');
+  await page.fill('[name="password"]', 'password123');
+  await page.click('button[type="submit"]');
+  await expect(page).toHaveURL('/dashboard');
+});
 
-  // 执行用户操作
-  await page.fill('[name="field"]', 'value');
+test('should login with 2FA', async ({ page }) => {
+  await page.goto('/login');
+  await page.fill('[name="email"]', '2fa@example.com');
+  await page.fill('[name="password"]', 'password123');
   await page.click('button[type="submit"]');
 
-  // 验证结果
-  await expect(page.locator('.success')).toBeVisible();
+  // 应该跳转到 2FA 验证页面
+  await expect(page).toHaveURL('/2fa-verify');
+
+  // 输入验证码
+  await page.fill('[name="code"]', '123456');
+  await page.click('button[type="submit"]');
+
+  // 应该跳转到 dashboard
+  await expect(page).toHaveURL('/dashboard');
 });
 ```
 
-### E2E 测试数据管理
+### 2.2 注册流程测试
 
-```typescript
-// e2e/fixtures/test-data.ts
-export const testUsers = {
-  admin: {
-    email: 'admin@test.com',
-    password: 'Admin123!',
-  },
-  user: {
-    email: 'user@test.com',
-    password: 'User123!',
-  },
-};
+**测试文件**: `e2e/auth-register.spec.ts`
 
-// e2e/helpers/auth.ts
-export async function login(page, user) {
-  await page.goto('/login');
-  await page.fill('[name="email"]', user.email);
-  await page.fill('[name="password"]', user.password);
-  await page.click('button[type="submit"]');
-  await expect(page).toHaveURL('/dashboard');
-}
-```
+| 测试场景                     | 状态 |
+| :--------------------------- | :--: |
+| 注册成功（显示验证邮件提示） |  ⏳  |
+| 注册失败（邮箱已存在）       |  ⏳  |
+| 注册失败（密码强度不够）     |  ⏳  |
+| 邮箱验证流程                 |  ⏳  |
+
+### 2.3 密码重置测试
+
+**测试文件**: `e2e/auth-password-reset.spec.ts`
+
+| 测试场景         | 状态 |
+| :--------------- | :--: |
+| 发送重置邮件成功 |  ⏳  |
+| 重置密码成功     |  ⏳  |
+| 重置链接过期     |  ⏳  |
+
+### 2.4 会话管理测试
+
+**测试文件**: `e2e/auth-session.spec.ts`
+
+| 测试场景       | 状态 |
+| :------------- | :--: |
+| 登出成功       |  ⏳  |
+| 会话过期重定向 |  ⏳  |
+| 访问受保护页面 |  ⏳  |
 
 ---
 
-## 视觉回归测试（10%）
-
-### 测试工具
-
-- **Playwright**：截图对比
-- **Percy** / **Chromatic**：视觉差异检测（可选）
+## Phase 3: 视觉回归测试（10%）
 
 ### 关键页面截图
 
-| 页面               | 状态 | 截图对比 | 状态 |
-| :----------------- | :--- | :------- | :--: |
-| {Page1} - 默认状态 | ⏳   | ⏳       |  ⏳  |
-| {Page1} - 加载状态 | ⏳   | ⏳       |  ⏳  |
-| {Page1} - 错误状态 | ⏳   | ⏳       |  ⏳  |
+| 页面                    | 状态 |
+| :---------------------- | :--: |
+| 登录页 - 默认状态       |  ⏳  |
+| 登录页 - 错误状态       |  ⏳  |
+| 注册页 - 默认状态       |  ⏳  |
+| 2FA 设置页 - 扫码步骤   |  ⏳  |
+| 2FA 设置页 - 备用码步骤 |  ⏳  |
 
-### 视觉测试示例
+---
+
+## Mock 策略
+
+### Better Auth Client Mock
 
 ```typescript
-// e2e/{feature}.visual.spec.ts
-import { test, expect } from '@playwright/test';
+// src/test/mocks/auth-client.ts
+export const mockAuthClient = {
+  signIn: {
+    email: vi.fn(),
+    social: vi.fn(),
+  },
+  signUp: {
+    email: vi.fn(),
+  },
+  signOut: vi.fn(),
+  getSession: vi.fn(),
+  useSession: vi.fn(() => ({
+    data: { session: null, user: null },
+    isPending: false,
+  })),
+  twoFactor: {
+    enable: vi.fn(),
+    verifyTotp: vi.fn(),
+    verifyBackupCode: vi.fn(),
+  },
+};
+```
 
-test.describe('{Feature} Visual Tests', () => {
-  test('should match default state snapshot', async ({ page }) => {
-    await page.goto('/{feature}');
-    await expect(page).toHaveScreenshot('{feature}-default.png');
-  });
+### Router Mock
 
-  test('should match mobile layout snapshot', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/{feature}');
-    await expect(page).toHaveScreenshot('{feature}-mobile.png');
-  });
+```typescript
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => vi.fn(),
+  useSearch: () => vi.fn(() => ({})),
+  createFileRoute: () => ({
+    component: (component: any) => component,
+  }),
+}));
+```
 
-  test('should match dark theme snapshot', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await page.goto('/{feature}');
-    await expect(page).toHaveScreenshot('{feature}-dark.png');
-  });
-});
+### Toast Mock
+
+```typescript
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  },
+}));
 ```
 
 ---
 
-## 可访问性测试
+## 测试环境配置
 
-### 测试工具
-
-- **axe-core**：自动检测可访问性问题
-- **jest-axe**：集成到组件测试
-- **Playwright Accessibility**：E2E 可访问性测试
-
-### 可访问性检查清单
-
-- [ ] 所有图片有 alt 属性
-- [ ] 表单字段有 label 关联
-- [ ] 按钮有明确的文本或 aria-label
-- [ ] 颜色对比度符合 WCAG AA 标准
-- [ ] 键盘导航完整可用
-- [ ] 焦点顺序合理
-- [ ] 屏幕阅读器兼容
-
-### 可访问性测试示例
+### Vitest 配置
 
 ```typescript
-// {component}.test.tsx
-import { axe } from 'jest-axe';
-
-describe('{Component} Accessibility', () => {
-  it('should have no accessibility violations', async () => {
-    const { container } = render(<{Component} {...defaultProps} />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
+// apps/web-admin/vitest.config.ts
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json'],
+    },
+  },
 });
 ```
 
----
+### Playwright 配置
 
-## 测试覆盖率目标
-
-- [ ] 组件测试覆盖率 > 80%
-- [ ] 关键用户流程 E2E 覆盖率 100%
-- [ ] 总体覆盖率 > 70%
+```typescript
+// apps/web-admin/playwright.config.ts
+export default defineConfig({
+  testDir: './e2e',
+  use: {
+    baseURL: 'http://localhost:3001',
+  },
+  webServer: {
+    command: 'pnpm dev:web',
+    url: 'http://localhost:3001',
+    reuseExistingServer: !process.env.CI,
+  },
+});
+```
 
 ---
 
 ## 测试命令
 
 ```bash
-# 运行组件测试
-pnpm vitest run
+# 组件测试
+pnpm vitest                    # 运行所有组件测试
+pnpm vitest watch              # 监听模式
+pnpm vitest coverage           # 生成覆盖率报告
 
-# 运行特定组件测试
-pnpm vitest run src/components/{component}.test.tsx
+# E2E 测试
+pnpm playwright test           # 运行所有 E2E 测试
+pnpm playwright test --ui      # UI 模式
+pnpm playwright test --debug   # 调试模式
 
-# 监听模式
-pnpm vitest watch
-
-# 运行覆盖率
-pnpm vitest run --coverage
-
-# 运行 E2E 测试
-pnpm playwright test
-
-# 运行特定 E2E 测试
-pnpm playwright test e2e/{feature}.spec.ts
-
-# 运行视觉回归测试
-pnpm playwright test --grep "Visual"
-
-# 更新快照
-pnpm playwright test --update-snapshots
-
-# 运行所有测试
-pnpm test
+# 特定测试
+pnpm vitest useAuth.spec.ts    # 运行特定文件
+pnpm playwright test auth-login.spec.ts
 ```
 
 ---
 
-## 测试最佳实践
+## 测试覆盖率目标
 
-### 1. 测试用户行为，而非实现细节
-
-```typescript
-// ✅ 推荐：测试用户行为
-await user.click(screen.getByRole('button', { name: /submit/i }));
-expect(screen.getByText('Success')).toBeInTheDocument();
-
-// ❌ 避免：测试实现细节
-expect(component.state.isSubmitted).toBe(true);
-```
-
-### 2. 使用 accessible queries
-
-```typescript
-// ✅ 推荐：使用角色和文本
-screen.getByRole('button', { name: /submit/i });
-screen.getByLabelText(/email/i);
-screen.getByText(/welcome/i);
-
-// ❌ 避免：使用 testid 或 selector
-screen.getByTestId('submit-button');
-container.querySelector('.btn-primary');
-```
-
-### 3. Mock 外部依赖
-
-```typescript
-// Mock API hooks
-vi.mock('@/hooks/useResource', () => ({
-  useResource: () => ({
-    data: mockData,
-    isLoading: false,
-  }),
-}));
-
-// Mock router
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ id: '123' }),
-}));
-```
-
-### 4. 测试异步行为
-
-```typescript
-import { waitFor } from '@testing-library/react';
-
-it('should load data', async () => {
-  render(<{Component} />);
-
-  await waitFor(() => {
-    expect(screen.getByText('Loaded Data')).toBeInTheDocument();
-  });
-});
-```
-
-### 2. 使用 accessible queries
-
-```typescript
-// ✅ 推荐：使用角色和文本
-screen.getByRole('button', { name: /submit/i });
-screen.getByLabelText(/email/i);
-screen.getByText(/welcome/i);
-
-// ❌ 避免：使用 testid 或实现细节
-screen.getByTestId('submit-button');
-screen.getBySelector('.btn-primary');
-```
-
-### 3. Mock 外部依赖
-
-```typescript
-// Mock API hooks
-vi.mock('@/hooks/useResource', () => ({
-  useResource: () => ({
-    data: mockData,
-    isLoading: false,
-  }),
-}));
-
-// Mock router
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ id: '123' }),
-}));
-```
-
-### 4. 测试异步行为
-
-```typescript
-import { waitFor } from '@testing-library/react';
-
-it('should load data', async () => {
-  render(<{Component} />);
-
-  // 等待数据加载
-  await waitFor(() => {
-    expect(screen.getByText('Loaded Data')).toBeInTheDocument();
-  });
-});
-```
+| 类型       |     目标      | 实际 | 状态 |
+| :--------- | :-----------: | :--: | :--: |
+| 组件测试   |     >80%      |  -%  |  ⏳  |
+| E2E 测试   | 100% 关键流程 |  -%  |  ⏳  |
+| 总体覆盖率 |     >70%      |  -%  |  ⏳  |
 
 ---
 
-## 参考资料
+## 测试清单
 
-- [Testing Library 文档](https://testing-library.com/docs/react-testing-library/intro/)
-- [Playwright 文档](https://playwright.dev/)
-- [Vitest 文档](https://vitest.dev/)
-- [jest-axe 文档](https://github.com/nickcolley/jest-axe)
+### 组件测试清单
+
+- [ ] useSignIn Hook
+- [ ] useSignUp Hook
+- [ ] useSignOut Hook
+- [ ] useAuthSession Hook
+- [ ] LoginPage 组件
+- [ ] RegisterPage 组件
+- [ ] ForgotPasswordPage 组件
+- [ ] ResetPasswordPage 组件
+- [ ] TwoFactorSetup 组件
+- [ ] TwoFactorVerify 组件
+- [ ] OAuthButtons 组件
+- [ ] AuthProvider 组件
+
+### E2E 测试清单
+
+- [ ] 邮箱密码登录成功
+- [ ] 登录失败（错误密码）
+- [ ] 2FA 登录流程
+- [ ] OAuth 登录流程
+- [ ] 注册流程
+- [ ] 邮箱验证流程
+- [ ] 密码重置流程
+- [ ] 登出流程
+- [ ] 会话过期处理
+
+---
+
+**文档更新日期**: 2026-03-07

@@ -1,8 +1,16 @@
 import { i as __toESM } from "../../../_runtime.mjs";
-import { i as require_jsx_runtime, s as require_react } from "../@radix-ui/react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { i as require_jsx_runtime } from "../@radix-ui/react-collection.mjs";
+import { n as MutationObserver, o as noop, r as notifyManager, s as shouldThrowError } from "./query-core.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
 var QueryClientContext = import_react.createContext(void 0);
+var useQueryClient = (queryClient) => {
+	const client = import_react.useContext(QueryClientContext);
+	if (queryClient) return queryClient;
+	if (!client) throw new Error("No QueryClient set, use QueryClientProvider to set one");
+	return client;
+};
 var QueryClientProvider = ({ client, children }) => {
 	import_react.useEffect(() => {
 		client.mount();
@@ -15,4 +23,21 @@ var QueryClientProvider = ({ client, children }) => {
 		children
 	});
 };
-export { QueryClientProvider as t };
+function useMutation(options, queryClient) {
+	const client = useQueryClient(queryClient);
+	const [observer] = import_react.useState(() => new MutationObserver(client, options));
+	import_react.useEffect(() => {
+		observer.setOptions(options);
+	}, [observer, options]);
+	const result = import_react.useSyncExternalStore(import_react.useCallback((onStoreChange) => observer.subscribe(notifyManager.batchCalls(onStoreChange)), [observer]), () => observer.getCurrentResult(), () => observer.getCurrentResult());
+	const mutate = import_react.useCallback((variables, mutateOptions) => {
+		observer.mutate(variables, mutateOptions).catch(noop);
+	}, [observer]);
+	if (result.error && shouldThrowError(observer.options.throwOnError, [result.error])) throw result.error;
+	return {
+		...result,
+		mutate,
+		mutateAsync: result.mutate
+	};
+}
+export { QueryClientProvider as n, useQueryClient as r, useMutation as t };

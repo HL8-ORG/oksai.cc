@@ -149,6 +149,14 @@ export class AuthGuard implements CanActivate {
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = getRequestFromContext(context);
+
+    // 跳过 Better Auth 原生 API 路由（由 Better Auth 中间件处理）
+    const basePath = this.options.auth.options.basePath ?? "/api/auth";
+    const requestPath = request.url || request.path || "";
+    if (requestPath.startsWith(basePath)) {
+      return true;
+    }
+
     const session: UserSession | null = await this.options.auth.api.getSession({
       headers: fromNodeHeaders(request.headers || request?.handshake?.headers || []),
     });

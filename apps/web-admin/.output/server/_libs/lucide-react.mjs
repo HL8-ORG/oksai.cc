@@ -1,5 +1,5 @@
 import { i as __toESM } from "../_runtime.mjs";
-import { s as require_react } from "../_chunks/_libs/@radix-ui/react-collection.mjs";
+import { tt as require_react } from "../_chunks/_libs/@hookform/resolvers.mjs";
 /**
 * @license lucide-react v0.575.0 - ISC
 *

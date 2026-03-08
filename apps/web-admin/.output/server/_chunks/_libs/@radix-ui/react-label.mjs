@@ -1,5 +1,6 @@
 import { i as __toESM } from "../../../_runtime.mjs";
-import { a as composeRefs, i as require_jsx_runtime, s as require_react } from "./react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { a as composeRefs, i as require_jsx_runtime } from "./react-collection.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
 var REACT_LAZY_TYPE = Symbol.for("react.lazy");

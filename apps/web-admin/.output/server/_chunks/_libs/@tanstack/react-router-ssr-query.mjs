@@ -1,8 +1,9 @@
 import { i as __toESM } from "../../../_runtime.mjs";
-import { i as require_jsx_runtime, s as require_react } from "../@radix-ui/react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { i as require_jsx_runtime } from "../@radix-ui/react-collection.mjs";
 import "./react-router.mjs";
-import { n as dehydrate } from "./query-core.mjs";
-import { t as QueryClientProvider } from "./react-query.mjs";
+import { i as dehydrate } from "./query-core.mjs";
+import { n as QueryClientProvider } from "./react-query.mjs";
 function setupCoreRouterSsrQueryIntegration({ router, queryClient, handleRedirects = true }) {
 	router.options.hydrate;
 	const ogDehydrate = router.options.dehydrate;

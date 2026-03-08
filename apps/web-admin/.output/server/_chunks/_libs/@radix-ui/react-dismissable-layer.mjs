@@ -1,5 +1,6 @@
 import { i as __toESM, t as __commonJSMin } from "../../../_runtime.mjs";
-import { i as require_jsx_runtime, n as createSlot, o as useComposedRefs, s as require_react } from "./react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { i as require_jsx_runtime, n as createSlot, o as useComposedRefs } from "./react-collection.mjs";
 import { t as composeEventHandlers } from "./primitive.mjs";
 /**
 * @license React

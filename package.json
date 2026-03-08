@@ -26,7 +26,8 @@
     "verify:gateway": "node scripts/verify-gateway-startup.js",
     "test:auth": "tsx apps/gateway/test-auth.ts",
     "test:oauth": "tsx apps/gateway/test-oauth.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lsof-kill": "for port in 3000 3001 3002 3003 3004 4201 1340; do lsof -ti :$port | xargs -r kill -9 2>/dev/null && echo \"端口 $port 已清理\" || true; done"
   },
   "devDependencies": {
     "@oksai/tsconfig": "workspace:*",

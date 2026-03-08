@@ -1,5 +1,6 @@
 import { i as __toESM, r as __require, t as __commonJSMin } from "../../../_runtime.mjs";
-import { i as require_jsx_runtime, s as require_react } from "../@radix-ui/react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { i as require_jsx_runtime } from "../@radix-ui/react-collection.mjs";
 import { o as require_react_dom } from "../@radix-ui/react-dismissable-layer.mjs";
 import { n as parseHref } from "./history.mjs";
 import { PassThrough, Readable } from "node:stream";
@@ -13277,4 +13278,4 @@ var renderRouterToStream = async ({ request, router, responseHeaders, children }
 	}
 	throw new Error("No renderToReadableStream or renderToPipeableStream found in react-dom/server. Ensure you are using a version of react-dom that supports streaming.");
 };
-export { createRouter as a, createRootRoute as c, isRedirect as d, redirect as f, RouterProvider as i, Link as l, Scripts as n, lazyRouteComponent as o, HeadContent as r, createFileRoute as s, renderRouterToStream as t, useNavigate as u };
+export { createRouter as a, createRootRoute as c, useSearch as d, isRedirect as f, RouterProvider as i, Link as l, Scripts as n, lazyRouteComponent as o, redirect as p, HeadContent as r, createFileRoute as s, renderRouterToStream as t, useNavigate as u };

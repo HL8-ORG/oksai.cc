@@ -1,5 +1,6 @@
 import { i as __toESM } from "../../../_runtime.mjs";
-import { i as require_jsx_runtime, o as useComposedRefs, r as createContextScope, s as require_react, t as createCollection } from "./react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { i as require_jsx_runtime, o as useComposedRefs, r as createContextScope, t as createCollection } from "./react-collection.mjs";
 import { a as dispatchDiscreteCustomEvent, i as Primitive, n as Root, o as require_react_dom, r as useCallbackRef, t as Branch } from "./react-dismissable-layer.mjs";
 import { t as composeEventHandlers } from "./primitive.mjs";
 import { n as useLayoutEffect2, t as Portal } from "./react-portal.mjs";

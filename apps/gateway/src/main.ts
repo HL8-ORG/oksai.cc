@@ -32,7 +32,9 @@ async function bootstrap() {
   app.useLogger(logger);
   app.flushLogs();
 
-  app.setGlobalPrefix("api");
+  app.setGlobalPrefix("api", {
+    exclude: ["/"],
+  });
 
   // 启用 CORS，允许前端跨域访问
   app.enableCors({

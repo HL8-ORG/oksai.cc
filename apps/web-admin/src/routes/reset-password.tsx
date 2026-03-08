@@ -1,9 +1,30 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+
+const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "密码至少 8 位")
+      .regex(/[A-Z]/, "密码至少包含一个大写字母")
+      .regex(/[a-z]/, "密码至少包含一个小写字母")
+      .regex(/[0-9]/, "密码至少包含一个数字"),
+    confirmPassword: z.string().min(1, "请确认密码"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "两次密码输入不一致",
+    path: ["confirmPassword"],
+  });
+
+type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
@@ -12,122 +33,115 @@ export const Route = createFileRoute("/reset-password")({
   }),
 });
 
-/**
- * 重置密码页面
- *
- * @description
- * 用户点击邮件中的重置链接后访问此页面
- * 设置新密码
- */
 function ResetPasswordPage() {
   const navigate = useNavigate();
-  const { token } = Route.useSearch();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const search = useSearch({ from: "/reset-password" });
+  const token = search.token;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
   useEffect(() => {
     if (!token) {
-      setError("缺少重置 Token");
+      toast.error("缺少重置 token");
+      navigate({ to: "/forgot-password" });
     }
-  }, [token]);
+  }, [token, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
+  const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
-      setError("缺少重置 Token");
+      toast.error("缺少重置 token");
       return;
     }
-
-    if (password !== confirmPassword) {
-      setError("两次输入的密码不一致");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("密码至少需要 8 个字符");
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
       await authClient.resetPassword({
-        newPassword: password,
+        newPassword: data.password,
         token,
       });
-      setSuccess(true);
-      // 3 秒后跳转到登录页
-      setTimeout(() => {
-        navigate({ to: "/login" });
-      }, 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "重置失败");
-    } finally {
-      setIsLoading(false);
+
+      toast.success("密码重置成功，请使用新密码登录");
+      navigate({ to: "/login" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "重置失败，请重试";
+      toast.error(message);
     }
   };
 
-  if (success) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h2 className="font-bold text-3xl text-green-600">密码重置成功！</h2>
-            <p className="mt-2 text-muted-foreground">您的密码已重置，即将跳转到登录页面...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h2 className="font-bold text-3xl">重置密码</h2>
-          <p className="mt-2 text-muted-foreground">请输入您的新密码</p>
+          <h2 className="font-bold text-3xl text-gray-900">重置密码</h2>
+          <p className="mt-2 text-gray-600">请输入您的新密码</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
               <Label htmlFor="password">新密码</Label>
               <Input
+                {...register("password")}
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="至少 8 个字符"
-                minLength={8}
+                placeholder="••••••••"
+                autoComplete="new-password"
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "password-error" : undefined}
               />
+              {errors.password && (
+                <p id="password-error" className="mt-1 text-red-600 text-sm" role="alert">
+                  {errors.password.message}
+                </p>
+              )}
+              <p className="mt-1 text-gray-500 text-xs">至少 8 位，包含大小写字母和数字</p>
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword">确认新密码</Label>
+              <Label htmlFor="confirmPassword">确认密码</Label>
               <Input
+                {...register("confirmPassword")}
                 id="confirmPassword"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                placeholder="再次输入新密码"
-                minLength={8}
+                placeholder="••••••••"
+                autoComplete="new-password"
+                aria-invalid={!!errors.confirmPassword}
+                aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
               />
+              {errors.confirmPassword && (
+                <p id="confirmPassword-error" className="mt-1 text-red-600 text-sm" role="alert">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
           </div>
 
-          {error && <div className="rounded-md bg-red-50 p-3 text-red-600 text-sm">{error}</div>}
-
-          <Button type="submit" className="w-full" disabled={isLoading || !token}>
-            {isLoading ? "重置中..." : "重置密码"}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "重置中..." : "重置密码"}
           </Button>
         </form>
+
+        <div className="text-center text-sm">
+          <span className="text-gray-600">记起密码了？</span>{" "}
+          <a
+            href="/login"
+            className="font-medium text-blue-600 hover:text-blue-500"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate({ to: "/login" });
+            }}>
+            返回登录
+          </a>
+        </div>
       </div>
     </div>
   );

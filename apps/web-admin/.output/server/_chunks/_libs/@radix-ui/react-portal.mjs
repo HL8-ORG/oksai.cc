@@ -1,5 +1,6 @@
 import { i as __toESM } from "../../../_runtime.mjs";
-import { i as require_jsx_runtime, s as require_react } from "./react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { i as require_jsx_runtime } from "./react-collection.mjs";
 import { i as Primitive, o as require_react_dom } from "./react-dismissable-layer.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var useLayoutEffect2 = globalThis?.document ? import_react.useLayoutEffect : () => {};

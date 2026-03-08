@@ -15,8 +15,10 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as R2faVerifyRouteImport } from './routes/2fa-verify'
 import { Route as R2faSetupRouteImport } from './routes/2fa-setup'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthCallbackProviderRouteImport } from './routes/auth/callback/$provider'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -48,6 +50,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const R2faVerifyRoute = R2faVerifyRouteImport.update({
+  id: '/2fa-verify',
+  path: '/2fa-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const R2faSetupRoute = R2faSetupRouteImport.update({
   id: '/2fa-setup',
   path: '/2fa-setup',
@@ -58,80 +65,99 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackProviderRoute = AuthCallbackProviderRouteImport.update({
+  id: '/auth/callback/$provider',
+  path: '/auth/callback/$provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/2fa-setup': typeof R2faSetupRoute
+  '/2fa-verify': typeof R2faVerifyRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/auth/callback/$provider': typeof AuthCallbackProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/2fa-setup': typeof R2faSetupRoute
+  '/2fa-verify': typeof R2faVerifyRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/auth/callback/$provider': typeof AuthCallbackProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/2fa-setup': typeof R2faSetupRoute
+  '/2fa-verify': typeof R2faVerifyRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/auth/callback/$provider': typeof AuthCallbackProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/2fa-setup'
+    | '/2fa-verify'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/auth/callback/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/2fa-setup'
+    | '/2fa-verify'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/auth/callback/$provider'
   id:
     | '__root__'
     | '/'
     | '/2fa-setup'
+    | '/2fa-verify'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/auth/callback/$provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R2faSetupRoute: typeof R2faSetupRoute
+  R2faVerifyRoute: typeof R2faVerifyRoute
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  AuthCallbackProviderRoute: typeof AuthCallbackProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -178,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/2fa-verify': {
+      id: '/2fa-verify'
+      path: '/2fa-verify'
+      fullPath: '/2fa-verify'
+      preLoaderRoute: typeof R2faVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/2fa-setup': {
       id: '/2fa-setup'
       path: '/2fa-setup'
@@ -192,18 +225,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback/$provider': {
+      id: '/auth/callback/$provider'
+      path: '/auth/callback/$provider'
+      fullPath: '/auth/callback/$provider'
+      preLoaderRoute: typeof AuthCallbackProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R2faSetupRoute: R2faSetupRoute,
+  R2faVerifyRoute: R2faVerifyRoute,
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  AuthCallbackProviderRoute: AuthCallbackProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

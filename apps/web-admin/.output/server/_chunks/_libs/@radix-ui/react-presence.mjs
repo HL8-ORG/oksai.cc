@@ -1,5 +1,6 @@
 import { i as __toESM } from "../../../_runtime.mjs";
-import { o as useComposedRefs, s as require_react } from "./react-collection.mjs";
+import { tt as require_react } from "../@hookform/resolvers.mjs";
+import { o as useComposedRefs } from "./react-collection.mjs";
 import { n as useLayoutEffect2 } from "./react-portal.mjs";
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 function useStateMachine(initialState, machine) {
