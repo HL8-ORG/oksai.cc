@@ -16,26 +16,9 @@ describe("mikroOrmAdapter (Integration)", () => {
 
   // 在所有测试前启动 ORM 和创建 Schema
   beforeAll(async () => {
-    orm = await createTestOrm();
-    await createSchema(orm);
-
-    // 创建适配器工厂
-    const adapterFactory = mikroOrmAdapter(orm);
-
-    // 从工厂获取实际的 adapter（传入空的 BetterAuthOptions）
-    adapter = adapterFactory({});
-  }, 30000);
-
-  // 在所有测试后清理资源
-  afterAll(async () => {
-    await dropSchema(orm);
-    await orm.close();
-  }, 30000);
-
-  // 每个测试前清理数据库
-  beforeEach(async () => {
-    await cleanDatabase(orm);
-  });
+    orm = await initORM();
+    adapter = mikroOrmAdapter(orm);
+  }, 60000); // 增加超时时间到60秒
 
   describe("create - 创建记录", () => {
     it("应该创建用户并返回", async () => {

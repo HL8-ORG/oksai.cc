@@ -152,7 +152,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "密码重置邮件已发送，请查收",
+        message: "如果该邮箱已注册，您将收到密码重置邮件",
       };
     } catch (error) {
       this.logger.error(`忘记密码失败: ${dto.email}`, error);
