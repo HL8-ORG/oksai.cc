@@ -215,7 +215,7 @@ await em.nativeDelete(User, { isActive: false });
 
 ```typescript
 import { EntityManager } from '@mikro-orm/core';
-import { EventSourcedRepository } from '@oksai/repository';
+import { EventSourcedRepository } from '@oksai/event-store';
 
 export class UserRepository extends EventSourcedRepository<User> {
   constructor(em: EntityManager, eventStore: EventStore) {

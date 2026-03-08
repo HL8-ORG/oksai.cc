@@ -999,7 +999,7 @@ export class OAuthRepository {
 // libs/oauth/src/infrastructure/repository/oauth.repository.ts
 import { EntityManager } from '@mikro-orm/core';
 import { OAuthClient } from '@oksai/database';
-import { EventSourcedRepository } from '@oksai/repository';
+import { EventSourcedRepository } from '@oksai/event-store';
 
 export class OAuthRepository extends EventSourcedRepository<OAuthClient> {
   constructor(em: EntityManager, eventStore: EventStore) {

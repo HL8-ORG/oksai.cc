@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { DomainEvent } from "../src/types.js";
 

@@ -1,0 +1,16 @@
+{
+  "extends": "@oksai/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"],
+  "references": [
+    { "path": "../config" },
+    { "path": "../context" },
+    { "path": "../contracts" },
+    { "path": "../kernel" },
+    { "path": "../logger" }
+  ]
+}

@@ -34,7 +34,7 @@ Phase 4: 优化清理      ████████████ 100% ✅
 - ✅ EventSourcedRepository 基类
 - ✅ 测试框架 (RepositoryTestBase)
 
-**新增库**: `@oksai/database`, `@oksai/event-store`, `@oksai/repository`, `@oksai/testing`
+**新增库**: `@oksai/database`, `@oksai/event-store`, `@oksai/event-store`, `@oksai/testing`
 
 ---
 

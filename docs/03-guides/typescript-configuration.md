@@ -484,7 +484,7 @@ export class AppController {
 | `@oksai/cache`                 | 缓存服务                     |
 | `@oksai/event-store`           | 事件存储                     |
 | `@oksai/better-auth-mikro-orm` | Better Auth 适配器           |
-| `@oksai/repository`            | 仓储层                       |
+| `@oksai/event-store`            | 仓储层                       |
 
 ---
 
