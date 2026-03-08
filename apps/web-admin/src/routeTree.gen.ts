@@ -18,6 +18,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as R2faVerifyRouteImport } from './routes/2fa-verify'
 import { Route as R2faSetupRouteImport } from './routes/2fa-setup'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminTenantsIndexRouteImport } from './routes/admin/tenants/index'
 import { Route as AuthCallbackProviderRouteImport } from './routes/auth/callback/$provider'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
@@ -65,6 +66,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTenantsIndexRoute = AdminTenantsIndexRouteImport.update({
+  id: '/admin/tenants/',
+  path: '/admin/tenants/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthCallbackProviderRoute = AuthCallbackProviderRouteImport.update({
   id: '/auth/callback/$provider',
   path: '/auth/callback/$provider',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
   '/auth/callback/$provider': typeof AuthCallbackProviderRoute
+  '/admin/tenants/': typeof AdminTenantsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
   '/auth/callback/$provider': typeof AuthCallbackProviderRoute
+  '/admin/tenants': typeof AdminTenantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
   '/auth/callback/$provider': typeof AuthCallbackProviderRoute
+  '/admin/tenants/': typeof AdminTenantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/auth/callback/$provider'
+    | '/admin/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/auth/callback/$provider'
+    | '/admin/tenants'
   id:
     | '__root__'
     | '/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/auth/callback/$provider'
+    | '/admin/tenants/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   AuthCallbackProviderRoute: typeof AuthCallbackProviderRoute
+  AdminTenantsIndexRoute: typeof AdminTenantsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/tenants/': {
+      id: '/admin/tenants/'
+      path: '/admin/tenants'
+      fullPath: '/admin/tenants/'
+      preLoaderRoute: typeof AdminTenantsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/callback/$provider': {
       id: '/auth/callback/$provider'
       path: '/auth/callback/$provider'
@@ -246,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   AuthCallbackProviderRoute: AuthCallbackProviderRoute,
+  AdminTenantsIndexRoute: AdminTenantsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
