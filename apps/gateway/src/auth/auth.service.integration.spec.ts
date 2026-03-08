@@ -70,11 +70,9 @@ describe("AuthService (Integration)", () => {
       expect(result.user).toBeDefined();
       expect(result.user?.email).toBe(signUpDto.email);
       expect(mockAuthAPI.signUpEmail).toHaveBeenCalledWith({
-        body: {
-          email: signUpDto.email,
-          password: signUpDto.password,
-          name: signUpDto.name,
-        },
+        email: signUpDto.email,
+        password: signUpDto.password,
+        name: signUpDto.name,
       });
     });
 
@@ -121,10 +119,8 @@ describe("AuthService (Integration)", () => {
       expect(result.user).toBeDefined();
       expect(result.session).toBeDefined();
       expect(mockAuthAPI.signInEmail).toHaveBeenCalledWith({
-        body: {
-          email: signInDto.email,
-          password: signInDto.password,
-        },
+        email: signInDto.email,
+        password: signInDto.password,
       });
     });
 
@@ -163,9 +159,7 @@ describe("AuthService (Integration)", () => {
       expect(result.message).toBe("邮箱验证成功");
       expect(result.user?.emailVerified).toBe(true);
       expect(mockAuthAPI.verifyEmail).toHaveBeenCalledWith({
-        body: {
-          token: verifyEmailDto.token,
-        },
+        token: verifyEmailDto.token,
       });
     });
 
@@ -188,10 +182,8 @@ describe("AuthService (Integration)", () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toBe("密码重置邮件已发送，请查收");
-      expect(mockAuthAPI.requestPasswordReset).toHaveBeenCalledWith({
-        body: {
-          email: forgotPasswordDto.email,
-        },
+      expect(mockAuthAPI.forgotPassword).toHaveBeenCalledWith({
+        email: forgotPasswordDto.email,
       });
     });
 
@@ -219,10 +211,8 @@ describe("AuthService (Integration)", () => {
       expect(result.success).toBe(true);
       expect(result.message).toBe("密码重置成功，请使用新密码登录");
       expect(mockAuthAPI.resetPassword).toHaveBeenCalledWith({
-        body: {
-          token: resetPasswordDto.token,
-          newPassword: resetPasswordDto.newPassword,
-        },
+        token: resetPasswordDto.token,
+        newPassword: resetPasswordDto.newPassword,
       });
     });
 
