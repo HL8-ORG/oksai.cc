@@ -50,7 +50,7 @@
       "options": {
         "testTargetName": "test"
       },
-      "exclude": ["@oksai/web-admin", "@oksai/testing"]
+      "exclude": ["@oksai/web-admin", "@oksai/testing", "libs/iam/better-auth-mikro-orm/**"]
     }
   ],
   "release": {

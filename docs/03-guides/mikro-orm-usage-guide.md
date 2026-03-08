@@ -24,12 +24,7 @@
 ### 1. 导入 Entity
 
 ```typescript
-import { 
-  User, 
-  Session, 
-  OAuthClient,
-  OAuthAccessToken 
-} from '@oksai/database';
+import { User, Session, OAuthClient, OAuthAccessToken } from '@oksai/database';
 ```
 
 ### 2. 使用 EntityManager
@@ -51,13 +46,14 @@ class UserService {
 ### 3. 使用 Repository
 
 ```typescript
-import { OAuthClientRepository } from '@oksai/oauth';
+import { OAuthClient } from '@oksai/database';
+import { EntityManager } from '@mikro-orm/core';
 
 class OAuthService {
-  constructor(private clientRepo: OAuthClientRepository) {}
+  constructor(private em: EntityManager) {}
 
   async findClient(clientId: string) {
-    return this.clientRepo.findByClientId(clientId);
+    return this.em.findOne(OAuthClient, { clientId });
   }
 }
 ```
@@ -81,6 +77,7 @@ export class MyEntity extends BaseEntity {
 ```
 
 **BaseEntity 包含**:
+
 - `id: string` - UUID 主键
 - `createdAt: Date` - 创建时间
 - `updatedAt: Date` - 更新时间
@@ -88,13 +85,13 @@ export class MyEntity extends BaseEntity {
 ### 完整 Entity 示例
 
 ```typescript
-import { 
-  Entity, 
-  Property, 
-  Index, 
+import {
+  Entity,
+  Property,
+  Index,
   Unique,
   BeforeCreate,
-  AfterUpdate 
+  AfterUpdate,
 } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
 
@@ -137,16 +134,16 @@ export class User extends BaseEntity {
 
 ### 常用装饰器
 
-| 装饰器 | 说明 | 示例 |
-|:---|:---|:---|
-| `@Entity()` | 标记为实体 | `@Entity()` |
-| `@Property()` | 普通属性 | `@Property()` |
-| `@PrimaryKey()` | 主键 | `@PrimaryKey()` |
-| `@Index()` | 索引 | `@Property() @Index()` |
-| `@Unique()` | 唯一约束 | `@Unique({ properties: ['email'] })` |
-| `@ManyToOne()` | 多对一关系 | `@ManyToOne(() => User)` |
-| `@OneToMany()` | 一对多关系 | `@OneToMany(() => Post)` |
-| `@ManyToMany()` | 多对多关系 | `@ManyToMany(() => Tag)` |
+| 装饰器          | 说明       | 示例                                 |
+| :-------------- | :--------- | :----------------------------------- |
+| `@Entity()`     | 标记为实体 | `@Entity()`                          |
+| `@Property()`   | 普通属性   | `@Property()`                        |
+| `@PrimaryKey()` | 主键       | `@PrimaryKey()`                      |
+| `@Index()`      | 索引       | `@Property() @Index()`               |
+| `@Unique()`     | 唯一约束   | `@Unique({ properties: ['email'] })` |
+| `@ManyToOne()`  | 多对一关系 | `@ManyToOne(() => User)`             |
+| `@OneToMany()`  | 一对多关系 | `@OneToMany(() => Post)`             |
+| `@ManyToMany()` | 多对多关系 | `@ManyToMany(() => Tag)`             |
 
 ---
 
@@ -156,9 +153,9 @@ export class User extends BaseEntity {
 
 ```typescript
 // 方式 1: create + flush
-const user = em.create(User, { 
+const user = em.create(User, {
   email: 'test@example.com',
-  username: 'testuser'
+  username: 'testuser',
 });
 await em.flush();
 
@@ -182,9 +179,9 @@ const users = await em.find(User, { isActive: true });
 
 // 查询并计数
 const [users, total] = await em.findAndCount(
-  User, 
+  User,
   { role: 'admin' },
-  { limit: 10, offset: 0 }
+  { limit: 10, offset: 0 },
 );
 ```
 
@@ -230,16 +227,20 @@ export class UserRepository extends EventSourcedRepository<User> {
   }
 
   async findActiveUsers(): Promise<User[]> {
-    return this.em.find(User, { 
-      isActive: true 
-    }, {
-      orderBy: { createdAt: 'DESC' }
-    });
+    return this.em.find(
+      User,
+      {
+        isActive: true,
+      },
+      {
+        orderBy: { createdAt: 'DESC' },
+      },
+    );
   }
 
   async findByRole(role: string): Promise<User[]> {
     return this.em.find(User, {
-      roles: { $contains: [role] }
+      roles: { $contains: [role] },
     });
   }
 }
@@ -275,30 +276,27 @@ const users = await qb
 // AND 条件
 const users = await em.find(User, {
   isActive: true,
-  role: 'admin'
+  role: 'admin',
 });
 
 // OR 条件
 const users = await em.find(User, {
-  $or: [
-    { role: 'admin' },
-    { role: 'moderator' }
-  ]
+  $or: [{ role: 'admin' }, { role: 'moderator' }],
 });
 
 // IN 条件
 const users = await em.find(User, {
-  role: { $in: ['admin', 'moderator'] }
+  role: { $in: ['admin', 'moderator'] },
 });
 
 // LIKE 查询
 const users = await em.find(User, {
-  email: { $like: '%@example.com' }
+  email: { $like: '%@example.com' },
 });
 
 // 比较运算
 const users = await em.find(User, {
-  createdAt: { $gte: new Date('2024-01-01') }
+  createdAt: { $gte: new Date('2024-01-01') },
 });
 ```
 
@@ -306,16 +304,24 @@ const users = await em.find(User, {
 
 ```typescript
 // 预加载关联
-const posts = await em.find(Post, {}, {
-  populate: ['author', 'comments']
-});
+const posts = await em.find(
+  Post,
+  {},
+  {
+    populate: ['author', 'comments'],
+  },
+);
 
 // 过滤关联
-const posts = await em.find(Post, {
-  author: { isActive: true }
-}, {
-  populate: ['author']
-});
+const posts = await em.find(
+  Post,
+  {
+    author: { isActive: true },
+  },
+  {
+    populate: ['author'],
+  },
+);
 ```
 
 ---
@@ -338,7 +344,7 @@ await em.flush(); // 自动提交事务
 await em.transactional(async (em) => {
   const user = em.create(User, { email: 'test@example.com' });
   const profile = em.create(Profile, { userId: user.id });
-  
+
   // 如果任何操作失败，整个事务回滚
   return user;
 });
@@ -350,7 +356,7 @@ await em.transactional(async (em) => {
 await em.transactional(async (em) => {
   // 外层事务
   const user = await em.findOne(User, { id: 'user-123' });
-  
+
   await em.transactional(async (em2) => {
     // 内层事务（使用 savepoint）
     const session = em2.create(Session, { userId: user.id });
@@ -364,14 +370,14 @@ await em.transactional(async (em) => {
 
 ### 可用钩子
 
-| 钩子 | 触发时机 | 用途 |
-|:---|:---|:---|
-| `@BeforeCreate()` | 创建前 | 验证、初始化 |
-| `@AfterCreate()` | 创建后 | 日志、事件 |
-| `@BeforeUpdate()` | 更新前 | 验证 |
-| `@AfterUpdate()` | 更新后 | 日志、事件 |
-| `@BeforeDelete()` | 删除前 | 级联清理 |
-| `@AfterDelete()` | 删除后 | 日志 |
+| 钩子              | 触发时机 | 用途         |
+| :---------------- | :------- | :----------- |
+| `@BeforeCreate()` | 创建前   | 验证、初始化 |
+| `@AfterCreate()`  | 创建后   | 日志、事件   |
+| `@BeforeUpdate()` | 更新前   | 验证         |
+| `@AfterUpdate()`  | 更新后   | 日志、事件   |
+| `@BeforeDelete()` | 删除前   | 级联清理     |
+| `@AfterDelete()`  | 删除后   | 日志         |
 
 ### 使用示例
 
@@ -390,7 +396,7 @@ export class User extends BaseEntity {
     if (!this.email.includes('@')) {
       throw new Error('Invalid email format');
     }
-    
+
     // 设置默认值
     this.status = 'pending';
   }
@@ -418,6 +424,7 @@ export class User extends BaseEntity {
 ### 1. Entity 设计
 
 ✅ **推荐**:
+
 ```typescript
 @Entity()
 export class User extends BaseEntity {
@@ -438,6 +445,7 @@ export class User extends BaseEntity {
 ```
 
 ❌ **不推荐**:
+
 ```typescript
 // 贫血模型，业务逻辑散落在 Service 中
 const user = new User();
@@ -448,21 +456,27 @@ user.status = 'active'; // 不验证状态转换
 ### 2. 查询优化
 
 ✅ **推荐**:
+
 ```typescript
 // 使用索引字段查询
 const user = await em.findOne(User, { email: 'test@example.com' });
 
 // 预加载关联
-const posts = await em.find(Post, {}, {
-  populate: ['author', 'comments']
-});
+const posts = await em.find(
+  Post,
+  {},
+  {
+    populate: ['author', 'comments'],
+  },
+);
 ```
 
 ❌ **不推荐**:
+
 ```typescript
 // 不使用索引字段
 const users = await em.find(User, {
-  bio: { $like: '%something%' } // bio 没有索引
+  bio: { $like: '%something%' }, // bio 没有索引
 });
 
 // N+1 查询问题
@@ -475,6 +489,7 @@ for (const post of posts) {
 ### 3. 事务管理
 
 ✅ **推荐**:
+
 ```typescript
 // 使用 Unit of Work
 const user = em.create(User, { email });
@@ -483,6 +498,7 @@ await em.flush(); // 自动事务
 ```
 
 ❌ **不推荐**:
+
 ```typescript
 // 手动管理事务
 await em.beginTransaction();
@@ -499,6 +515,7 @@ try {
 ### 4. 错误处理
 
 ✅ **推荐**:
+
 ```typescript
 try {
   const user = await em.findOneOrFail(User, { id: 'user-123' });
@@ -514,15 +531,16 @@ try {
 ### 5. 测试友好
 
 ✅ **推荐**:
+
 ```typescript
 // Entity 独立可测试
 describe('User', () => {
   it('should activate pending user', () => {
     const user = new User('test@example.com');
     user.status = 'pending';
-    
+
     user.activate();
-    
+
     expect(user.status).toBe('active');
   });
 });
@@ -538,7 +556,7 @@ describe('User', () => {
 // 一对多
 @Entity()
 export class User extends BaseEntity {
-  @OneToMany(() => Post, post => post.author)
+  @OneToMany(() => Post, (post) => post.author)
   posts = new Collection<Post>(this);
 }
 
@@ -549,9 +567,13 @@ export class Post extends BaseEntity {
 }
 
 // 使用
-const user = await em.findOne(User, { id: 'user-123' }, {
-  populate: ['posts']
-});
+const user = await em.findOne(
+  User,
+  { id: 'user-123' },
+  {
+    populate: ['posts'],
+  },
+);
 ```
 
 ### 2. 如何使用 JSON 字段？
@@ -565,7 +587,7 @@ export class User extends BaseEntity {
 
 // 查询 JSON 字段
 const users = await em.find(User, {
-  metadata: { $contains: { role: 'admin' } }
+  metadata: { $contains: { role: 'admin' } },
 });
 ```
 
@@ -580,7 +602,7 @@ export class User extends BaseEntity {
 
 // 查询数组字段
 const admins = await em.find(User, {
-  roles: { $contains: ['admin'] }
+  roles: { $contains: ['admin'] },
 });
 ```
 

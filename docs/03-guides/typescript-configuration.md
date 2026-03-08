@@ -481,7 +481,6 @@ export class AppController {
 | `@oksai/nestjs-better-auth`    | 需要处理 peer dependencies   |
 | `@oksai/nestjs-utils`          | NestJS 工具集                |
 | `@oksai/database`              | 复杂的数据库层，外部依赖多   |
-| `@oksai/oauth`                 | OAuth 协议实现，依赖复杂     |
 | `@oksai/cache`                 | 缓存服务                     |
 | `@oksai/event-store`           | 事件存储                     |
 | `@oksai/better-auth-mikro-orm` | Better Auth 适配器           |

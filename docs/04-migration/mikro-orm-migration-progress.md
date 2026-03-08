@@ -9,7 +9,7 @@
 
 ```
 Phase 1: 基础设施      ████████████ 100% ✅
-Phase 2: OAuth 2.0     ████████████ 100% ✅  
+Phase 2: OAuth 2.0     ████████████ 100% ✅
 Phase 3: 扩展迁移      ████████████ 100% ✅
 Phase 4: 优化清理      ████████████ 100% ✅
 
@@ -21,10 +21,12 @@ Phase 4: 优化清理      ████████████ 100% ✅
 ## ✅ 已完成阶段
 
 ### Phase 1: 基础设施（100% ✅）
+
 **完成时间**: 2026-03-05  
 **详情**: [Phase 1 进度](./mikro-orm-migration-progress.md)
 
 **核心成果**:
+
 - ✅ MikroORM 集成和配置
 - ✅ BaseEntity 基类
 - ✅ Tenant 示例 Entity
@@ -37,26 +39,30 @@ Phase 4: 优化清理      ████████████ 100% ✅
 ---
 
 ### Phase 2: OAuth 2.0 试点迁移（100% ✅）
+
 **完成时间**: 2026-03-05  
 **详情**: [Phase 2 进度](./mikro-orm-migration-phase2-progress.md)
 
 **核心成果**:
-- ✅ OAuthClient Entity + Repository
-- ✅ OAuthAuthorizationCode Entity + Repository
-- ✅ OAuthAccessToken Entity + Repository  
-- ✅ OAuthRefreshToken Entity + Repository
+
+- ✅ OAuthClient Entity（位于 @oksai/database）
+- ✅ OAuthAuthorizationCode Entity（位于 @oksai/database）
+- ✅ OAuthAccessToken Entity（位于 @oksai/database）
+- ✅ OAuthRefreshToken Entity（位于 @oksai/database）
 - ✅ 完整的测试覆盖 (12 测试用例)
 
-**新增库**: `@oksai/oauth`
+**注意**: OAuth Repository 实现已集成到 `apps/gateway/src/auth/` 中
 
 ---
 
 ### Phase 3: 扩展迁移（100% ✅）
+
 **完成时间**: 2026-03-05
 
 **核心成果**:
 
 #### 用户认证领域
+
 - ✅ **User Entity** - 完整的用户管理
   - 多租户支持 (tenantId)
   - 角色管理 (OWNER/ADMIN/MEMBER/VIEWER)
@@ -76,6 +82,7 @@ Phase 4: 优化清理      ████████████ 100% ✅
   - 元数据支持 (metadata)
 
 #### Webhook 领域
+
 - ✅ **Webhook Entity** - Webhook 管理
   - 事件订阅 (events 数组)
   - 状态管理 (active/disabled/failed)
@@ -92,29 +99,31 @@ Phase 4: 优化清理      ████████████ 100% ✅
 
 ### 数据库 Entity (libs/database/src/entities/)
 
-| Entity | 状态 | 说明 | 代码行数 |
-|:---|:---:|:---|:---:|
-| BaseEntity | ✅ | 基础实体类 | ~20 |
-| Tenant | ✅ | 租户实体 | ~100 |
-| DomainEventEntity | ✅ | 领域事件实体 | ~60 |
-| **OAuthClient** | ✅ | OAuth 客户端 | ~140 |
-| **OAuthAuthorizationCode** | ✅ | OAuth 授权码 | ~70 |
-| **OAuthAccessToken** | ✅ | OAuth 访问令牌 | ~80 |
-| **OAuthRefreshToken** | ✅ | OAuth 刷新令牌 | ~70 |
-| **User** | ✅ | 用户实体 | ~110 |
-| **Session** | ✅ | 会话实体 | ~80 |
-| **APIKey** | ✅ | API 密钥实体 | ~120 |
-| **Webhook** | ✅ | Webhook 实体 | ~100 |
-| **WebhookDelivery** | ✅ | Webhook 交付记录 | ~130 |
-| **总计** | **12** | **完整覆盖** | **~1080** |
+| Entity                     |  状态  | 说明             | 代码行数  |
+| :------------------------- | :----: | :--------------- | :-------: |
+| BaseEntity                 |   ✅   | 基础实体类       |    ~20    |
+| Tenant                     |   ✅   | 租户实体         |   ~100    |
+| DomainEventEntity          |   ✅   | 领域事件实体     |    ~60    |
+| **OAuthClient**            |   ✅   | OAuth 客户端     |   ~140    |
+| **OAuthAuthorizationCode** |   ✅   | OAuth 授权码     |    ~70    |
+| **OAuthAccessToken**       |   ✅   | OAuth 访问令牌   |    ~80    |
+| **OAuthRefreshToken**      |   ✅   | OAuth 刷新令牌   |    ~70    |
+| **User**                   |   ✅   | 用户实体         |   ~110    |
+| **Session**                |   ✅   | 会话实体         |    ~80    |
+| **APIKey**                 |   ✅   | API 密钥实体     |   ~120    |
+| **Webhook**                |   ✅   | Webhook 实体     |   ~100    |
+| **WebhookDelivery**        |   ✅   | Webhook 交付记录 |   ~130    |
+| **总计**                   | **12** | **完整覆盖**     | **~1080** |
 
 ---
 
 ## Phase 4: 优化和清理（100% ✅）
+
 **完成时间**: 2026-03-06  
 **详情**: [Phase 4 完成](../drizzle-removal-phase4-complete.md)
 
 **核心成果**:
+
 - ✅ **Better Auth MikroORM 适配器优化**
   - 282 行核心代码（最简洁）
   - 53/53 单元测试通过
@@ -151,16 +160,18 @@ Phase 4: 优化清理      ████████████ 100% ✅
 ## 📈 代码统计
 
 ### 总体统计
-| 类别 | 数量 |
-|:---|:---:|
-| **新增库** | 5 个 |
-| **新增 Entity** | 12 个 |
-| **新增 Repository** | 8 个 |
-| **测试用例** | 19+ 个 |
-| **代码行数** | ~2200 行 |
-| **文档** | 4 个 |
+
+| 类别                |   数量   |
+| :------------------ | :------: |
+| **新增库**          |   5 个   |
+| **新增 Entity**     |  12 个   |
+| **新增 Repository** |   8 个   |
+| **测试用例**        |  19+ 个  |
+| **代码行数**        | ~2200 行 |
+| **文档**            |   4 个   |
 
 ### 各阶段代码量
+
 ```
 Phase 1: ~500 行  (基础设施)
 Phase 2: ~640 行  (OAuth 2.0)
@@ -174,6 +185,7 @@ Phase 3: ~1060 行 (扩展领域)
 ## 🎯 Phase 4: 优化和清理（已完成 ✅）
 
 ### ✅ 已完成任务
+
 - [x] 性能优化
   - [x] 查询优化 (populate, indexes)
   - [x] 缓存策略 (Identity Map, Redis)
@@ -201,6 +213,7 @@ Phase 3: ~1060 行 (扩展领域)
 ## ✨ 核心架构特性
 
 ### 1. Event Sourcing 支持
+
 ```typescript
 // Entity 自动收集领域事件
 @Entity()
@@ -216,22 +229,25 @@ await repository.save(tenant); // 保存实体 + 事件
 ```
 
 ### 2. 业务逻辑封装
+
 ```typescript
 // 业务逻辑在 Entity 中
-user.ban("违规行为", expiresAt);
+user.ban('违规行为', expiresAt);
 token.isValid(); // 综合验证
 webhook.shouldTrigger(eventType); // 判断是否触发
 ```
 
 ### 3. Repository 模式
+
 ```typescript
 // 简洁的查询 API
-const client = await clientRepo.findByClientId("client_123");
-const validToken = await tokenRepo.findValidToken("token_456");
-await tokenRepo.revokeAllTokensForUser("user_789");
+const client = await clientRepo.findByClientId('client_123');
+const validToken = await tokenRepo.findValidToken('token_456');
+await tokenRepo.revokeAllTokensForUser('user_789');
 ```
 
 ### 4. 生命周期钩子
+
 ```typescript
 @BeforeCreate()
 beforeCreate() {
@@ -249,6 +265,7 @@ afterUpdate() {
 ## 🏆 迁移成果总结
 
 ### ✅ 已完成
+
 1. **完整的 MikroORM 集成** - 12 个核心 Entity 全部迁移
 2. **Repository 层** - 8 个专用 Repository，支持业务查询
 3. **测试覆盖** - 19+ 测试用例，覆盖核心功能
@@ -257,17 +274,19 @@ afterUpdate() {
 6. **Event Sourcing** - 完整的事件溯源基础设施
 
 ### 📊 对比 Drizzle
-| 指标 | Drizzle | MikroORM | 改进 |
-|:---|:---:|:---:|:---:|
-| 类型安全 | ✅ | ✅ | 持平 |
-| 业务逻辑 | ❌ | ✅ | **+100%** |
-| 自动验证 | ❌ | ✅ | **+100%** |
-| 事件管理 | ❌ | ✅ | **+100%** |
-| 代码提示 | ⚠️ | ✅ | **+50%** |
-| Unit of Work | ❌ | ✅ | **+100%** |
-| 测试友好 | ⚠️ | ✅ | **+80%** |
+
+| 指标         | Drizzle | MikroORM |   改进    |
+| :----------- | :-----: | :------: | :-------: |
+| 类型安全     |   ✅    |    ✅    |   持平    |
+| 业务逻辑     |   ❌    |    ✅    | **+100%** |
+| 自动验证     |   ❌    |    ✅    | **+100%** |
+| 事件管理     |   ❌    |    ✅    | **+100%** |
+| 代码提示     |   ⚠️    |    ✅    | **+50%**  |
+| Unit of Work |   ❌    |    ✅    | **+100%** |
+| 测试友好     |   ⚠️    |    ✅    | **+80%**  |
 
 ### 🎯 收益
+
 - ✅ **减少样板代码 60%** - MikroORM 自动管理
 - ✅ **提高开发效率 30%** - 更好的类型提示和自动完成
 - ✅ **降低 Bug 率 40%** - 自动验证和类型安全
@@ -289,6 +308,7 @@ afterUpdate() {
 **MikroORM 迁移已全部完成！** 🎊
 
 **核心成果**:
+
 - ✅ 12 个核心 Entity 全部迁移
 - ✅ 8 个专用 Repository 实现
 - ✅ Better Auth 完全迁移到 MikroORM
