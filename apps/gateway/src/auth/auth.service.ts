@@ -256,7 +256,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "Magic Link 已发送到您的邮箱，请查收",
+        message: "如果该邮箱已注册，您将收到 Magic Link",
       };
     } catch (error) {
       this.logger.error(`发送 Magic Link 失败: ${dto.email}`, error);

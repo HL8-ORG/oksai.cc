@@ -22,7 +22,7 @@ describe("AuthService (Integration)", () => {
       getSession: vi.fn(),
       signOut: vi.fn(),
       signInSocial: vi.fn(),
-      sendVerificationEmail: vi.fn(),
+      sendMagicLink: vi.fn(),
       enableTwoFactor: vi.fn(),
       verifyTwoFactor: vi.fn(),
       disableTwoFactor: vi.fn(),
@@ -258,11 +258,7 @@ describe("AuthService (Integration)", () => {
       expect(result.message).toBe("获取会话成功");
       expect(result.user).toBeDefined();
       expect(result.session).toBeDefined();
-      expect(mockAuthAPI.getSession).toHaveBeenCalledWith({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
+      expect(mockAuthAPI.getSession).toHaveBeenCalledWith(token);
     });
 
     it("Token 无效时应该抛出 UnauthorizedException", async () => {
@@ -282,11 +278,7 @@ describe("AuthService (Integration)", () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toBe("登出成功");
-      expect(mockAuthAPI.signOut).toHaveBeenCalledWith({
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
+      expect(mockAuthAPI.signOut).toHaveBeenCalledWith(token);
     });
 
     it("登出失败时应该抛出错误", async () => {
@@ -302,21 +294,19 @@ describe("AuthService (Integration)", () => {
     };
 
     it("应该成功发送 Magic Link", async () => {
-      mockAuthAPI.sendVerificationEmail.mockResolvedValue({});
+      mockAuthAPI.sendMagicLink.mockResolvedValue({});
 
       const result = await service.sendMagicLink(magicLinkDto);
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe("Magic Link 已发送到您的邮箱，请查收");
-      expect(mockAuthAPI.sendVerificationEmail).toHaveBeenCalledWith({
-        body: {
-          email: magicLinkDto.email,
-        },
+      expect(result.message).toBe("如果该邮箱已注册，您将收到 Magic Link");
+      expect(mockAuthAPI.sendMagicLink).toHaveBeenCalledWith({
+        email: magicLinkDto.email,
       });
     });
 
     it("即使邮箱不存在也应该返回成功（安全考虑）", async () => {
-      mockAuthAPI.sendVerificationEmail.mockRejectedValue(new Error("用户不存在"));
+      mockAuthAPI.sendMagicLink.mockRejectedValue(new Error("用户不存在"));
 
       const result = await service.sendMagicLink(magicLinkDto);
 
@@ -350,10 +340,7 @@ describe("AuthService (Integration)", () => {
         expect(result.success).toBe(true);
         expect(result.message).toBe("双因素认证已启用");
         expect(result.user).toBeDefined();
-        expect(mockAuthAPI.enableTwoFactor).toHaveBeenCalledWith({
-          headers: { authorization: `Bearer ${token}` },
-          body: { password: enableDto.password },
-        });
+        expect(mockAuthAPI.enableTwoFactor).toHaveBeenCalledWith({ password: enableDto.password }, token);
       });
 
       it("启用失败时应该抛出 BadRequestException", async () => {
@@ -387,10 +374,10 @@ describe("AuthService (Integration)", () => {
         expect(result.success).toBe(true);
         expect(result.message).toBe("双因素认证验证成功");
         expect(result.user).toBeDefined();
-        expect(mockAuthAPI.verifyTwoFactor).toHaveBeenCalledWith({
-          headers: { authorization: `Bearer ${token}` },
-          body: { code: verifyDto.code, trustDevice: verifyDto.trustDevice },
-        });
+        expect(mockAuthAPI.verifyTwoFactor).toHaveBeenCalledWith(
+          { code: verifyDto.code, trustDevice: verifyDto.trustDevice },
+          token
+        );
       });
 
       it("验证码错误时应该抛出 BadRequestException", async () => {
@@ -414,10 +401,7 @@ describe("AuthService (Integration)", () => {
 
         expect(result.success).toBe(true);
         expect(result.message).toBe("双因素认证已禁用");
-        expect(mockAuthAPI.disableTwoFactor).toHaveBeenCalledWith({
-          headers: { authorization: `Bearer ${token}` },
-          body: { password: disableDto.password },
-        });
+        expect(mockAuthAPI.disableTwoFactor).toHaveBeenCalledWith({ password: disableDto.password }, token);
       });
 
       it("密码错误时应该抛出错误", async () => {
