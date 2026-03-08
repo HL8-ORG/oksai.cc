@@ -15,8 +15,8 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm && tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "build:watch": "tsup src/index.ts --format cjs,esm --watch",
+    "build": "pnpm exec tsup src/index.ts --format cjs,esm && pnpm exec tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:watch": "pnpm exec tsup src/index.ts --format cjs,esm --watch",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write .",
     "lint:check": "biome check .",
