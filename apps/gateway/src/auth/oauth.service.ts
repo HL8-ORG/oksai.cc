@@ -19,9 +19,9 @@ import {
   OAuthRefreshToken,
   User,
 } from "@oksai/database";
-import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util";
-import { verifyCodeVerifier } from "./oauth-crypto.util";
-import { validateRedirectUri, validateRedirectUriList } from "./redirect-uri.util";
+import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util.js";
+import { verifyCodeVerifier } from "./oauth-crypto.util.js";
+import { validateRedirectUri, validateRedirectUriList } from "./redirect-uri.util.js";
 
 /**
  * Token 缓存数据

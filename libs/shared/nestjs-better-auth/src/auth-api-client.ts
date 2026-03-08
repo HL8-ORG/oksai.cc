@@ -5,7 +5,7 @@
  * 为 Better Auth API 提供类型安全的客户端封装
  */
 
-import type { BetterAuthAPI } from "./better-auth-types";
+import type { BetterAuthAPI } from "./better-auth-types.js";
 
 /**
  * Better Auth API 客户端类

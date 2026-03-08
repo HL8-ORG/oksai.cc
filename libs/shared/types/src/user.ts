@@ -1,4 +1,4 @@
-import type { TenantPlan } from "./tenant";
+import type { TenantPlan } from "./tenant.js";
 
 export type UserRole = "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
 

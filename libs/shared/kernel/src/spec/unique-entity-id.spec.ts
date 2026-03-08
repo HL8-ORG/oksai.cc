@@ -3,7 +3,7 @@
  *
  * 测试唯一实体标识符的创建和比较能力
  */
-import { UniqueEntityID } from "../lib/unique-entity-id.vo";
+import { UniqueEntityID } from "../lib/unique-entity-id.vo.js";
 
 describe("UniqueEntityID", () => {
   describe("create", () => {

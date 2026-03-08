@@ -22,8 +22,8 @@ import {
   OrganizationResponse,
   UpdateMemberRoleDto,
   UpdateOrganizationDto,
-} from "./dto";
-import { OrganizationService } from "./organization.service";
+} from "./dto/index.js";
+import { OrganizationService } from "./organization.service.js";
 
 /**
  * 组织管理控制器

@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { TTLJitterService } from "./ttl-jitter.service";
+import { TTLJitterService } from "./ttl-jitter.service.js";
 
 describe("TTLJitterService", () => {
   let service: TTLJitterService;

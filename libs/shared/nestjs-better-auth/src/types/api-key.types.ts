@@ -2,7 +2,7 @@
  * Better Auth API Key 插件 API 类型定义
  */
 
-import type { BetterAuthRequestOptions } from "./base.types";
+import type { BetterAuthRequestOptions } from "./base.types.js";
 import type {
   CreateApiKeyRequest,
   DeleteApiKeyRequest,
@@ -11,7 +11,7 @@ import type {
   UpdateApiKeyRequest,
   VerifyApiKeyRequest,
 } from "./requests/api-key.requests";
-import type { ApiKeyListResponse, ApiKeyResponse, ApiKeyVerifyResponse } from "./responses/api-key.responses";
+import type { ApiKeyListResponse, ApiKeyResponse, ApiKeyVerifyResponse } from "./responses/api-key.responses.js";
 
 /**
  * Better Auth API Key 插件 API 接口

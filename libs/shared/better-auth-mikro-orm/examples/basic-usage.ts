@@ -9,7 +9,7 @@ import { MikroORM } from "@mikro-orm/core";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { mikroOrmAdapter } from "@oksai/better-auth-mikro-orm";
 import { betterAuth } from "better-auth";
-import { Account, Session, User } from "./entities";
+import { Account, Session, User } from "./entities.js";
 
 // ============================================
 // 1. 初始化 MikroORM
@@ -245,7 +245,7 @@ async function updateUserExample(headers: Headers) {
  *
  * ```typescript
  * import express from "express";
- * import { auth } from "./auth";
+ * import { auth } from "./auth.js";
  * import { toNodeHandler } from "better-auth/node";
  *
  * const app = express();

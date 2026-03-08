@@ -4,7 +4,7 @@
  * @module common/decorators/cached-response.decorator
  */
 
-import type { TwoLayerCacheService } from "../services/two-layer-cache.service";
+import type { TwoLayerCacheService } from "../services/two-layer-cache.service.js";
 
 /**
  * @CachedResponse 装饰器选项

@@ -23,8 +23,8 @@ import {
   OAuthClientResponse,
   RotateClientSecretResponse,
   UpdateOAuthClientDto,
-} from "./dto";
-import { OAuthService } from "./oauth.service";
+} from "./dto/index.js";
+import { OAuthService } from "./oauth.service.js";
 
 /**
  * OAuth Client 管理 Controller

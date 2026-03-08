@@ -14,7 +14,7 @@ import type {
   SignUpDto,
   VerifyEmailDto,
   VerifyTwoFactorDto,
-} from "./dto";
+} from "./dto/index.js";
 
 /**
  * 认证服务响应
@@ -152,7 +152,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "密码重置邮件已发送，请查收",
+        message: "如果该邮箱已注册，您将收到密码重置邮件",
       };
     } catch (error) {
       this.logger.error(`忘记密码失败: ${dto.email}`, error);
@@ -256,7 +256,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "Magic Link 已发送到您的邮箱，请查收",
+        message: "如果该邮箱已注册，您将收到 Magic Link",
       };
     } catch (error) {
       this.logger.error(`发送 Magic Link 失败: ${dto.email}`, error);
@@ -379,8 +379,8 @@ export class AuthService {
    */
   async impersonateUser(
     adminUserId: string,
-    dto: import("./dto/impersonation.dto").ImpersonateUserDto
-  ): Promise<import("./dto/impersonation.dto").ImpersonationUserResponse> {
+    dto: import("./dto/impersonation.dto.js").ImpersonateUserDto
+  ): Promise<import("./dto/impersonation.dto.js").ImpersonationUserResponse> {
     try {
       this.logger.log(`管理员 ${adminUserId} 开始模拟用户 ${dto.email}`);
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ApplicationException } from "../lib/application.exception";
-import { BusinessRuleException } from "../lib/business-rule.exception";
-import { DomainException } from "../lib/domain.exception";
-import { InfrastructureException } from "../lib/infrastructure.exception";
+import { ApplicationException } from "../lib/application.exception.js";
+import { BusinessRuleException } from "../lib/business-rule.exception.js";
+import { DomainException } from "../lib/domain.exception.js";
+import { InfrastructureException } from "../lib/infrastructure.exception.js";
 import {
   createExceptionContext,
   isApplicationException,
@@ -14,7 +14,7 @@ import {
   toApplicationException,
   toDomainException,
 } from "../lib/utils";
-import { ValidationException } from "../lib/validation.exception";
+import { ValidationException } from "../lib/validation.exception.js";
 
 describe("异常类型守卫", () => {
   describe("isBaseException", () => {

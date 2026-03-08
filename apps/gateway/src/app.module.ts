@@ -10,10 +10,10 @@ import { MikroOrmDatabaseModule } from "@oksai/database";
 import { GlobalExceptionFilter } from "@oksai/exceptions";
 import { LoggerModule } from "@oksai/logger";
 import { AuthModule } from "@oksai/nestjs-better-auth";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-import { createAuthInstance } from "./auth/auth";
-import { AuthFeatureModule } from "./auth/auth.module";
+import { AppController } from "./app.controller.js";
+import { AppService } from "./app.service.js";
+import { createAuthInstance } from "./auth/auth.js";
+import { AuthFeatureModule } from "./auth/auth.module.js";
 import {
   AdminImpersonateResponse,
   AdminSessionListResponse,
@@ -60,11 +60,11 @@ import {
   VerifyTwoFactorDto,
   WebhookDeliveryResponse,
   WebhookResponse,
-} from "./auth/dto";
-import { CustomThrottlerGuard } from "./common/custom-throttler.guard";
-import { ExceptionExampleController } from "./examples/exception-example.controller";
-import { HealthController } from "./health/health.controller";
-import { RootController } from "./root.controller";
+} from "./auth/dto/index.js";
+import { CustomThrottlerGuard } from "./common/custom-throttler.guard.js";
+import { ExceptionExampleController } from "./examples/exception-example.controller.js";
+import { HealthController } from "./health/health.controller.js";
+import { RootController } from "./root.controller.js";
 
 /**
  * 根模块

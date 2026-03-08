@@ -9,7 +9,16 @@ import { UnauthorizedException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiKeyGuard, type ApiKeyPayload } from "./api-key.guard";
+import { ApiKeyGuard, type ApiKeyPayload } from "./api-key.guard.js";
+
+// Mock auth module
+vi.mock("./auth.js", () => ({
+  auth: {
+    api: {
+      verifyApiKey: vi.fn(),
+    },
+  },
+}));
 
 // 类型检查辅助函数
 function ensureApiClientExists(): typeof BetterAuthApiClient {
@@ -45,9 +54,9 @@ describe("API Key 认证", () => {
         prefix: "oks_valid",
       };
 
-      // Mock Better Auth API Client
-      const { BetterAuthApiClient } = await import("@oksai/nestjs-better-auth");
-      (BetterAuthApiClient.prototype.verifyApiKey as any).mockResolvedValueOnce({
+      // Mock auth.api.verifyApiKey
+      const { auth } = await import("./auth.js");
+      (auth.api.verifyApiKey as any).mockResolvedValueOnce({
         valid: true,
         key: {
           id: mockPayload.id,
@@ -86,9 +95,9 @@ describe("API Key 认证", () => {
     it("无效的 API Key 应该抛出 UnauthorizedException", async () => {
       const apiKey = "oks_invalid_key";
 
-      // Mock Better Auth API Client 返回无效结果
-      const { BetterAuthApiClient } = await import("@oksai/nestjs-better-auth");
-      (BetterAuthApiClient.prototype.verifyApiKey as any).mockResolvedValueOnce({
+      // Mock auth.api.verifyApiKey
+      const { auth } = await import("./auth.js");
+      (auth.api.verifyApiKey as any).mockResolvedValueOnce({
         valid: false,
         key: null,
       });
@@ -115,8 +124,9 @@ describe("API Key 认证", () => {
         prefix: "oks_bearer",
       };
 
-      const { BetterAuthApiClient } = await import("@oksai/nestjs-better-auth");
-      (BetterAuthApiClient.prototype.verifyApiKey as any).mockResolvedValueOnce({
+      // Mock auth.api.verifyApiKey
+      const { auth } = await import("./auth.js");
+      (auth.api.verifyApiKey as any).mockResolvedValueOnce({
         valid: true,
         key: {
           id: mockPayload.id,

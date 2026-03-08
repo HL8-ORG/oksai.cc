@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { ApplicationException } from "../lib/application.exception";
-import { BaseException } from "../lib/base.exception";
-import { BusinessRuleException } from "../lib/business-rule.exception";
-import { ExceptionCode } from "../lib/codes";
-import { DomainException } from "../lib/domain.exception";
-import { InfrastructureException } from "../lib/infrastructure.exception";
-import { NotFoundException } from "../lib/not-found.exception";
-import { type ValidationError, ValidationException } from "../lib/validation.exception";
+import { ApplicationException } from "../lib/application.exception.js";
+import { BaseException } from "../lib/base.exception.js";
+import { BusinessRuleException } from "../lib/business-rule.exception.js";
+import { ExceptionCode } from "../lib/codes.js";
+import { DomainException } from "../lib/domain.exception.js";
+import { InfrastructureException } from "../lib/infrastructure.exception.js";
+import { NotFoundException } from "../lib/not-found.exception.js";
+import { type ValidationError, ValidationException } from "../lib/validation.exception.js";
 
 describe("异常代码枚举", () => {
   it("应该定义所有异常代码", () => {

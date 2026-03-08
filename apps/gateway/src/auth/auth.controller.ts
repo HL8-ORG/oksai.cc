@@ -12,8 +12,8 @@ import {
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { AllowAnonymous } from "@oksai/nestjs-better-auth";
-import { RateLimit, RateLimitPresets } from "../common/rate-limit.decorator";
-import { type AuthResponse, AuthService } from "./auth.service";
+import { RateLimit, RateLimitPresets } from "../common/rate-limit.decorator.js";
+import { type AuthResponse, AuthService } from "./auth.service.js";
 import {
   DisableTwoFactorDto,
   EnableTwoFactorDto,
@@ -24,7 +24,7 @@ import {
   SignUpDto,
   VerifyEmailDto,
   VerifyTwoFactorDto,
-} from "./dto";
+} from "./dto/index.js";
 
 /**
  * 认证控制器

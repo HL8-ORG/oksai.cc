@@ -1,6 +1,6 @@
-import { BaseException } from "./base.exception";
-import type { ExceptionCode } from "./codes";
-import { ExceptionCode as Codes } from "./codes";
+import { BaseException } from "./base.exception.js";
+import type { ExceptionCode } from "./codes.js";
+import { ExceptionCode as Codes } from "./codes.js";
 
 /**
  * 验证错误项

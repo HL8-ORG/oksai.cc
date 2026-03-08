@@ -9,7 +9,7 @@
 
 import { CacheService } from "@oksai/cache";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { TokenCacheData } from "./oauth.service";
+import type { TokenCacheData } from "./oauth.service.js";
 
 describe("OAuth Token 缓存", () => {
   let cacheService: CacheService;

@@ -3,7 +3,7 @@
  *
  * 测试多租户上下文管理
  */
-import { AsyncLocalStorageProvider, TenantContext, TenantContextService } from "../index";
+import { AsyncLocalStorageProvider, TenantContext, TenantContextService } from "../index.js";
 
 describe("Context", () => {
   describe("TenantContext", () => {

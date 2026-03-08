@@ -1,4 +1,4 @@
-import type { ExceptionCode } from "./codes";
+import type { ExceptionCode } from "./codes.js";
 
 /**
  * 异常序列化 JSON 接口

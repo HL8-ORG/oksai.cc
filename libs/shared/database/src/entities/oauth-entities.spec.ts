@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { OAuthAccessToken } from "./oauth-access-token.entity";
-import { OAuthAuthorizationCode } from "./oauth-authorization-code.entity";
-import { OAuthClient } from "./oauth-client.entity";
-import { OAuthRefreshToken } from "./oauth-refresh-token.entity";
+import { OAuthAccessToken } from "./oauth-access-token.entity.js";
+import { OAuthAuthorizationCode } from "./oauth-authorization-code.entity.js";
+import { OAuthClient } from "./oauth-client.entity.js";
+import { OAuthRefreshToken } from "./oauth-refresh-token.entity.js";
 
 describe("OAuth Entities", () => {
   describe("OAuthClient", () => {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { Tenant } from "./tenant.entity";
+import { Tenant } from "./tenant.entity.js";
 
 describe("Tenant Entity", () => {
   describe("创建租户", () => {

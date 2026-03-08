@@ -2,7 +2,7 @@
  * Better Auth Session 管理插件 API 类型定义
  */
 
-import type { BetterAuthRequestOptions } from "./base.types";
+import type { BetterAuthRequestOptions } from "./base.types.js";
 import type {
   SessionConfigResponse,
   SessionConfigUpdateResponse,

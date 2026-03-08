@@ -1,6 +1,6 @@
 import type { EntityManager, QueryOrderMap } from "@mikro-orm/core";
 import { DomainEventEntity } from "@oksai/database";
-import type { DomainEvent, EventStore } from "./types";
+import type { DomainEvent, EventStore } from "./types.js";
 
 export class MikroOrmEventStore implements EventStore {
   constructor(private em: EntityManager) {}

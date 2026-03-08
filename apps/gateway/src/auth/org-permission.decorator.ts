@@ -3,7 +3,7 @@
  */
 
 import { SetMetadata } from "@nestjs/common";
-import type { OrganizationPermission } from "./organization-role.enum";
+import type { OrganizationPermission } from "./organization-role.enum.js";
 
 /**
  * 组织权限元数据 Key

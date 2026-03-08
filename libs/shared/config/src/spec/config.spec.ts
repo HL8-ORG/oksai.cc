@@ -5,7 +5,7 @@
  */
 
 import process from "node:process";
-import { ConfigEnvError, ConfigModule, ConfigService, env } from "../index";
+import { ConfigEnvError, ConfigModule, ConfigService, env } from "../index.js";
 
 describe("Config", () => {
   let originalEnv: NodeJS.ProcessEnv;

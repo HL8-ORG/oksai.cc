@@ -131,7 +131,7 @@ describe("mikroOrmAdapter", () => {
   describe("适配器创建", () => {
     it("应该创建适配器工厂", async () => {
       const mockOrm = createMockOrm();
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm);
 
@@ -141,7 +141,7 @@ describe("mikroOrmAdapter", () => {
 
     it("应该使用默认配置", async () => {
       const mockOrm = createMockOrm();
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm);
 
@@ -150,7 +150,7 @@ describe("mikroOrmAdapter", () => {
 
     it("应该接受自定义配置", async () => {
       const mockOrm = createMockOrm();
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm, {
         debugLogs: true,
@@ -165,7 +165,7 @@ describe("mikroOrmAdapter", () => {
     it("应该返回适配器实例", async () => {
       const mockOrm = createMockOrm();
       const mockOptions = createMockOptions();
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm);
       const adapter = factory(mockOptions);
@@ -185,7 +185,7 @@ describe("mikroOrmAdapter", () => {
       const mockOrm = createMockOrm();
       const mockOptions = createMockOptions();
       const forkSpy = vi.spyOn(mockOrm.em, "fork");
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm);
       const adapter = factory(mockOptions);
@@ -200,7 +200,7 @@ describe("mikroOrmAdapter", () => {
   describe("配置选项", () => {
     it("应该支持 debugLogs", async () => {
       const mockOrm = createMockOrm();
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm, { debugLogs: true });
 
@@ -209,7 +209,7 @@ describe("mikroOrmAdapter", () => {
 
     it("应该支持 supportsJSON", async () => {
       const mockOrm = createMockOrm();
-      const { mikroOrmAdapter } = await import("../adapter");
+      const { mikroOrmAdapter } = await import("../adapter.js");
 
       const factory = mikroOrmAdapter(mockOrm, { supportsJSON: false });
 

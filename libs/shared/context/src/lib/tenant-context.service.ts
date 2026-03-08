@@ -21,8 +21,8 @@
  * ```
  */
 import { Injectable } from "@nestjs/common";
-import type { AsyncLocalStorageProvider } from "./async-local-storage.provider";
-import type { TenantContext } from "./tenant-context.vo";
+import type { AsyncLocalStorageProvider } from "./async-local-storage.provider.js";
+import type { TenantContext } from "./tenant-context.vo.js";
 
 @Injectable()
 export class TenantContextService {

@@ -4,7 +4,7 @@ import { type AsyncLocalStorageProvider, TenantContextService } from "@oksai/con
 import { PARAMS_PROVIDER_TOKEN, type Params } from "nestjs-pino";
 import type { Logger } from "pino";
 import { pino } from "pino";
-import { serializeError } from "./logger.serializer";
+import { serializeError } from "./logger.serializer.js";
 
 /**
  * Pino HTTP 配置类型

@@ -2,7 +2,7 @@
  * Better Auth 基础认证 API 类型定义
  */
 
-import type { BetterAuthRequestOptions } from "./base.types";
+import type { BetterAuthRequestOptions } from "./base.types.js";
 import type {
   DisableTwoFactorRequest,
   EnableTwoFactorRequest,

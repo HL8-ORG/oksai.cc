@@ -1,6 +1,6 @@
 import { MikroORM } from "@mikro-orm/core";
 import type { ConfigService } from "@oksai/config";
-import { createAuth } from "./auth.config";
+import { createAuth } from "./auth.config.js";
 
 /**
  * Better Auth 实例管理

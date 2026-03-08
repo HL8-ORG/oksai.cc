@@ -16,7 +16,7 @@ import {
   Session,
   SuperAdminOnly,
 } from "./decorators";
-import { HOOK_KEY } from "./symbols";
+import { HOOK_KEY } from "./symbols.js";
 
 describe("Decorators", () => {
   describe("@AllowAnonymous", () => {

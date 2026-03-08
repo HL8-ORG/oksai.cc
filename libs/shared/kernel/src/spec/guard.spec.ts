@@ -3,7 +3,7 @@
  *
  * 测试类型守卫和验证工具
  */
-import { Guard } from "../lib/guard";
+import { Guard } from "../lib/guard.js";
 
 describe("Guard", () => {
   describe("isEmpty", () => {

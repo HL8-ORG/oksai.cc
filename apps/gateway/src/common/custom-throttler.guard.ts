@@ -7,7 +7,7 @@
 
 import { type ExecutionContext, HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { RATE_LIMIT_KEY, type RateLimitConfig } from "./rate-limit.decorator";
+import { RATE_LIMIT_KEY, type RateLimitConfig } from "./rate-limit.decorator.js";
 
 interface Request {
   headers: Record<string, string | string[] | undefined>;

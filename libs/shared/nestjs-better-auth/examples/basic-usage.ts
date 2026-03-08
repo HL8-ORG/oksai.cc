@@ -65,7 +65,7 @@ export class UsersController {
 
 // 4. 在 main.ts 中启动应用
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
+import { AppModule } from "./app.module.js";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

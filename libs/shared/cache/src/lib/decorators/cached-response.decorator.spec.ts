@@ -3,10 +3,10 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CacheService } from "../services/cache.service";
-import { RedisCacheEnhancedService } from "../services/redis-cache-enhanced.service";
-import { TwoLayerCacheService } from "../services/two-layer-cache.service";
-import { CachedResponse } from "./cached-response.decorator";
+import { CacheService } from "../services/cache.service.js";
+import { RedisCacheEnhancedService } from "../services/redis-cache-enhanced.service.js";
+import { TwoLayerCacheService } from "../services/two-layer-cache.service.js";
+import { CachedResponse } from "./cached-response.decorator.js";
 
 describe("@CachedResponse Decorator", () => {
   let twoLayerCache: TwoLayerCacheService;

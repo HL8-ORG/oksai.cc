@@ -29,7 +29,7 @@ import {
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { UserSession } from "@oksai/nestjs-better-auth";
 import { BetterAuthApiClient, Session } from "@oksai/nestjs-better-auth";
-import { auth } from "./auth";
+import { auth } from "./auth.js";
 import {
   AdminImpersonateResponse,
   AdminSessionListResponse,
@@ -45,8 +45,8 @@ import {
   StopImpersonatingResponse,
   UnbanUserResponse,
   UpdateAdminUserDto,
-} from "./dto";
-import { hasPermission } from "./user-role.enum";
+} from "./dto/index.js";
+import { hasPermission } from "./user-role.enum.js";
 
 /**
  * Admin 管理控制器

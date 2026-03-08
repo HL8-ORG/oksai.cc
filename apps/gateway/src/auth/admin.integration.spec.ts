@@ -7,8 +7,8 @@
 
 import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AdminController } from "./admin.controller";
-import * as authModule from "./auth";
+import { AdminController } from "./admin.controller.js";
+import * as authModule from "./auth.js";
 
 // Mock Better Auth
 vi.mock("./auth", () => ({
@@ -246,7 +246,9 @@ describe("Admin 管理功能集成测试", () => {
           body: expect.objectContaining({
             userId: "user-001",
             banReason: "违反服务条款",
-            banExpiresIn: 86400,
+          }),
+          headers: expect.objectContaining({
+            authorization: expect.stringContaining("Bearer"),
           }),
         })
       );

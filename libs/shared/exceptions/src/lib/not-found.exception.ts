@@ -1,5 +1,5 @@
-import { BaseException } from "./base.exception";
-import { ExceptionCode } from "./codes";
+import { BaseException } from "./base.exception.js";
+import { ExceptionCode } from "./codes.js";
 
 /**
  * 未找到异常

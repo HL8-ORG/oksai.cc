@@ -11,10 +11,10 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { ORG_PERMISSION_KEY } from "./org-permission.decorator";
-import { OrganizationService } from "./organization.service";
-import type { OrganizationPermission } from "./organization-role.enum";
-import { hasPermission, type OrganizationRole } from "./organization-role.enum";
+import { ORG_PERMISSION_KEY } from "./org-permission.decorator.js";
+import { OrganizationService } from "./organization.service.js";
+import type { OrganizationPermission } from "./organization-role.enum.js";
+import { hasPermission, type OrganizationRole } from "./organization-role.enum.js";
 
 /**
  * 组织权限守卫

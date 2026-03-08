@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { AuthService } from "./auth-service";
+import { AuthService } from "./auth-service.js";
 
 describe("AuthService", () => {
   let service: AuthService;

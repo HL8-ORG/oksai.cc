@@ -17,7 +17,7 @@
  * ]);
  * ```
  */
-import { Result } from "./result";
+import { Result } from "./result.js";
 
 /**
  * 验证错误信息

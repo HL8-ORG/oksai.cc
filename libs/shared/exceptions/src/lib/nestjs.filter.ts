@@ -8,13 +8,13 @@ import {
   Logger,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { ApplicationException } from "./application.exception";
-import { BaseException } from "./base.exception";
-import { DomainException } from "./domain.exception";
-import { InfrastructureException } from "./infrastructure.exception";
-import { NotFoundException } from "./not-found.exception";
-import { createExceptionContext, isClientError } from "./utils";
-import { ValidationException } from "./validation.exception";
+import { ApplicationException } from "./application.exception.js";
+import { BaseException } from "./base.exception.js";
+import { DomainException } from "./domain.exception.js";
+import { InfrastructureException } from "./infrastructure.exception.js";
+import { NotFoundException } from "./not-found.exception.js";
+import { createExceptionContext, isClientError } from "./utils.js";
+import { ValidationException } from "./validation.exception.js";
 
 /**
  * 统一异常过滤器

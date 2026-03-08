@@ -2,7 +2,7 @@ import { Controller, Get, Injectable, Module } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import type { Request, Response } from "express";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { AfterHook, AllowAnonymous, AuthModule, BeforeHook, Hook, type UserSession } from "./index";
+import { AfterHook, AllowAnonymous, AuthModule, BeforeHook, Hook, type UserSession } from "./index.js";
 
 /**
  * E2E 测试 - 覆盖 auth-module.ts 的 configure() 和 onModuleInit() 方法

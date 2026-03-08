@@ -5,8 +5,8 @@
 import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import type { UserSession } from "@oksai/nestjs-better-auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AdminController } from "./admin.controller";
-import * as authModule from "./auth";
+import { AdminController } from "./admin.controller.js";
+import * as authModule from "./auth.js";
 
 // Mock auth module
 vi.mock("./auth", () => ({

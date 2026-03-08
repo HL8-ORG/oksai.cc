@@ -5,7 +5,7 @@
 import { type CanActivate, type ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { BetterAuthApiClient } from "@oksai/nestjs-better-auth";
 import type { Request } from "express";
-import { auth } from "./auth";
+import { auth } from "./auth.js";
 
 /**
  * API Key 验证结果

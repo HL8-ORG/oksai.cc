@@ -1,5 +1,5 @@
 {
-  "extends": "@oksai/tsconfig/nestjs.json",
+  "extends": "@oksai/tsconfig/nestjs-esm.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./dist",
