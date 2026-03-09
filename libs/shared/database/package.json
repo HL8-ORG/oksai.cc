@@ -25,7 +25,7 @@
     "@mikro-orm/reflection": "catalog:",
     "@nestjs/common": "catalog:",
     "@oksai/context": "workspace:*",
-    "@oksai/kernel": "workspace:*",
+    "@oksai/domain-core": "workspace:*",
     "pino": "catalog:",
     "postgres": "catalog:"
   },

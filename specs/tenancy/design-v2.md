@@ -40,7 +40,7 @@
 
 | 功能需求     | 共享库               | 使用方式                                                      |
 | ------------ | -------------------- | ------------------------------------------------------------- |
-| DDD 核心基类 | `@oksai/kernel`      | `AggregateRoot`, `Entity`, `ValueObject`, `Result`, `Guard`   |
+| DDD 核心基类 | `@oksai/domain-core`      | `AggregateRoot`, `Entity`, `ValueObject`, `Result`, `Guard`   |
 | 仓储基类     | `@oksai/event-store` | `EventSourcedRepository<T>`                                   |
 | CQRS 模式    | `@oksai/cqrs`        | `ICommand`, `IQuery`, `ICommandHandler`, `IQueryHandler`      |
 | 事件驱动     | `@oksai/eda`         | `IEventPublisher`, `Outbox`, `Inbox`                          |
@@ -66,11 +66,11 @@
 
 #### 聚合根
 
-**Tenant**: 租户聚合根（继承 `@oksai/kernel` 的 `AggregateRoot`）
+**Tenant**: 租户聚合根（继承 `@oksai/domain-core` 的 `AggregateRoot`）
 
 ```typescript
-import { AggregateRoot, Result, UniqueEntityID } from '@oksai/kernel';
-import type { DomainEvent } from '@oksai/kernel';
+import { AggregateRoot, Result, UniqueEntityID } from '@oksai/domain-core';
+import type { DomainEvent } from '@oksai/domain-core';
 
 export interface TenantProps {
   name: string;
@@ -259,10 +259,10 @@ export class Tenant extends AggregateRoot<TenantProps> {
 
 #### 值对象
 
-**TenantPlan**: 租户套餐（继承 `@oksai/kernel` 的 `ValueObject`）
+**TenantPlan**: 租户套餐（继承 `@oksai/domain-core` 的 `ValueObject`）
 
 ```typescript
-import { ValueObject, Result } from '@oksai/kernel';
+import { ValueObject, Result } from '@oksai/domain-core';
 
 export class TenantPlan extends ValueObject<{ value: PlanType }> {
   private static readonly PLANS = {
@@ -297,7 +297,7 @@ export type PlanType = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
 **TenantStatus**: 租户状态
 
 ```typescript
-import { ValueObject } from '@oksai/kernel';
+import { ValueObject } from '@oksai/domain-core';
 
 export class TenantStatus extends ValueObject<{ value: StatusType }> {
   public get value(): StatusType {
@@ -335,7 +335,7 @@ export type StatusType = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 **TenantQuota**: 租户配额
 
 ```typescript
-import { ValueObject, Result } from '@oksai/kernel';
+import { ValueObject, Result } from '@oksai/domain-core';
 
 export class TenantQuota extends ValueObject<TenantQuotaProps> {
   public get maxOrganizations(): number {
@@ -372,10 +372,10 @@ export interface TenantQuotaProps {
 
 #### 领域事件
 
-**继承 `@oksai/kernel` 的 `DomainEvent`**：
+**继承 `@oksai/domain-core` 的 `DomainEvent`**：
 
 ```typescript
-import { DomainEvent, UniqueEntityID } from '@oksai/kernel';
+import { DomainEvent, UniqueEntityID } from '@oksai/domain-core';
 
 export class TenantCreatedEvent extends DomainEvent<TenantCreatedPayload> {
   constructor(aggregateId: UniqueEntityID, payload: TenantCreatedPayload) {
@@ -671,7 +671,7 @@ export class TenantGuard implements CanActivate {
 
 | 依赖库               | 用途       | 使用内容                                                                                     |
 | -------------------- | ---------- | -------------------------------------------------------------------------------------------- |
-| `@oksai/kernel`      | DDD 核心   | `AggregateRoot`, `Entity`, `ValueObject`, `Result`, `Guard`, `UniqueEntityID`, `DomainEvent` |
+| `@oksai/domain-core`      | DDD 核心   | `AggregateRoot`, `Entity`, `ValueObject`, `Result`, `Guard`, `UniqueEntityID`, `DomainEvent` |
 | `@oksai/event-store` | 事件存储   | `EventSourcedRepository`, `EventStorePort`, `StoredEvent`                                    |
 | `@oksai/cqrs`        | CQRS 模式  | `ICommand`, `IQuery`, `ICommandHandler`, `IQueryHandler`                                     |
 | `@oksai/eda`         | 事件驱动   | `IEventPublisher`, `Outbox`（可选）                                                          |
@@ -740,7 +740,7 @@ export class TenantGuard implements CanActivate {
 
 **领域层**：
 
-- 使用 `@oksai/kernel` 的 `Result` 模式
+- 使用 `@oksai/domain-core` 的 `Result` 模式
 - 测试业务规则（状态转换、配额验证）
 - 测试领域事件发布
 - **覆盖率目标**: >95%

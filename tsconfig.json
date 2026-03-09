@@ -5,7 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "@oksai/better-auth-mikro-orm": [
-        "libs/shared/better-auth-mikro-orm/src/index.ts"
+        "libs/iam/better-auth-mikro-orm/src/index.ts"
       ],
       "@oksai/config": ["libs/shared/config/src/index.ts"],
       "@oksai/constants": ["libs/shared/constants/src/index.ts"],
@@ -29,7 +29,7 @@
       "path": "./libs/notification/email"
     },
     {
-      "path": "./libs/shared/better-auth-mikro-orm"
+      "path": "./libs/iam/better-auth-mikro-orm"
     },
     {
       "path": "./libs/shared/config"
@@ -41,13 +41,13 @@
       "path": "./libs/shared/context"
     },
     {
-      "path": "./libs/shared/kernel"
+      "path": "./libs/iam/domain"
     },
     {
       "path": "./libs/shared/logger"
     },
     {
-      "path": "./libs/shared/nestjs-better-auth"
+      "path": "./libs/iam/nestjs-better-auth"
     },
     {
       "path": "./libs/shared/types"
@@ -62,13 +62,7 @@
       "path": "./libs/shared/exceptions"
     },
     {
-      "path": "./libs/shared/repository"
-    },
-    {
       "path": "./libs/testing"
-    },
-    {
-      "path": "./libs/oauth"
     },
     {
       "path": "./libs/shared/nestjs-utils"

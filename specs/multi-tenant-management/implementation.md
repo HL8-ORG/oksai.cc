@@ -380,7 +380,7 @@ CREATE INDEX idx_organization_tenant_id ON "organization"(tenant_id);
 
 **技术亮点**：
 
-- ✅ 充分利用 `@oksai/kernel` 的 DDD 基础设施
+- ✅ 充分利用 `@oksai/domain-core` 的 DDD 基础设施
 - ✅ 使用 `AggregateRoot` 自动管理领域事件
 - ✅ 使用 `ValueObject` 保证不可变性
 - ✅ 使用 `Result` 进行函数式错误处理

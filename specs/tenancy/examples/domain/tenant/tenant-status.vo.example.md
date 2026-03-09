@@ -16,7 +16,7 @@
 ## 完整代码
 
 ```typescript
-import { ValueObject } from '@oksai/kernel';
+import { ValueObject } from '@oksai/domain-core';
 
 export type StatusType = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 

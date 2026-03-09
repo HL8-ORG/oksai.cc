@@ -6,7 +6,7 @@ const config: Options = {
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ["@oksai/kernel"],
+  external: ["@oksai/domain-core"],
   tsconfig: "./tsconfig.build.json",
 };
 

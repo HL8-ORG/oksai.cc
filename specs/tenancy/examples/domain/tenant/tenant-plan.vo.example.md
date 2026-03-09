@@ -18,7 +18,7 @@
 ## 完整代码
 
 ```typescript
-import { ValueObject } from '@oksai/kernel';
+import { ValueObject } from '@oksai/domain-core';
 
 export type PlanType = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
 
@@ -90,7 +90,7 @@ export class TenantPlan extends ValueObject<TenantPlanProps> {
 
 ## 关键点
 
-1. **继承 ValueObject**：使用 `@oksai/kernel` 的 `ValueObject` 基类
+1. **继承 ValueObject**：使用 `@oksai/domain-core` 的 `ValueObject` 基类
 2. **私有构造函数**：防止直接实例化，必须通过 `create()` 工厂方法
 3. **静态常量**：`PLANS` 定义了每个套餐的默认配额
 4. **业务方法**：`defaultQuota()` 和 `isDowngradeFrom()` 提供业务逻辑

@@ -1,0 +1,44 @@
+{
+  "name": "@oksai/iam-identity",
+  "version": "0.1.0",
+  "private": true,
+  "description": "IAM Identity 基础设施层 - 实体、仓储实现、映射器、过滤器",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@oksai/config": "workspace:*",
+    "@oksai/context": "workspace:*",
+    "@oksai/domain-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

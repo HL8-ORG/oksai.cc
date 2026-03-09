@@ -4,8 +4,7 @@ import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { TenantFilter } from "./filters/tenant.filter.js";
 
 export default defineConfig({
-  entities: ["./dist/entities/**/*.js"],
-  entitiesTs: ["./src/entities/**/*.ts"],
+  entities: [], // 实体由 MikroOrmDatabaseModule.forRoot() 的 entities 参数提供
   dbName: process.env.DB_NAME || "oksai",
   host: process.env.DB_HOST || "localhost",
   port: Number(process.env.DB_PORT) || 5432,

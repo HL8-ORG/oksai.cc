@@ -12,14 +12,9 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { CacheInvalidate, TwoLayerCacheService } from "@oksai/cache";
-import {
-  OAuthAccessToken,
-  OAuthAuthorizationCode,
-  OAuthClient,
-  OAuthRefreshToken,
-  User,
-} from "@oksai/iam-infrastructure";
-import { createEncryptionUtil, type EncryptionUtil } from "./encryption.util.js";
+import { OAuthAccessToken, OAuthAuthorizationCode, OAuthClient, OAuthRefreshToken } from "@oksai/iam-identity";
+import { User } from "@oksai/iam-identity";
+import { createEncryptionUtil, EncryptionUtil } from "./encryption.util.js";
 import { verifyCodeVerifier } from "./oauth-crypto.util.js";
 import { validateRedirectUri, validateRedirectUriList } from "./redirect-uri.util.js";
 
@@ -243,7 +238,9 @@ export class OAuthService {
       }
 
       // 查找授权码
-      const authCode = await this.em.findOne(OAuthAuthorizationCode, { code: params.code });
+      const authCode = await this.em.findOne(OAuthAuthorizationCode, {
+        code: params.code,
+      });
 
       if (!authCode) {
         throw new BadRequestException("无效的授权码");
@@ -521,7 +518,9 @@ export class OAuthService {
       }
 
       // 获取用户信息
-      const user = await this.em.findOne(User, { id: accessTokenRecord.userId });
+      const user = await this.em.findOne(User, {
+        id: accessTokenRecord.userId,
+      });
 
       const result = {
         userId: accessTokenRecord.userId,
@@ -567,7 +566,9 @@ export class OAuthService {
 
       if (tokenTypeHint === "refresh_token" || !tokenTypeHint) {
         // 尝试撤销 Refresh Token
-        const refreshToken = await this.em.findOne(OAuthRefreshToken, { refreshToken: token });
+        const refreshToken = await this.em.findOne(OAuthRefreshToken, {
+          refreshToken: token,
+        });
         if (refreshToken) {
           refreshToken.revoke();
         }
@@ -575,7 +576,9 @@ export class OAuthService {
 
       if (tokenTypeHint === "access_token" || !tokenTypeHint) {
         // 尝试撤销 Access Token
-        const accessToken = await this.em.findOne(OAuthAccessToken, { accessToken: token });
+        const accessToken = await this.em.findOne(OAuthAccessToken, {
+          accessToken: token,
+        });
         if (accessToken) {
           accessToken.revoke();
         }

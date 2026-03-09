@@ -5,7 +5,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { Webhook, WebhookDelivery } from "@oksai/iam-infrastructure";
+import { Webhook, WebhookDelivery } from "@oksai/iam-identity";
 import type {
   CreateWebhookDto,
   UpdateWebhookDto,
@@ -106,7 +106,9 @@ export class WebhookService {
   async listDeliveries(webhookId: string, userId: string): Promise<WebhookDeliveryResponse[]> {
     await this.getWebhook(webhookId, userId);
 
-    const deliveries = await this.em.find(WebhookDelivery, { webhook: { id: webhookId } });
+    const deliveries = await this.em.find(WebhookDelivery, {
+      webhook: { id: webhookId },
+    });
 
     return deliveries.map((d) => ({
       id: d.id,

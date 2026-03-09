@@ -92,7 +92,7 @@ pnpm test
 **依赖关系**:
 
 ```
-@oksai/iam-domain          # 无外部依赖，仅 @oksai/kernel
+@oksai/iam-domain          # 无外部依赖，仅 @oksai/domain-core
   ↓
 @oksai/iam-infrastructure  # 依赖 @oksai/iam-domain
   ↓

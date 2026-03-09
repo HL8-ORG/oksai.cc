@@ -1,4 +1,4 @@
-import { AggregateRoot } from '@oksai/kernel';
+import { AggregateRoot } from '@oksai/domain-core';
 import { SyncStatus, type ETLMetadata } from './index.js';
 
 /**

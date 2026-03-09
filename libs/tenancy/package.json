@@ -1,0 +1,61 @@
+{
+  "name": "@oksai/tenancy",
+  "version": "0.1.0",
+  "description": "多租户系统 - 租户隔离、资源配额、租户上下文管理",
+  "license": "AGPL-3.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/swagger": "catalog:",
+    "@oksai/config": "workspace:*",
+    "@oksai/context": "workspace:*",
+    "@oksai/cqrs": "workspace:*",
+    "@oksai/domain-core": "workspace:*",
+    "@oksai/eda": "workspace:*",
+    "@oksai/event-store": "workspace:*",
+    "@oksai/exceptions": "workspace:*",
+    "@oksai/iam-identity": "workspace:*",
+    "@oksai/logger": "workspace:*",
+    "@oksai/nestjs-better-auth": "workspace:*",
+    "class-transformer": "catalog:",
+    "class-validator": "catalog:"
+  },
+  "peerDependencies": {
+    "@mikro-orm/core": "^6.0.0",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "reflect-metadata": "^0.2.0"
+  },
+  "devDependencies": {
+    "@oksai/tsconfig": "workspace:*",
+    "@types/express": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

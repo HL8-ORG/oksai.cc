@@ -1,0 +1,46 @@
+{
+  "name": "@oksai/iam-identity",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/iam/identity/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:shared", "layer:infrastructure"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "tsup",
+        "cwd": "libs/iam/identity"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/coverage"],
+      "options": {
+        "command": "vitest run",
+        "cwd": "libs/iam/identity"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome check --write .",
+        "cwd": "libs/iam/identity"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "libs/iam/identity"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec rimraf dist coverage",
+        "cwd": "libs/iam/identity"
+      }
+    }
+  }
+}

@@ -31,7 +31,7 @@
 
 | 功能需求   | 共享库               | 使用内容                                                      |
 | ---------- | -------------------- | ------------------------------------------------------------- |
-| DDD 核心   | `@oksai/kernel`      | `AggregateRoot`, `Entity`, `ValueObject`, `Result`, `Guard`   |
+| DDD 核心   | `@oksai/domain-core`      | `AggregateRoot`, `Entity`, `ValueObject`, `Result`, `Guard`   |
 | 仓储基类   | `@oksai/event-store` | `EventSourcedRepository<T>`                                   |
 | CQRS 模式  | `@oksai/cqrs`        | `ICommand`, `IQuery`, `ICommandHandler`, `IQueryHandler`      |
 | 事件驱动   | `@oksai/eda`         | `IEventPublisher`, `Outbox`, `Inbox`                          |
@@ -113,7 +113,7 @@ throw new DomainException(
    - 完整的 Tenant 聚合根实现
    - 包含所有值对象（TenantPlan, TenantStatus, TenantQuota）
    - 包含所有领域事件
-   - 使用 `@oksai/kernel` 和 `@oksai/exceptions`
+   - 使用 `@oksai/domain-core` 和 `@oksai/exceptions`
 
 2. **`tenant.repository.example.ts`** (2,754 字节)
    - TenantRepository 实现
@@ -166,7 +166,7 @@ export class Tenant {
 **之后**（使用共享基础设施）:
 
 ```typescript
-import { AggregateRoot, Result } from '@oksai/kernel';
+import { AggregateRoot, Result } from '@oksai/domain-core';
 import { DomainException } from '@oksai/exceptions';
 
 export class Tenant extends AggregateRoot<TenantProps> {

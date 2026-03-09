@@ -61,7 +61,7 @@ libs/domain/job/
 
 ```typescript
 // job-id.vo.ts
-import { ValueObject } from '@oksai/kernel';
+import { ValueObject } from '@oksai/domain-core';
 import { Result } from '@oksai/result';
 import { ValidationError } from '@oksai/exceptions';
 
@@ -102,7 +102,7 @@ export class JobId extends ValueObject<{ value: string }> {
 
 ```typescript
 // job-title.vo.ts
-import { ValueObject } from '@oksai/kernel';
+import { ValueObject } from '@oksai/domain-core';
 import { Result } from '@oksai/result';
 import { ValidationError } from '@oksai/exceptions';
 
@@ -201,7 +201,7 @@ export class JobStatusVO extends ValueObject<{ value: JobStatus }> {
 
 ```typescript
 // job.aggregate.ts
-import { AggregateRoot } from '@oksai/kernel';
+import { AggregateRoot } from '@oksai/domain-core';
 import { Result } from '@oksai/result';
 import { DomainError, ValidationError } from '@oksai/exceptions';
 import { JobId } from './job-id.vo';
@@ -389,7 +389,7 @@ interface CreateJobProps {
 
 ```typescript
 // events/job-created.domain-event.ts
-import { IDomainEvent } from '@oksai/kernel';
+import { IDomainEvent } from '@oksai/domain-core';
 import { JobId } from '../job-id.vo';
 import { JobTitle } from '../job-title.vo';
 
@@ -478,7 +478,7 @@ export interface IJobRepository {
 
 ```typescript
 // ports/event-store.port.ts
-import { IDomainEvent } from '@oksai/kernel';
+import { IDomainEvent } from '@oksai/domain-core';
 
 /**
  * 事件存储 Port（Secondary Port）
@@ -606,7 +606,7 @@ static fromDatabase(row: JobRow): Job {
 
 ### ✅ 推荐做法
 
-1. **领域层无依赖**：只依赖 `@oksai/kernel`、`@oksai/result` 等共享库
+1. **领域层无依赖**：只依赖 `@oksai/domain-core`、`@oksai/result` 等共享库
 2. **定义 Port 接口**：领域层定义接口，基础设施层实现
 3. **Event Sourcing**：所有状态变更通过事件
 4. **领域事件**：在业务方法中触发事件

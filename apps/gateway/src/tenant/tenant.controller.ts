@@ -20,7 +20,7 @@ import {
   Query,
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { Tenant } from "@oksai/iam-infrastructure";
+import { Tenant } from "@oksai/iam-identity";
 import type { UserSession } from "@oksai/nestjs-better-auth";
 import { Session } from "@oksai/nestjs-better-auth";
 import {

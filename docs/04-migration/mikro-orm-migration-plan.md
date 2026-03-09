@@ -252,7 +252,7 @@ NestJS 库（`libs/shared/*/tsconfig.json`）：
       "@oksai/config": ["libs/shared/config/src/index.ts"],
       "@oksai/constants": ["libs/shared/constants/src/index.ts"],
       "@oksai/context": ["libs/shared/context/src/index.ts"],
-      "@oksai/kernel": ["libs/shared/kernel/src/index.ts"],
+      "@oksai/domain-core": ["libs/shared/kernel/src/index.ts"],
       "@oksai/logger": ["libs/shared/logger/src/index.ts"],
       "@oksai/nestjs-better-auth": ["libs/shared/nestjs-better-auth/src/index.ts"],
       "@oksai/types": ["libs/shared/types/src/index.ts"],
@@ -480,7 +480,7 @@ export abstract class AggregateRoot<T> {
 ```typescript
 // libs/database/src/entities/tenant.entity.ts
 import { Entity, Property, BeforeCreate, AfterUpdate } from '@mikro-orm/core';
-import { AggregateRoot } from '@oksai/kernel';
+import { AggregateRoot } from '@oksai/domain-core';
 import { TenantCreatedEvent } from '../events';
 
 @Entity()
@@ -628,7 +628,7 @@ export class MikroOrmEventStore implements EventStore {
 ```typescript
 // libs/shared/repository/src/event-sourced.repository.ts
 import { EntityManager } from '@mikro-orm/core';
-import type { AggregateRoot } from '@oksai/kernel';
+import type { AggregateRoot } from '@oksai/domain-core';
 import type { EventStore } from '@oksai/event-store';
 
 export abstract class EventSourcedRepository<T extends AggregateRoot<any>> {

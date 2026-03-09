@@ -11,7 +11,7 @@
 import process from "node:process";
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger } from "@nestjs/common";
-import { Tenant } from "@oksai/iam-infrastructure";
+import { Tenant } from "@oksai/iam-identity";
 
 /**
  * 租户域名信息

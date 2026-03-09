@@ -9,7 +9,7 @@
 ## 完整代码
 
 ```typescript
-import { ValueObject } from '@oksai/kernel';
+import { ValueObject } from '@oksai/domain-core';
 
 export interface TenantQuotaProps {
   maxOrganizations: number;

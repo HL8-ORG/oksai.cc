@@ -8,7 +8,7 @@
 import { EntityManager } from "@mikro-orm/core";
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { TenantContextService } from "@oksai/context";
-import { Tenant } from "@oksai/iam-infrastructure";
+import { Tenant } from "@oksai/iam-identity";
 
 /**
  * 租户配置

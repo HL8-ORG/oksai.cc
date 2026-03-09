@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@nestjs/common": "catalog:",
-    "@oksai/kernel": "workspace:*"
+    "@oksai/domain-core": "workspace:*"
   },
   "peerDependencies": {
     "@nestjs/common": "^11.0.0"

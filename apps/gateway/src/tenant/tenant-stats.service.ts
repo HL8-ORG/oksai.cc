@@ -8,7 +8,8 @@
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger } from "@nestjs/common";
 import { TenantContextService } from "@oksai/context";
-import { Session, Tenant, User, Webhook } from "@oksai/iam-infrastructure";
+import { Webhook } from "@oksai/iam-identity";
+import { Session, Tenant, User } from "@oksai/iam-identity";
 
 /**
  * 租户统计概览

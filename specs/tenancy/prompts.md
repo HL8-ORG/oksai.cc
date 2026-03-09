@@ -46,7 +46,7 @@
 
 参考：
 - 现有实现：libs/tenancy/domain/events/tenant-created.event.ts
-- 基类：@oksai/kernel 的 DomainEvent
+- 基类：@oksai/domain-core 的 DomainEvent
 ```
 
 ---

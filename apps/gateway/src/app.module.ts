@@ -1,14 +1,27 @@
 import process from "node:process";
 import { MikroORM } from "@mikro-orm/core";
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ApiExtraModels } from "@nestjs/swagger";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { CacheModule, CacheMonitorController } from "@oksai/cache";
 import { ConfigModule, ConfigService } from "@oksai/config";
-import { MikroOrmDatabaseModule } from "@oksai/iam-infrastructure";
+import { MikroOrmDatabaseModule } from "@oksai/database";
 import { GlobalExceptionFilter } from "@oksai/exceptions";
-import { Account, ApiKey, DomainEventEntity, Session, Tenant, User } from "@oksai/iam-infrastructure";
+import {
+  Account,
+  ApiKey,
+  DomainEventEntity,
+  OAuthAccessToken,
+  OAuthAuthorizationCode,
+  OAuthClient,
+  OAuthRefreshToken,
+  Session,
+  Tenant,
+  User,
+  Webhook,
+  WebhookDelivery,
+} from "@oksai/iam-identity";
 import { LoggerModule } from "@oksai/logger";
 import { AuthModule } from "@oksai/nestjs-better-auth";
 import { AppController } from "./app.controller.js";
@@ -167,7 +180,23 @@ const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "tru
      * - IAM 实体（通过 extraEntities 注入）
      */
     MikroOrmDatabaseModule.forRoot({
-      extraEntities: [Tenant, User, Session, Account, ApiKey, DomainEventEntity],
+      entities: [
+        // IAM 实体
+        Tenant,
+        User,
+        Session,
+        Account,
+        ApiKey,
+        DomainEventEntity,
+        // OAuth 实体
+        OAuthClient,
+        OAuthAccessToken,
+        OAuthRefreshToken,
+        OAuthAuthorizationCode,
+        // Webhook 实体
+        Webhook,
+        WebhookDelivery,
+      ],
     }),
 
     AuthModule.forRootAsync({
@@ -215,25 +244,4 @@ const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "tru
     },
   ],
 })
-export class AppModule implements NestModule {
-  /**
-   * 配置中间件
-   *
-   * 租户识别中间件配置：
-   * - 应用到所有路由
-   * - 排除公开路由（健康检查、认证接口等）
-   */
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TenantMiddleware)
-      .exclude(
-        "health",
-        "auth/(.*)",
-        "api/health",
-        "api/auth/login",
-        "api/auth/register",
-        "api/auth/callback"
-      )
-      .forRoutes("*");
-  }
-}
+export class AppModule {}

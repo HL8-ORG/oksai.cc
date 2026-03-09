@@ -5,7 +5,7 @@ import {
   type ConfigModuleOptions as NestConfigModuleOptions,
   ConfigService as NestConfigService,
 } from "@nestjs/config";
-import { Result } from "@oksai/kernel";
+import { Result } from "@oksai/domain-core";
 import type { z } from "zod";
 import {
   ConfigEnvError,

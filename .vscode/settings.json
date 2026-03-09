@@ -54,5 +54,5 @@
 	},
 	"angular.enable-strict-mode-prompt": false,
 	"nxConsole.generateAiAgentRules": true,
-	"git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true
 }

@@ -105,7 +105,7 @@ apps → composition → domains → shared
 
 | 模块 | 说明 |
 |:---|:---|
-| `@oksai/kernel` | 核心领域原语 |
+| `@oksai/domain-core` | 核心领域原语 |
 | `@oksai/constants` | 基础常量（零依赖） |
 | `@oksai/event-store` | 事件存储抽象 |
 | `@oksai/cqrs` | CQRS 基础设施 |
@@ -305,7 +305,7 @@ export default [
 	...rootConfig,
 	createTestFileConfig(),
 	createSharedPureBoundaryGuardrail({
-		packageName: '@oksai/kernel'
+		packageName: '@oksai/domain-core'
 	})
 ];
 ```

@@ -7,7 +7,7 @@
 import { type EntityManager, MikroORM } from "@mikro-orm/core";
 import { type INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { Tenant, User } from "@oksai/database";
+import { Tenant, User } from "@oksai/iam-identity";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { AppModule } from "../src/app.module.js";
@@ -143,7 +143,7 @@ describe("多租户管理 E2E 测试", () => {
       // status 会自动设置为 "pending"
       tenant.maxOrganizations = 10;
       tenant.maxMembers = 100;
-      tenant.maxStorage = 10737418240;
+      tenant.maxStorage = 1073741824;
       em.persist(tenant);
       await em.flush();
 
@@ -184,7 +184,7 @@ describe("多租户管理 E2E 测试", () => {
       tenant.suspend("测试停用");
       tenant.maxOrganizations = 10;
       tenant.maxMembers = 100;
-      tenant.maxStorage = 10737418240;
+      tenant.maxStorage = 1073741824;
       em.persist(tenant);
       await em.flush();
 
@@ -250,7 +250,7 @@ describe("多租户管理 E2E 测试", () => {
       tenant.status = "ACTIVE";
       tenant.maxOrganizations = 10;
       tenant.maxMembers = 100;
-      tenant.maxStorage = 10737418240;
+      tenant.maxStorage = 1073741824;
       em.persist(tenant);
       await em.flush();
 
@@ -292,7 +292,7 @@ describe("多租户管理 E2E 测试", () => {
       tenant.status = "ACTIVE";
       tenant.maxOrganizations = 10;
       tenant.maxMembers = 100;
-      tenant.maxStorage = 10737418240;
+      tenant.maxStorage = 1073741824;
       em.persist(tenant);
       await em.flush();
 
@@ -408,7 +408,7 @@ describe("多租户管理 E2E 测试", () => {
       tenant.status = "ACTIVE";
       tenant.maxOrganizations = 10;
       tenant.maxMembers = 100;
-      tenant.maxStorage = 10737418240;
+      tenant.maxStorage = 1073741824;
       em.persist(tenant);
       await em.flush();
 

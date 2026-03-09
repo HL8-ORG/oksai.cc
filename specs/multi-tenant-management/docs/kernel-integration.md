@@ -2,9 +2,9 @@
 
 ## 概述
 
-本指南说明如何在多租户管理功能中充分利用 `@oksai/kernel` 提供的 DDD 基础设施。
+本指南说明如何在多租户管理功能中充分利用 `@oksai/domain-core` 提供的 DDD 基础设施。
 
-## @oksai/kernel 提供的核心类
+## @oksai/domain-core 提供的核心类
 
 | 类 | 用途 | 使用场景 |
 |---|---|---|
@@ -22,7 +22,7 @@
 
 ```typescript
 // libs/shared/database/src/domain/tenant/tenant.aggregate.ts
-import { AggregateRoot, Result, Guard, UniqueEntityID } from "@oksai/kernel";
+import { AggregateRoot, Result, Guard, UniqueEntityID } from "@oksai/domain-core";
 import { TenantQuota } from "./tenant-quota.vo.js";
 import { TenantPlan } from "./tenant-plan.vo.js";
 import { TenantStatus } from "./tenant-status.vo.js";
@@ -242,7 +242,7 @@ export class Tenant extends AggregateRoot<TenantProps> {
 
 ```typescript
 // libs/shared/database/src/domain/tenant/tenant-quota.vo.ts
-import { ValueObject, Result, Guard } from "@oksai/kernel";
+import { ValueObject, Result, Guard } from "@oksai/domain-core";
 
 /**
  * 租户配额属性
@@ -373,7 +373,7 @@ export class TenantQuota extends ValueObject<TenantQuotaProps> {
 
 ```typescript
 // libs/shared/database/src/domain/tenant/tenant-plan.vo.ts
-import { ValueObject, Result, Guard } from "@oksai/kernel";
+import { ValueObject, Result, Guard } from "@oksai/domain-core";
 
 export type TenantPlanValue = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
 
@@ -441,7 +441,7 @@ export class TenantPlan extends ValueObject<{ value: TenantPlanValue }> {
 
 ```typescript
 // libs/shared/database/src/domain/tenant/tenant-status.vo.ts
-import { ValueObject } from "@oksai/kernel";
+import { ValueObject } from "@oksai/domain-core";
 
 export type TenantStatusValue = "PENDING" | "ACTIVE" | "SUSPENDED" | "DELETED";
 
@@ -507,7 +507,7 @@ export class TenantStatus extends ValueObject<{ value: TenantStatusValue }> {
 
 ```typescript
 // libs/shared/database/src/domain/events/tenant-created.event.ts
-import { DomainEvent, UniqueEntityID } from "@oksai/kernel";
+import { DomainEvent, UniqueEntityID } from "@oksai/domain-core";
 
 export interface TenantCreatedPayload {
   tenantId: string;
@@ -550,7 +550,7 @@ export class TenantActivatedEvent extends DomainEvent<{
 ```typescript
 // apps/gateway/src/tenant/tenant.service.ts
 import { Injectable } from "@nestjs/common";
-import { Result } from "@oksai/kernel";
+import { Result } from "@oksai/domain-core";
 import { Tenant } from "@oksai/database/domain/tenant/tenant.aggregate.js";
 import { TenantRepository } from "./repositories/tenant.repository.js";
 

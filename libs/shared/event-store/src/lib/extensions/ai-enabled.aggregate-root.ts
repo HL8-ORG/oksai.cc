@@ -1,4 +1,4 @@
-import { AggregateRoot } from '@oksai/kernel';
+import { AggregateRoot } from '@oksai/domain-core';
 import { EmbeddingStatus, type AIProcessingMetadata } from './index.js';
 
 /**

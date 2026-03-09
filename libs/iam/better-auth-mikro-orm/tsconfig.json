@@ -14,7 +14,7 @@
   ],
   "references": [
     {
-      "path": "../config"
+      "path": "../../shared/config"
     }
   ]
 }

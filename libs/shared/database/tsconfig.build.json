@@ -1,8 +1,13 @@
 {
-  "extends": ["@oksai/tsconfig/node-library.json", "@oksai/tsconfig/build.json"],
+  "extends": [
+    "@oksai/tsconfig/node-library.json",
+    "@oksai/tsconfig/build.json"
+  ],
   "compilerOptions": {
     "outDir": "./dist",
-    "composite": false
+    "composite": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]

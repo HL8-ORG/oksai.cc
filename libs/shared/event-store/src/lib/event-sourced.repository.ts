@@ -7,7 +7,7 @@
  */
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { AggregateRoot, DomainEvent } from "@oksai/kernel";
+import type { AggregateRoot, DomainEvent } from "@oksai/domain-core";
 import type { EventStorePort } from "./event-store.port.js";
 import { StoredEvent } from "./stored-event.entity.js";
 

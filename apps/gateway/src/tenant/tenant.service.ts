@@ -6,7 +6,7 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { Tenant } from "@oksai/iam-infrastructure";
+import { Tenant } from "@oksai/iam-identity";
 
 /**
  * 创建租户 DTO

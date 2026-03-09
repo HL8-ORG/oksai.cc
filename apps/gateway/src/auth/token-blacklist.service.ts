@@ -4,7 +4,7 @@
 
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable, Logger } from "@nestjs/common";
-import { OAuthAccessToken, OAuthRefreshToken } from "@oksai/iam-infrastructure";
+import { OAuthAccessToken, OAuthRefreshToken } from "@oksai/iam-identity";
 
 @Injectable()
 export class TokenBlacklistService {
@@ -96,7 +96,10 @@ export class TokenBlacklistService {
   /**
    * 清理过期的 Token
    */
-  async cleanupExpiredTokens(): Promise<{ accessTokens: number; refreshTokens: number }> {
+  async cleanupExpiredTokens(): Promise<{
+    accessTokens: number;
+    refreshTokens: number;
+  }> {
     this.logger.log("开始清理过期 Token");
 
     const now = new Date();

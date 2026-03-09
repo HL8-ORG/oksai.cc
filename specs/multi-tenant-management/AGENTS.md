@@ -69,9 +69,9 @@ it('should filter by tenantId automatically', () => {
 3. **基础设施层**：TenantMiddleware、TenantGuard、TenantFilter
 4. **接口层**：TenantController
 
-## 核心依赖：@oksai/kernel
+## 核心依赖：@oksai/domain-core
 
-**重要**：多租户管理功能必须充分利用 `@oksai/kernel` 提供的 DDD 基础设施。
+**重要**：多租户管理功能必须充分利用 `@oksai/domain-core` 提供的 DDD 基础设施。
 
 ### 核心类映射
 
@@ -90,11 +90,11 @@ it('should filter by tenantId automatically', () => {
 
 ### 多租户核心模式
 
-#### 0. 使用 @oksai/kernel 的 DDD 模式（推荐）
+#### 0. 使用 @oksai/domain-core 的 DDD 模式（推荐）
 
 ```typescript
 // ✅ 正确：使用 AggregateRoot
-import { AggregateRoot, Result, Guard, UniqueEntityID } from "@oksai/kernel";
+import { AggregateRoot, Result, Guard, UniqueEntityID } from "@oksai/domain-core";
 
 export class Tenant extends AggregateRoot<TenantProps> {
   private constructor(props: TenantProps, id?: UniqueEntityID) {

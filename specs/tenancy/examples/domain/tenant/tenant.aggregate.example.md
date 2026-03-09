@@ -18,8 +18,8 @@
 ## 关键代码
 
 ```typescript
-import { AggregateRoot, Result, UniqueEntityID, Guard } from '@oksai/kernel';
-import type { DomainEvent } from '@oksai/kernel';
+import { AggregateRoot, Result, UniqueEntityID, Guard } from '@oksai/domain-core';
+import type { DomainEvent } from '@oksai/domain-core';
 import { DomainException } from '@oksai/exceptions';
 import { TenantPlan } from './tenant-plan.vo.js';
 import { TenantStatus } from './tenant-status.vo.js';
@@ -126,7 +126,7 @@ export class Tenant extends AggregateRoot<TenantProps> {
 
 ## 关键点
 
-1. **继承 AggregateRoot**：使用 `@oksai/kernel` 的基类
+1. **继承 AggregateRoot**：使用 `@oksai/domain-core` 的基类
 2. **Result 模式**：使用 `Result<T, E>` 处理错误
 3. **领域事件**：使用 `addDomainEvent()` 发布事件
 4. **验证**：使用 `Guard` 验证输入

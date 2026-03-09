@@ -457,7 +457,7 @@ export class AppController {
 
 | 项目                | 原因                      |
 | ------------------- | ------------------------- |
-| `@oksai/kernel`     | 纯 DDD 基础类，无复杂依赖 |
+| `@oksai/domain-core`     | 纯 DDD 基础类，无复杂依赖 |
 | `@oksai/context`    | 上下文管理，简单结构      |
 | `@oksai/constants`  | 常量定义                  |
 | `@oksai/exceptions` | 异常类定义                |
@@ -735,7 +735,7 @@ find apps/gateway/src -name "*.ts" -exec \
 
 | 项目                        | 构建工具   | 配置包         | 特殊配置              |
 | --------------------------- | ---------- | -------------- | --------------------- |
-| `@oksai/kernel`             | tsc        | node-library   | -                     |
+| `@oksai/domain-core`             | tsc        | node-library   | -                     |
 | `@oksai/context`            | tsc        | node-library   | -                     |
 | `@oksai/constants`          | tsc        | node-library   | -                     |
 | `@oksai/config`             | tsup       | node-library   | external deps         |

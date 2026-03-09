@@ -395,7 +395,7 @@ interface QuotaCheckResponse {
 
 ### 内部依赖
 
-- `@oksai/kernel`：基础设施（AggregateRoot、Result、Guard、UniqueEntityID）
+- `@oksai/domain-core`：基础设施（AggregateRoot、Result、Guard、UniqueEntityID）
 - `@oksai/context`：租户上下文管理（AsyncLocalStorage、TenantContext）
 - `@oksai/exceptions`：领域异常（DomainException、NotFoundException）
 - `@oksai/logger`：日志记录（OksaiLoggerService）

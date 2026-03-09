@@ -31,7 +31,7 @@
 
 #### 下午（3 小时）
 
-4. **学习 @oksai/kernel**：
+4. **学习 @oksai/domain-core**：
    ```bash
    # 阅读 kernel 源码
    cat libs/shared/kernel/src/index.ts
@@ -259,7 +259,7 @@ pnpm format
 
 - [ ] 阅读 `docs/evaluations/multi-tenant-evaluation.md`
 - [ ] 理解 3 个架构决策（ADR-001/002/003）
-- [ ] 理解 `@oksai/kernel` 核心类
+- [ ] 理解 `@oksai/domain-core` 核心类
 - [ ] 创建 `TenantPlan` 值对象 + 测试
 - [ ] 创建 `TenantStatus` 值对象 + 测试
 - [ ] 创建 `TenantQuota` 值对象 + 测试

@@ -18,7 +18,7 @@
 ## 完整代码
 
 ```typescript
-import { DomainEvent, UniqueEntityID } from '@oksai/kernel';
+import { DomainEvent, UniqueEntityID } from '@oksai/domain-core';
 import type { PlanType } from '../tenant-plan.vo.js';
 
 export interface TenantCreatedPayload {
@@ -51,7 +51,7 @@ export class TenantCreatedEvent extends DomainEvent<TenantCreatedPayload> {
 
 ## 关键点
 
-1. **继承 DomainEvent**：使用 `@oksai/kernel` 的 `DomainEvent` 基类
+1. **继承 DomainEvent**：使用 `@oksai/domain-core` 的 `DomainEvent` 基类
 2. **事件命名**：`[实体][过去式]Event` (如 `TenantCreatedEvent`)
 3. **Payload 接口**：明确定义事件携带的数据
 4. **事件版本**：`eventVersion: 1` 用于事件演进

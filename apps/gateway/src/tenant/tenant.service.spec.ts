@@ -3,7 +3,7 @@
  */
 
 import { EntityManager } from "@mikro-orm/core";
-import { Tenant } from "@oksai/iam-infrastructure";
+import { Tenant } from "@oksai/iam-identity";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateTenantDto, TenantService } from "./tenant.service.js";
 

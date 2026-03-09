@@ -79,7 +79,7 @@ libs/iam/domain/
 
 **依赖**:
 
-- `@oksai/kernel` (Result, Entity, DomainEvent)
+- `@oksai/domain-core` (Result, Entity, DomainEvent)
 - TypeScript-only (无 NestJS, 无 MikroORM)
 
 ### 3.2 @oksai/iam/infrastructure

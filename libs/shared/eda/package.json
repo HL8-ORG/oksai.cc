@@ -31,7 +31,7 @@
     "@oksai/config": "workspace:*",
     "@oksai/context": "workspace:*",
     "@oksai/contracts": "workspace:*",
-    "@oksai/kernel": "workspace:*",
+    "@oksai/domain-core": "workspace:*",
     "@oksai/logger": "workspace:*"
   },
   "optionalDependencies": {

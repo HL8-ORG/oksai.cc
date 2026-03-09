@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm exec tsup src/index.ts --format cjs,esm --dts --external @oksai/kernel",
+    "build": "pnpm exec tsup src/index.ts --format cjs,esm --dts --external @oksai/domain-core",
     "build:watch": "pnpm exec tsup src/index.ts --format cjs,esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -30,7 +30,7 @@
   "dependencies": {
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
-    "@oksai/kernel": "workspace:*",
+    "@oksai/domain-core": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

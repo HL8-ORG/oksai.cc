@@ -1,0 +1,33 @@
+{
+  "name": "@oksai/domain-core",
+  "version": "0.1.0",
+  "description": "领域驱动设计核心基类 - 聚合根、实体、值对象、领域事件、Result 模式",
+  "license": "AGPL-3.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "clean": "pnpm exec rimraf dist coverage"
+  },
+  "devDependencies": {
+    "@oksai/tsconfig": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

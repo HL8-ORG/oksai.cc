@@ -39,7 +39,7 @@
 
 | 库名               | 版本  | 文件数 | 描述                                              | 构建工具 |
 | ------------------ | ----- | ------ | ------------------------------------------------- | -------- |
-| `@oksai/kernel`    | 0.1.0 | 6      | DDD 核心基类（聚合根、实体、值对象、Result 模式） | tsc      |
+| `@oksai/domain-core`    | 0.1.0 | 6      | DDD 核心基类（聚合根、实体、值对象、Result 模式） | tsc      |
 | `@oksai/constants` | 0.1.0 | 3      | 业务常量定义                                      | tsup     |
 | `@oksai/types`     | 0.1.0 | 2      | 共享类型定义                                      | tsup     |
 
@@ -65,7 +65,7 @@
 
 **依赖关系**:
 
-- `@oksai/context` → `@oksai/kernel`
+- `@oksai/context` → `@oksai/domain-core`
 - `@oksai/exceptions` → `@nestjs/common` (peer)
 
 **评价**: ✅ **优秀**
@@ -90,8 +90,8 @@
 **依赖关系**:
 
 - `@oksai/logger` → `@oksai/config`, `@oksai/context`, `@oksai/constants`
-- `@oksai/database` → `@oksai/kernel`, `@oksai/context`, MikroORM
-- `@oksai/cache` → `@oksai/kernel`, Redis
+- `@oksai/database` → `@oksai/domain-core`, `@oksai/context`, MikroORM
+- `@oksai/cache` → `@oksai/domain-core`, Redis
 
 **评价**: ✅ **良好**
 
@@ -115,8 +115,8 @@
 **依赖关系**:
 
 - `@oksai/cqrs` → `@oksai/context`, `@oksai/logger`
-- `@oksai/eda` → `@oksai/kernel`, `@oksai/config`, `@oksai/context`, `@oksai/contracts`, `@oksai/logger`
-- `@oksai/event-store` → `@oksai/kernel`, `@oksai/eda`
+- `@oksai/eda` → `@oksai/domain-core`, `@oksai/config`, `@oksai/context`, `@oksai/contracts`, `@oksai/logger`
+- `@oksai/event-store` → `@oksai/domain-core`, `@oksai/eda`
 
 **评价**: ⭐ **杰出**
 
@@ -276,7 +276,7 @@ optionalDependencies: {
 | 库名                | 测试文件数 | 测试行数 | 评估    |
 | ------------------- | ---------- | -------- | ------- |
 | `@oksai/exceptions` | 10         | ~2,500   | ✅ 优秀 |
-| `@oksai/kernel`     | 8          | ~2,000   | ✅ 良好 |
+| `@oksai/domain-core`     | 8          | ~2,000   | ✅ 良好 |
 | `@oksai/cqrs`       | 12         | ~1,800   | ✅ 良好 |
 | `@oksai/eda`        | 6          | ~1,200   | ⚠️ 一般 |
 | `@oksai/context`    | 5          | ~800     | ⚠️ 一般 |
@@ -314,7 +314,7 @@ optionalDependencies: {
 
 **选择标准**:
 
-- **tsc**: 简单库，不需要打包（如 `@oksai/kernel`）
+- **tsc**: 简单库，不需要打包（如 `@oksai/domain-core`）
 - **tsup**: 需要多格式输出（CJS + ESM）或打包（如 `@oksai/logger`）
 
 ### tsconfig.build.json 配置
@@ -416,7 +416,7 @@ graph TD
 
 | 实践                    | 遵循度  | 说明                                      |
 | ----------------------- | ------- | ----------------------------------------- |
-| 聚合根 (Aggregate Root) | ✅ 100% | `@oksai/kernel` 提供 `AggregateRoot` 基类 |
+| 聚合根 (Aggregate Root) | ✅ 100% | `@oksai/domain-core` 提供 `AggregateRoot` 基类 |
 | 实体 (Entity)           | ✅ 100% | `Entity<T>` 泛型基类                      |
 | 值对象 (Value Object)   | ✅ 100% | `ValueObject<T>` 抽象类                   |
 | 领域事件 (Domain Event) | ✅ 100% | `DomainEvent` 基类 + 事件总线             |
@@ -591,7 +591,7 @@ export class DomainException extends BaseException {
 
 | 库名                  | 架构 | 代码质量 | 测试 | 文档 | 构建配置 | 总体评分 |
 | --------------------- | ---- | -------- | ---- | ---- | -------- | -------- |
-| `@oksai/kernel`       | A    | A        | B+   | C    | A        | **A-**   |
+| `@oksai/domain-core`       | A    | A        | B+   | C    | A        | **A-**   |
 | `@oksai/constants`    | A    | A        | C    | C    | A        | **B+**   |
 | `@oksai/types`        | A    | A        | C    | C    | A        | **B+**   |
 | `@oksai/utils`        | A    | A        | C    | C    | A        | **B+**   |

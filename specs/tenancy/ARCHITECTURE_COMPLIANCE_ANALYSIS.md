@@ -526,7 +526,7 @@ export class Tenant extends AggregateRoot<TenantProps> {
 ## 完整代码
 
 \`\`\`typescript
-import { AggregateRoot, Result, UniqueEntityID } from '@oksai/kernel';
+import { AggregateRoot, Result, UniqueEntityID } from '@oksai/domain-core';
 import { TenantPlan } from './tenant-plan.vo.js';
 import { TenantStatus } from './tenant-status.vo.js';
 import { TenantCreatedEvent } from './events/tenant-created.domain-event.js';

@@ -70,7 +70,7 @@ oksai.cc 项目**技术上可以**采用 DDD + Hexagonal + CQRS + Event Sourcing
 
 ```typescript
 // 1. DDD 核心基类已实现
-@oksai/kernel
+@oksai/domain-core
   ├── AggregateRoot      ✅ 聚合根基类
   ├── Entity             ✅ 实体基类
   ├── ValueObject        ✅ 值对象基类

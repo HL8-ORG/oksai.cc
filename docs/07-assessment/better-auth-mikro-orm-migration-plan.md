@@ -331,7 +331,7 @@ export default defineConfig({
 ```typescript
 // libs/database/src/entities/user.entity.ts
 import { Entity, Property, PrimaryKey, BeforeCreate } from '@mikro-orm/core';
-import { AggregateRoot } from '@oksai/kernel';
+import { AggregateRoot } from '@oksai/domain-core';
 
 @Entity()
 export class User extends AggregateRoot<UserProps> {

@@ -149,7 +149,7 @@ const name = configService.getString("APP_NAME", {
 ### Result 模式
 
 ```typescript
-import { Result } from "@oksai/kernel";
+import { Result } from "@oksai/domain-core";
 
 // 使用 Result 类型处理配置错误
 const result = configService.tryGet("OPTIONAL_CONFIG");

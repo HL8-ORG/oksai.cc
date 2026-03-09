@@ -10,7 +10,7 @@
  */
 
 import process from "node:process";
-import { Result } from "@oksai/kernel";
+import { Result } from "@oksai/domain-core";
 import {
   type ParseCsvOptions,
   parseCsv,

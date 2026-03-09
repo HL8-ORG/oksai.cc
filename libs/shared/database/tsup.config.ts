@@ -7,8 +7,8 @@ const config: Options = {
   clean: true,
   sourcemap: true,
   external: [
-    "@oksai/kernel",
-    "@oksai/iam-infrastructure",
+    "@oksai/domain-core",
+    "@oksai/iam-identity",
     "@mikro-orm/core",
     "@mikro-orm/nestjs",
     "@mikro-orm/reflection",

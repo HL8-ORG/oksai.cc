@@ -4,7 +4,6 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { DynamicModule, Module } from "@nestjs/common";
 import { pino } from "pino";
-import * as databaseEntities from "./entities/index.js";
 
 const isProduction = process.env.NODE_ENV === "production";
 const shouldPrettyLog = process.env.LOG_PRETTY ? process.env.LOG_PRETTY === "true" : !isProduction;
@@ -32,22 +31,32 @@ const mikroOrmPino = pino({
  */
 export interface MikroOrmDatabaseModuleOptions {
   /**
-   * 额外的实体类
+   * 实体类数组
    *
    * @description
-   * 用于注册额外的 MikroORM 实体，例如 IAM、OAuth 等领域的实体。
-   * 基础实体（OAuth + Webhook）已自动加载。
+   * 用于注册所有 MikroORM 实体，包括 IAM、OAuth、Webhook 等领域的实体。
    *
    * @example
    * ```typescript
-   * import { Tenant, User } from '@oksai/iam-infrastructure';
+   * import {
+   *   Tenant, User, Session, Account, ApiKey,
+   *   OAuthClient, OAuthAccessToken,
+   *   Webhook, WebhookDelivery
+   * } from '@oksai/iam-identity';
    *
    * MikroOrmDatabaseModule.forRoot({
-   *   extraEntities: [Tenant, User]
+   *   entities: [
+   *     // IAM 实体
+   *     Tenant, User, Session, Account, ApiKey,
+   *     // OAuth 实体
+   *     OAuthClient, OAuthAccessToken,
+   *     // Webhook 实体
+   *     Webhook, WebhookDelivery
+   *   ]
    * })
    * ```
    */
-  extraEntities?: Function[];
+  entities: Function[];
 }
 
 /**
@@ -55,26 +64,29 @@ export interface MikroOrmDatabaseModuleOptions {
  *
  * @description
  * 配置 MikroORM 数据库连接：
- * - 自动加载 database 包的实体（OAuth + Webhook）
- * - 支持通过 extraEntities 注册额外实体（如 IAM 实体）
+ * - 通过 entities 参数注册所有实体
  * - registerRequestContext: 为每个请求创建独立的 EntityManager
  * - 从环境变量读取数据库连接配置
  *
  * @example
  * ```typescript
- * // 基础用法（只使用 OAuth + Webhook 实体）
- * @Module({
- *   imports: [MikroOrmDatabaseModule.forRoot()]
- * })
- * export class AppModule {}
- *
- * // 高级用法（添加 IAM 实体）
- * import { Tenant, User, Session } from '@oksai/iam-infrastructure';
+ * import {
+ *   Tenant, User, Session, Account, ApiKey,
+ *   OAuthClient, OAuthAccessToken, OAuthRefreshToken,
+ *   Webhook, WebhookDelivery
+ * } from '@oksai/iam-identity';
  *
  * @Module({
  *   imports: [
  *     MikroOrmDatabaseModule.forRoot({
- *       extraEntities: [Tenant, User, Session, Account, ApiKey]
+ *       entities: [
+ *         // IAM 实体
+ *         Tenant, User, Session, Account, ApiKey,
+ *         // OAuth 实体
+ *         OAuthClient, OAuthAccessToken, OAuthRefreshToken,
+ *         // Webhook 实体
+ *         Webhook, WebhookDelivery
+ *       ]
  *     })
  *   ]
  * })
@@ -89,17 +101,17 @@ export class MikroOrmDatabaseModule {
    * 注册 MikroORM 数据库模块
    *
    * @param options - 配置选项
-   * @param options.extraEntities - 额外的实体类数组
+   * @param options.entities - 实体类数组（必需）
    * @returns DynamicModule
    */
-  static forRoot(options: MikroOrmDatabaseModuleOptions = {}): DynamicModule {
+  static forRoot(options: MikroOrmDatabaseModuleOptions): DynamicModule {
     return {
       module: MikroOrmDatabaseModule,
       imports: [
         MikroOrmModule.forRootAsync({
           useFactory: () => ({
             driver: PostgreSqlDriver,
-            entities: [...Object.values(databaseEntities), ...(options.extraEntities || [])],
+            entities: options.entities,
             registerRequestContext: true,
             dbName: process.env.DB_NAME || "oksai",
             host: process.env.DB_HOST || "localhost",

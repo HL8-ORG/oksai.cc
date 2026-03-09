@@ -34,7 +34,7 @@
 
 ```typescript
 // tenant.aggregate.ts
-import { AggregateRoot, Guard, Result, UniqueEntityID } from "@oksai/kernel";
+import { AggregateRoot, Guard, Result, UniqueEntityID } from "@oksai/domain-core";
 
 export class Tenant extends AggregateRoot<TenantProps> {
   // 私有构造函数
@@ -77,7 +77,7 @@ export class Tenant extends AggregateRoot<TenantProps> {
 
 ```typescript
 // tenant-status.vo.ts
-import { ValueObject, Result } from '@oksai/kernel';
+import { ValueObject, Result } from '@oksai/domain-core';
 
 export class TenantStatus extends ValueObject<TenantStatusProps> {
   private constructor(props: TenantStatusProps) {
@@ -102,7 +102,7 @@ export class TenantStatus extends ValueObject<TenantStatusProps> {
 
 ```typescript
 // tenant.repository.ts
-import type { Result } from '@oksai/kernel';
+import type { Result } from '@oksai/domain-core';
 import type { Tenant } from './tenant.aggregate.js';
 
 export interface ITenantRepository {

@@ -157,9 +157,9 @@
 - 编写 3 个架构决策记录（ADR-001/002/003）
 - 设置 BDD 场景和测试计划
 
-## 🧩 @oksai/kernel 集成
+## 🧩 @oksai/domain-core 集成
 
-本功能**必须**充分利用 `@oksai/kernel` 提供的 DDD 基础设施：
+本功能**必须**充分利用 `@oksai/domain-core` 提供的 DDD 基础设施：
 
 | Kernel 类 | 使用场景 | 优势 |
 |----------|---------|------|

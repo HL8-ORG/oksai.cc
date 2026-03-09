@@ -3,7 +3,7 @@
  */
 
 import { BadRequestException, ForbiddenException, NotFoundException } from "@nestjs/common";
-import { Tenant } from "@oksai/iam-infrastructure";
+import { Tenant } from "@oksai/iam-identity";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TenantPlan } from "./dto/index.js";
 import { TenantController } from "./tenant.controller.js";

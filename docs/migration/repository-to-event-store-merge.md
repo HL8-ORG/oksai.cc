@@ -51,7 +51,7 @@
   "dependencies": {
 +   "@mikro-orm/core": "catalog:",
 +   "@oksai/database": "workspace:*",
-    "@oksai/kernel": "workspace:*"
+    "@oksai/domain-core": "workspace:*"
   },
 ```
 

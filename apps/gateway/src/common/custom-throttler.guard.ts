@@ -5,7 +5,7 @@
  * 根据装饰器配置动态应用速率限制
  */
 
-import { type ExecutionContext, HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { type ExecutionContext, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { RATE_LIMIT_KEY, type RateLimitConfig } from "./rate-limit.decorator.js";
 
@@ -25,7 +25,7 @@ interface Request {
  */
 @Injectable()
 export class CustomThrottlerGuard {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
   // 存储速率限制计数器
   private readonly storage = new Map<string, { count: number; resetAt: number }>();

@@ -1,0 +1,45 @@
+{
+  "name": "@oksai/tenancy",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/tenancy/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "libs/tenancy/dist",
+        "main": "libs/tenancy/src/index.ts",
+        "tsConfig": "libs/tenancy/tsconfig.build.json",
+        "assets": ["libs/tenancy/*.md"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "libs/tenancy"
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/libs/tenancy"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/libs/tenancy"
+      }
+    },
+    "lint": {
+      "executor": "@nx/js:biome-check",
+      "outputs": ["{options.outputFile}"]
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec rimraf dist coverage",
+        "cwd": "libs/tenancy"
+      }
+    }
+  }
+}

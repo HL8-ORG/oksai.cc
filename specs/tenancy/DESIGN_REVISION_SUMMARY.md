@@ -34,7 +34,7 @@
 
 | 功能需求   | 共享库               | 使用内容                                |
 | ---------- | -------------------- | --------------------------------------- |
-| DDD 核心   | `@oksai/kernel`      | `AggregateRoot`, `Result`, `Guard`      |
+| DDD 核心   | `@oksai/domain-core`      | `AggregateRoot`, `Result`, `Guard`      |
 | 仓储基类   | `@oksai/event-store` | `EventSourcedRepository<T>`             |
 | CQRS 模式  | `@oksai/cqrs`        | `ICommand`, `IQuery`, `ICommandHandler` |
 | 事件驱动   | `@oksai/eda`         | `IEventPublisher`, `Outbox`             |
@@ -213,10 +213,10 @@ export class Tenant {
 }
 ```
 
-**变更后**（使用 @oksai/kernel）:
+**变更后**（使用 @oksai/domain-core）:
 
 ```typescript
-import { AggregateRoot, Result, UniqueEntityID } from '@oksai/kernel';
+import { AggregateRoot, Result, UniqueEntityID } from '@oksai/domain-core';
 import { DomainException } from '@oksai/exceptions';
 
 export class Tenant extends AggregateRoot<TenantProps> {
@@ -268,7 +268,7 @@ Phase 6: 清理和发布（1 天）
 
 ```
 Phase 1: 包初始化（1 天） - 无需迁移，直接使用共享库
-Phase 2: 领域层实现（2-3 天） - 使用 @oksai/kernel
+Phase 2: 领域层实现（2-3 天） - 使用 @oksai/domain-core
 Phase 3: 应用层实现（2-3 天） - 使用 @oksai/cqrs
 Phase 4: 基础设施层实现（2-3 天） - 使用 @oksai/event-store
 Phase 5: API 层和文档（1-2 天） - 标准实现
@@ -342,7 +342,7 @@ export class Tenant {
 **之后**（libs/tenancy/domain/tenant.aggregate.ts）:
 
 ```typescript
-import { AggregateRoot } from '@oksai/kernel';
+import { AggregateRoot } from '@oksai/domain-core';
 
 export class Tenant extends AggregateRoot<TenantProps> {
   // 使用共享基础设施
